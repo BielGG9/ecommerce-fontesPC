@@ -1,0 +1,166 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+
+abstract PessoaFisica extends Pessoa {
+  -cpf: String
+  -rg: String
+}
+
+abstract PessoaJuridica extends Pessoa {
+  -cnpj: String
+  -inscricaoEstadual: String
+}
+
+abstract class Pessoa {
+  -nome: String
+  -email: String
+}
+
+class Cliente extends PessoaFisica {
+  -dataCadastro: LocalDateTime
+}
+
+class Endereco {
+  -rua: String
+  -bairro: String
+  -complemento: String
+  -numero: String
+  -cidade: String
+  -estado: String
+  -cep: String
+}
+
+class Telefone {
+  -numero: String
+  -ddd: String
+}
+
+Class Departamento {
+  -sigla: String
+  -descricao: String
+}
+
+class Funcionario extends PessoaFisica {
+  -cargo: String
+  -dataAdmissao: LocalDate
+}
+
+class Fornecedor extends PessoaJuridica {
+  -razaoSocial: String
+}
+
+class Usuario {
+  -nome: String
+  -senha: String
+}
+
+Enum Perfil {
+  ADM
+  USER
+}
+
+class Pedido {
+  -nomeCliente: String
+  -total: Double
+  -dataPedido: LocalDateTime
+  -quantidade: Integer
+}
+
+Class EnderecoEntrega {
+  -rua: String
+  -numero: String
+  -complemento: String
+  -bairro: String
+  -cidade: String
+  -estado: String
+  -cep: String
+}
+
+abstract Pagamento {
+  -valor: Double
+  -dataPagamento: LocalDateTime
+}
+
+class Pix extends Pagamento {
+  -chavePix: String
+  -validade: LocalDateTime
+}
+
+class Boleto extends Pagamento {
+  -codigoBarras: String
+  -dataVencimento: LocalDateTime
+}
+
+class Cartao extends Pagamento {
+  -numeroCartao: String
+  -nomeImpresso: String
+  -validade: LocalDate
+  -cvv: String
+  -status: String
+}
+
+class ItemPedido {
+  -quantidade: Integer
+  -preco: double
+}
+
+class Fonte {
+  -nome: String
+  -potencia: Integer
+  -preco: double
+  -estoque: Integer
+}
+
+class Marca {
+  -nome: String
+}
+
+enum Certificacao {
+  BRONZE
+  SILVER
+  GOLD
+}
+
+class Modelo {
+  -numeracao: int
+}
+
+
+Enum StatusPedido {
+  + PENDENTE
+  + PAGO 
+  + ENVIADO 
+  + ENTREGUE 
+  + CANCELADO
+
+}
+
+' --- RELACIONAMENTOS ---
+
+Pessoa "1" *--> "*" Endereco
+Pessoa "1" *--> "*" Telefone
+
+Funcionario "*" --> "1" Departamento
+
+Pedido "*" --> "1" Cliente
+Pedido "1" --> "*" ItemPedido
+Pedido "*" --> "1" Pagamento
+Pedido "1" --> "*" StatusPedido
+Pedido "1" --> "1" EnderecoEntrega
+
+Cliente "1" --> "1" Usuario
+
+Cliente "1" --> "*" Cartao
+
+Usuario "*" --> "1" Perfil
+
+ItemPedido "*" --> "1" Fonte
+
+Fonte "*" --> "1" Modelo
+Fonte "*" --> "*" Fornecedor
+Fonte "*" --> "1" Certificacao
+
+Modelo "*" --> "1" Marca
+
+@enduml

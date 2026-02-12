@@ -1,0 +1,21 @@
+<div style="padding: 20px;">
+  <h1>Fontes Disponíveis</h1>
+
+  <ul>
+    <li *ngFor="let fonte of fontes()" style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; display: flex; align-items: center;">
+      
+      <img
+        src="https://a-static.mlcdn.com.br/280x210/fonte-atx-500w-reais-20-4p-super-silenciosa-para-pc-bivolt-ketchup/techguia/319p/2b3455103cc5b379e4db141c9cbba37b.jpeg"
+        alt="Imagem ilustrativa de fonte"
+        style="width: 130px; height: 120px; margin-right: 20px; object-fit: cover; border: 2px solid #ddd;"
+      >
+      
+      <div>
+        <strong>{{ fonte.nome }}</strong> - {{ fonte.marca }} <br>
+        Preço: R$ {{ fonte.preco }} | Potência: {{ fonte.potencia }}W
+      </div>
+    </li>
+  </ul>
+
+  <router-outlet></router-outlet>
+</div>
