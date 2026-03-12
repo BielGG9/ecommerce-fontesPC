@@ -26,7 +26,7 @@ public class ModeloResource {
     private static final Logger logger = Logger.getLogger(ClienteResource.class.getName());
 
     @GET
-    @RolesAllowed({"USER", "ADM"})
+    // @RolesAllowed({"USER", "ADM"})
     public List<ModeloResponse> findAll() {
         logger.info("Buscando todos os modelos");
         return service.findAll();
@@ -34,7 +34,7 @@ public class ModeloResource {
 
     @GET
     @Path("/{id}")
-    @RolesAllowed({"USER", "ADM"})
+    // @RolesAllowed({"USER", "ADM"})
     public ModeloResponse findById(@PathParam("id") Long id) {
         logger.info("Buscando modelo pelo ID: " + id);
         return service.findById(id);
@@ -42,7 +42,7 @@ public class ModeloResource {
 
     @POST
     @Transactional
-    @RolesAllowed("ADM")
+    // @RolesAllowed("ADM")
     public Response create(ModeloRequest request) {
         ModeloResponse response = service.create(request);
         logger.info("Modelo criado: " + response.id());
@@ -52,7 +52,7 @@ public class ModeloResource {
     @PUT
     @Path("/{id}")
     @Transactional
-    @RolesAllowed("ADM")
+    // @RolesAllowed("ADM")
     public ModeloResponse update(@PathParam("id") Long id, ModeloRequest request) {
         logger.info("Atualizando modelo com ID: " + id);
         return service.update(id, request);
@@ -61,7 +61,7 @@ public class ModeloResource {
     @DELETE
     @Path("/{id}")
     @Transactional
-    @RolesAllowed("ADM")
+    // @RolesAllowed("ADM")
     public Response delete(@PathParam("id") Long id) {
         ModeloResponse modeloDeletado = service.delete(id);
         logger.info("Modelo deletado: " + modeloDeletado.id());

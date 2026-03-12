@@ -1,0 +1,30 @@
+<div style="padding: 20px;">
+  
+  <div style="display: flex; justify-content: space-between; align-items: center; background-color: #f8f9fa; padding: 15px 20px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 30px;">
+    
+    <h2 style="margin: 0; color: #333;">E-commerce Fontes PC</h2>
+
+    <div>
+      <a routerLink="/marca" style="margin-right: 20px; font-weight: bold; color: #0d6efd; text-decoration: none; cursor: pointer;">Gerir Marcas</a>
+      <a routerLink="/fontes" style="margin-right: 20px; font-weight: bold; color: #198754; text-decoration: none; cursor: pointer;">Gerir Fontes</a>
+    </div>
+
+    <div style="display: flex; gap: 15px; align-items: center;">
+      <button *ngIf="!logado" (click)="fazerLogin()" style="padding: 10px 20px; background-color: #0d6efd; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">
+        Login
+      </button>
+
+      <div *ngIf="logado" style="display: flex; gap: 15px; align-items: center;">
+        <span style="font-weight: bold; color: #555;">Olá, {{ nomeUsuario }}!</span>
+        <button (click)="fazerLogout()" style="padding: 10px 20px; background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+          Sair
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+
+  <router-outlet></router-outlet>
+
+</div>

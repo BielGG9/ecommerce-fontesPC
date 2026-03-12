@@ -25,7 +25,7 @@ public class FonteResource {
 
     @POST
     @Transactional
-    @RolesAllowed("ADM")
+    //@RolesAllowed("ADM")
     public Response cadastrarFonte(FonteRequest fonteRequest) {
         FonteResponse fonteCriada = service.create(fonteRequest);
         logger.info("Fonte criada: " + fonteCriada.id());
@@ -42,7 +42,7 @@ public class FonteResource {
 
     @GET
     @Path("/{id}")
-    @RolesAllowed({ "USER", "ADM" })
+    //@RolesAllowed({ "USER", "ADM" })
     public Response findById(@PathParam("id") Long id) {
         FonteResponse fonte = service.findById(id);
         logger.info("Buscando fonte pelo ID: " + id);
@@ -52,7 +52,7 @@ public class FonteResource {
     @DELETE
     @Path("/{id}")
     @Transactional
-    @RolesAllowed("ADM")
+    //@RolesAllowed("ADM")
     public Response delete(@PathParam("id") Long id) {
         FonteResponse fonteDeletada = service.delete(id);
         logger.info("Fonte deletada: " + fonteDeletada.id());
@@ -62,7 +62,7 @@ public class FonteResource {
     @PUT
     @Path("/{id}")
     @Transactional
-    @RolesAllowed("ADM")
+    //@RolesAllowed("ADM")
     public Response update(@PathParam("id") Long id, FonteRequest fonteRequest) {
         FonteResponse fonteAtualizada = service.update(id, fonteRequest);
         logger.info("Fonte atualizada: " + fonteAtualizada.id());

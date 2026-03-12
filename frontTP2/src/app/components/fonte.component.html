@@ -1,0 +1,118 @@
+<div class="fonte-container">
+  
+  <mat-card class="material-card">
+    <div class="card-header-azul">
+      <h2 style="margin: 0; font-size: 20px;">Gestão de Fontes</h2>
+    </div>
+
+    <form [formGroup]="fonteForm" (ngSubmit)="salvar()">
+      <mat-card-content style="padding-top: 20px;">
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field-full">
+            <mat-label>Nome da Fonte</mat-label>
+            <input matInput formControlName="nome" placeholder="Ex: RM750x">
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field-full">
+            <mat-label>Potência (W)</mat-label>
+            <input matInput type="number" formControlName="potencia" placeholder="Ex: 750">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field-full">
+            <mat-label>Preço (R$)</mat-label>
+            <input matInput type="number" formControlName="preco" placeholder="Ex: 850.00">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field-full">
+            <mat-label>Selecione a Marca</mat-label>
+            <mat-select formControlName="idMarca">
+              <mat-option *ngFor="let m of marcas()" [value]="m.id">
+                {{ m.nome }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="form-row" style="align-items: center; margin-top: 10px;">
+          <mat-form-field appearance="outline" class="form-field-full">
+            <mat-label>Selecione o Modelo</mat-label>
+            <mat-select formControlName="idModelo">
+              <mat-option *ngFor="let mod of modelos()" [value]="mod.id">
+                {{ mod.numeracao }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline" style="flex: 2;">
+            <mat-label>Certificação 80 Plus</mat-label>
+            <input matInput formControlName="certificacaoNome" placeholder="Clique no botão ao lado ->" readonly>
+          </mat-form-field>
+
+          <button mat-raised-button color="accent" type="button" (click)="abrirDialogCertificacao()" style="flex: 1; height: 50px; margin-bottom: 20px; margin-left: 15px;">
+            <mat-icon>verified</mat-icon>
+            Escolher Certificação
+          </button>
+
+        </div>
+
+      </mat-card-content>
+
+      <mat-card-actions align="end" style="padding: 16px;">
+        <button mat-button type="button" (click)="cancelar()">Cancelar</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="fonteForm.invalid">
+          Salvar
+        </button>
+      </mat-card-actions>
+    </form>
+  </mat-card>
+
+  <table mat-table [dataSource]="fontes()" class="mat-elevation-z8" style="width: 100%; border-radius: 8px; margin-bottom: 30px;">
+
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef style="width: 60px; font-weight: bold;"> ID </th>
+      <td mat-cell *matCellDef="let f"> {{f.id}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="nome">
+      <th mat-header-cell *matHeaderCellDef style="font-weight: bold;"> Nome </th>
+      <td mat-cell *matCellDef="let f"> {{f.nome}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="potencia">
+      <th mat-header-cell *matHeaderCellDef style="font-weight: bold;"> Potência </th>
+      <td mat-cell *matCellDef="let f"> {{f.potencia}}W </td>
+    </ng-container>
+
+    <ng-container matColumnDef="preco">
+      <th mat-header-cell *matHeaderCellDef style="font-weight: bold;"> Preço </th>
+      <td mat-cell *matCellDef="let f"> R$ {{f.preco}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="marca">
+      <th mat-header-cell *matHeaderCellDef style="font-weight: bold;"> Marca </th>
+      <td mat-cell *matCellDef="let f"> {{f.marca?.nome}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="acoes">
+      <th mat-header-cell *matHeaderCellDef style="width: 120px; text-align: center; font-weight: bold;"> Ações </th>
+      <td mat-cell *matCellDef="let f" style="text-align: center;">
+        <button mat-icon-button color="primary" title="Editar">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" title="Excluir">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="coluna"></tr>
+    <tr mat-row *matRowDef="let row; columns: coluna;"></tr>
+  </table>
+
+  <div *ngIf="fontes().length === 0" style="text-align: center; padding: 20px; color: #666;">
+    Nenhuma fonte registada no momento.
+  </div>
+
+</div>

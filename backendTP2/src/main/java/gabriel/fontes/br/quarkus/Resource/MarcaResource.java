@@ -25,7 +25,7 @@ public class MarcaResource {
     private static final Logger logger = Logger.getLogger(ClienteResource.class.getName());
 
     @GET
-    @RolesAllowed({"USER", "ADM"})
+    // @RolesAllowed({"USER", "ADM"})
     public List<MarcaResponse> findAll() {
         logger.info("Buscando todas as marcas");
         return service.findAll();
@@ -33,7 +33,7 @@ public class MarcaResource {
 
     @GET
     @Path("/{id}")
-    @RolesAllowed({"USER", "ADM"})
+    // @RolesAllowed({"USER", "ADM"})
     public MarcaResponse findById(@PathParam("id") Long id) {
         logger.info("Buscando marca pelo ID: " + id);
         return service.findById(id);
@@ -41,7 +41,7 @@ public class MarcaResource {
 
     @POST
     @Transactional
-    @RolesAllowed("ADM")
+    // @RolesAllowed("ADM") 
     public Response create(MarcaRequest request) {
         MarcaResponse response = service.create(request);
         logger.info("Marca criada: " + response.id());
@@ -51,7 +51,7 @@ public class MarcaResource {
     @PUT
     @Path("/{id}")
     @Transactional
-    @RolesAllowed("ADM")
+    // @RolesAllowed("ADM")
     public MarcaResponse update(@PathParam("id") Long id, MarcaRequest request) {
         logger.info("Atualizando marca com ID: " + id);
         return service.update(id, request);
@@ -60,7 +60,7 @@ public class MarcaResource {
     @DELETE
     @Path("/{id}")
     @Transactional
-    @RolesAllowed("ADM")
+    // @RolesAllowed("ADM")
     public Response delete(@PathParam("id") Long id) {
         MarcaResponse marcaDeletada = service.delete(id);
         logger.info("Marca deletada: " + marcaDeletada.id());

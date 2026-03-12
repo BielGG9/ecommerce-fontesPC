@@ -18,4 +18,16 @@ export class FonteService {
   findById(id: number): Observable<Fonte> {
     return this.http.get<Fonte>(`${this.apiUrl}/${id}`);
   }
+
+  save(fonte: Fonte): Observable<Fonte> {
+    return this.http.post<Fonte>(this.apiUrl, fonte);
+  }
+
+  update(fonte: Fonte): Observable<Fonte> {
+    return this.http.put<Fonte>(`${this.apiUrl}/${fonte.id}`, fonte);
+  }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
 }
