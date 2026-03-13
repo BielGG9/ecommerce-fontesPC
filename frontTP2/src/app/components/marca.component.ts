@@ -89,6 +89,7 @@ export class MarcaComponent implements OnInit {
       this.marcaService.delete(id).subscribe({
         next: () => {
           alert('Marca eliminada!');
+          this.resetForm();
           this.carregarMarcas();
         }
       });

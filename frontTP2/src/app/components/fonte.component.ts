@@ -98,11 +98,15 @@ export class FonteComponent implements OnInit {
       });
     }
 
-  salvar() {
+ salvar() {
     if (this.fonteForm.invalid) return;
     
-    // Aqui criamos o objeto limpo para enviar ao Quarkus
-    const novaFonte = {
+    // 1. Verificamos se há um ID preenchido no formulário 
+    const idAtual = this.fonteForm.value.id;
+    
+    // 2. Montamos o pacote.
+    const fontePronta = {
+        id: idAtual, // <-- Se for novo vai nulo, se for edição vai com o número!
         nome: this.fonteForm.value.nome,
         potencia: Number(this.fonteForm.value.potencia),
         preco: Number(this.fonteForm.value.preco),
@@ -111,19 +115,69 @@ export class FonteComponent implements OnInit {
         certificacao: this.fonteForm.value.certificacao
     } as Fonte;
 
-    this.fonteService.save(novaFonte).subscribe({
-      next: () => {
-        alert('Fonte guardada com sucesso!');
-        this.fonteForm.reset();
-        this.carregarFontes();
-      },
-      error: (err) => alert('Erro ao guardar fonte. Verifique o F12.')
+    // 3. A Bifurcação: Atualizar ou Criar?
+    if (idAtual) {
+      // TEM ID: Vamos chamar o método de atualizar
+      this.fonteService.update(fontePronta).subscribe({
+        next: () => {
+          alert('Fonte atualizada com sucesso!');
+          this.resetForm(); // Usamos o cancelar para limpar tudo direitinho
+          this.carregarFontes();
+        },
+        error: (err) => {
+          console.error('Erro ao atualizar fonte', err);
+          alert('Erro ao atualizar. Verifique o F12.');
+        }
+      });
+    } else {
+      // NÃO TEM ID: É uma fonte nova 
+      this.fonteService.save(fontePronta).subscribe({
+        next: () => {
+          alert('Fonte guardada com sucesso!');
+          this.resetForm(); 
+          this.carregarFontes();
+        },
+        error: (err) => {
+          console.error('Erro ao salvar fonte', err);
+          alert('Erro ao guardar fonte. Verifique o F12.');
+        }
+      });
+    }
+  }
+  editar(fonte: any) {
+    // Pegamos o nome da certificação quer venha como objeto ou como texto
+    const nomeCert = fonte.certificacao?.fontcert || fonte.certificacao;
+
+    // Colamos os dados no formulário! 
+    this.fonteForm.patchValue({
+      ...fonte,    
+      idModelo: fonte.idModelo, 
+      certificacaoNome: nomeCert,
+      certificacao: nomeCert ? nomeCert.replace('80 Plus ', '').toUpperCase() : ''
     });
   }
-  cancelar() {
-    this.fonteForm.reset();
+
+  excluir(id: number | undefined) {
+    if (!id) return; // Segurança extra caso o ID venha vazio
+    
+    if (confirm('Tem a certeza que deseja eliminar esta fonte?')) {
+      this.fonteService.delete(id).subscribe({
+        next: () => {
+          alert('Fonte eliminada com sucesso!');
+          this.resetForm();
+          this.carregarFontes();
+        },
+        error: (err) => {
+          console.error('Erro ao excluir', err);
+          alert('Erro ao excluir a fonte.');
+        }
+      });
+    }
   }
 
+  resetForm() {
+    this.fonteForm.reset();
+  }
   abrirDialogCertificacao() {
     // 1. Mandamos o Angular abrir o nosso componente flutuante
     const dialogRef = this.dialog.open(CertificacaoDialog, {

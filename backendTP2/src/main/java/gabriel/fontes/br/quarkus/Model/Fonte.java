@@ -25,13 +25,18 @@ public class Fonte extends DefaultEntity {
     private double preco;
     private Integer estoque;
 
+
     // Relação Muitos-para-Muitos com Fornecedor
     @ManyToMany
     @JoinTable(
     name = "fonte_fornecedor", 
     joinColumns = @JoinColumn(name = "fonte_id"),
     inverseJoinColumns = @JoinColumn(name = "fornecedor_id")
+
+    
 )
+
+
 private List<Fornecedor> fornecedores;
 
     @ManyToOne(optional = false)

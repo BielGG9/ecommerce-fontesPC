@@ -10,6 +10,8 @@ public record FonteResponse(
     double preco,
     Integer estoque,
     String marca,
+    Long idMarca,
+    Long idModelo,
     Certificacao certificacao
 ) {
     public static FonteResponse fromEntity(Fonte fonte) {
@@ -20,6 +22,8 @@ public record FonteResponse(
             fonte.getPreco(),
             fonte.getEstoque(),
             fonte.getModelo().getMarca().getNome(),
+            fonte.getModelo().getMarca().getId(),
+            fonte.getModelo().getId(),
             fonte.getCertificacao()
         );
     }

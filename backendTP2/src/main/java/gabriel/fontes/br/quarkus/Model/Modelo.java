@@ -14,6 +14,7 @@ public class Modelo  extends DefaultEntity {
     @ManyToOne(optional = false)
     private Marca marca;
 
+
     public Modelo () {
 
     }
