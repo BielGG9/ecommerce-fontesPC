@@ -1,0 +1,100 @@
+<div class="modelo-container">
+  
+  <mat-card class="material-card">
+    <div class="card-header-azul">
+      <h2 style="margin: 0; font-size: 20px;">Gestão de Modelos</h2>
+    </div>
+
+    <form [formGroup]="modeloForm" (ngSubmit)="salvar()">
+      <mat-card-content style="padding-top: 20px;">
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field-full">
+            <mat-label>Numeração do Modelo</mat-label>
+            <input matInput type="number" formControlName="numeracao" maxlength="50" placeholder="Ex: 500, 650, 850...">
+            @if (modeloForm.get('numeracao')?.invalid && modeloForm.get('numeracao')?.touched) {
+              <mat-error>{{ obterMensagemErro('numeracao', 'Numeração') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field-full">
+            <mat-label>Selecione a Marca</mat-label>
+            <mat-select formControlName="idMarca">
+              <mat-option *ngFor="let m of marcas()" [value]="m.id">
+                {{ m.nome }}
+              </mat-option>
+            </mat-select>
+            @if (modeloForm.get('idMarca')?.invalid && modeloForm.get('idMarca')?.touched) {
+              <mat-error>{{ obterMensagemErro('idMarca', 'Marca') }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+      </mat-card-content>
+
+      <mat-card-actions align="end" style="padding: 16px;">
+        <button mat-button type="button" (click)="cancelar()">Cancelar</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="modeloForm.invalid">
+          Salvar
+        </button>
+      </mat-card-actions>
+    </form>
+  </mat-card>
+
+  <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: baseline; margin-top: 30px;">
+    <mat-form-field appearance="outline" style="flex: 1;">
+      <mat-label>Pesquisar Modelo por Numeração</mat-label>
+      <input matInput #inputPesquisa (keyup.enter)="buscar(inputPesquisa.value)" placeholder="Ex: 650">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    
+    <button mat-raised-button color="primary" (click)="buscar(inputPesquisa.value)" style="height: 50px;">
+      Buscar
+    </button>
+  </div>
+
+  <table mat-table [dataSource]="modelos()" class="mat-elevation-z8" style="width: 100%; border-radius: 8px; margin-bottom: 30px;">
+
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef style="width: 60px; font-weight: bold;"> ID </th>
+      <td mat-cell *matCellDef="let mod"> {{mod.id}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="numeracao">
+      <th mat-header-cell *matHeaderCellDef style="font-weight: bold;"> Numeração </th>
+      <td mat-cell *matCellDef="let mod"> {{mod.numeracao}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="marca">
+      <th mat-header-cell *matHeaderCellDef style="font-weight: bold;"> Marca </th>
+      <td mat-cell *matCellDef="let mod"> {{mod.marca}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="acoes">
+      <th mat-header-cell *matHeaderCellDef style="width: 120px; text-align: center; font-weight: bold;"> Ações </th>
+      <td mat-cell *matCellDef="let mod" style="text-align: center;">
+        <button mat-icon-button color="primary" title="Editar" (click)="editar(mod)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" title="Excluir" (click)="excluir(mod.id)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="colunasExibidas"></tr>
+    <tr mat-row *matRowDef="let row; columns: colunasExibidas;"></tr>
+  </table>
+
+  <mat-paginator 
+    [pageSizeOptions]="[2, 4, 8, 16]" 
+    [pageSize]="pageSize" 
+    [length]="totalModelos()" 
+    (page)="paginar($event)">
+  </mat-paginator>
+
+  <div *ngIf="modelos().length === 0" style="text-align: center; padding: 20px; color: #666;">
+    Nenhum modelo registado no momento.
+  </div>
+
+</div>

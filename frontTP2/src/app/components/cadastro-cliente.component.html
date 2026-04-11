@@ -1,0 +1,76 @@
+<div class="cadastro-container">
+  <mat-card class="cadastro-card mat-elevation-z8">
+    
+    <div class="card-header">
+      <h2>Criar Conta</h2>
+      <p>Junte-se a nós para comprar rápida e facilmente!</p>
+    </div>
+
+    <form [formGroup]="cadastroForm" (ngSubmit)="salvar()">
+      <mat-card-content class="form-content">
+        
+        @if (erroCadastro) {
+          <div class="error-message" style="color: #f44336; background-color: #ffebee; padding: 10px; border-radius: 4px; margin-bottom: 20px; text-align: center; font-weight: 500;">
+            {{ erroCadastro }}
+          </div>
+        }
+        
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nome Completo</mat-label>
+          <input matInput formControlName="nome" placeholder="Digite o seu nome" maxlength="100">
+          @if (cadastroForm.get('nome')?.invalid && cadastroForm.get('nome')?.touched) {
+            <mat-error>{{ obterMensagemErro('nome', 'Nome') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>E-mail</mat-label>
+          <input matInput formControlName="email" type="email" placeholder="Digite o seu e-mail" maxlength="100">
+          @if (cadastroForm.get('email')?.invalid && cadastroForm.get('email')?.touched) {
+            <mat-error>{{ obterMensagemErro('email', 'E-mail') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>CPF</mat-label>
+            <input matInput formControlName="cpf" maxlength="11" placeholder="Somente números">
+            @if (cadastroForm.get('cpf')?.invalid && cadastroForm.get('cpf')?.touched) {
+              <mat-error>{{ obterMensagemErro('cpf', 'CPF') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>RG</mat-label>
+            <input matInput formControlName="rg" maxlength="20" placeholder="Seu RG">
+            @if (cadastroForm.get('rg')?.invalid && cadastroForm.get('rg')?.touched) {
+              <mat-error>{{ obterMensagemErro('rg', 'RG') }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Senha</mat-label>
+          <input matInput formControlName="senha" type="password" placeholder="Crie uma senha forte" minlength="6">
+          @if (cadastroForm.get('senha')?.invalid && cadastroForm.get('senha')?.touched) {
+            <mat-error>{{ obterMensagemErro('senha', 'Senha') }}</mat-error>
+          }
+        </mat-form-field>
+
+      </mat-card-content>
+
+      <mat-card-actions class="cadastro-actions" style="display: flex; flex-direction: column; gap: 10px;">
+        <button mat-raised-button color="primary" type="submit" [disabled]="cadastroForm.invalid" style="width: 100%;">
+          Criar Conta
+        </button>
+        <button mat-button type="button" routerLink="/login" style="width: 100%;">
+          <mat-icon>arrow_back</mat-icon> Voltar para o Login
+        </button>
+        <button mat-button type="button" routerLink="/" style="width: 100%;">
+          <mat-icon>home</mat-icon> Voltar para a Home
+        </button>
+      </mat-card-actions>
+      
+    </form>
+  </mat-card>
+</div>

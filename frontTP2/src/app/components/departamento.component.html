@@ -1,0 +1,110 @@
+<div class="marca-container">
+  
+  <mat-card class="material-card">
+    
+    <div class="card-header-azul">
+      <h2 style="margin: 0; font-size: 20px;">Gestão de Departamentos</h2>
+    </div>
+    <div style="margin-bottom: 20px; display: flex; align-items: center; padding: 16px;">
+      <button mat-button color="primary" (click)="navegarParaHome()">
+        <mat-icon>arrow_back</mat-icon>
+        Voltar para a Home
+      </button>
+    </div>
+
+    <form [formGroup]="departamentoForm" (ngSubmit)="salvar()">
+      
+      <mat-card-content style="padding-top: 20px;">
+        
+        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 15px;">
+          <mat-label>Sigla</mat-label>
+          <input matInput formControlName="sigla" maxlength="10" placeholder="Ex: TI, FIN...">
+          @if (departamentoForm.get('sigla')?.invalid && departamentoForm.get('sigla')?.touched) {
+            <mat-error>{{ obterMensagemErro('sigla', 'Sigla') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-label>Descrição</mat-label>
+          <input matInput formControlName="descricao" maxlength="100" placeholder="Ex: Tecnologia da Informação">
+          @if (departamentoForm.get('descricao')?.invalid && departamentoForm.get('descricao')?.touched) {
+            <mat-error>{{ obterMensagemErro('descricao', 'Descrição') }}</mat-error>
+          }
+        </mat-form-field>
+
+      </mat-card-content>
+
+      <mat-card-actions align="end" style="padding: 16px;">
+        
+        <button *ngIf="departamentoForm.value.id" mat-button type="button" (click)="resetForm()">
+          Cancelar
+        </button>
+
+        <button mat-raised-button color="primary" type="submit" [disabled]="departamentoForm.invalid">
+          {{ departamentoForm.value.id ? 'Atualizar' : 'Salvar' }}
+        </button>
+
+      </mat-card-actions>
+    </form>
+  </mat-card>
+
+  <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: baseline; margin-top: 30px;">
+    <mat-form-field appearance="outline" style="flex: 1;">
+      <mat-label>Pesquisar Departamento por Descrição</mat-label>
+      <input matInput #inputPesquisa (keyup.enter)="buscar(inputPesquisa.value)" placeholder="Ex: Tecnologia da Informação">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    
+    <button mat-raised-button color="primary" (click)="buscar(inputPesquisa.value)" style="height: 50px;">
+      Buscar
+    </button>
+  </div>
+
+<table mat-table [dataSource]="departamentos()" class="mat-elevation-z8" style="width: 100%; border-radius: 8px; margin-bottom: 30px;">
+
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef style="width: 80px; font-weight: bold;"> ID </th>
+      <td mat-cell *matCellDef="let departamento"> {{departamento.id}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="sigla">
+      <th mat-header-cell *matHeaderCellDef style="font-weight: bold;"> Sigla </th>
+      <td mat-cell *matCellDef="let departamento"> {{departamento.sigla}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="descricao">
+      <th mat-header-cell *matHeaderCellDef style="font-weight: bold;"> Descrição </th>
+      <td mat-cell *matCellDef="let departamento"> {{departamento.descricao}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="acoes">
+      <th mat-header-cell *matHeaderCellDef style="width: 120px; text-align: center; font-weight: bold;"> Ações </th>
+      <td mat-cell *matCellDef="let departamento" style="text-align: center;">
+        
+        <button mat-icon-button color="primary" (click)="editar(departamento)" title="Editar">
+          <mat-icon>edit</mat-icon>
+        </button>
+
+        <button mat-icon-button color="warn" (click)="excluir(departamento.id!)" title="Excluir">
+          <mat-icon>delete</mat-icon>
+        </button>
+
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+    <tr mat-row *matRowDef="let row; columns: colunas;"></tr>
+
+  </table>
+
+  <mat-paginator 
+    [pageSizeOptions]="[2, 4, 8, 16]" 
+    [pageSize]="pageSize" 
+    [length]="totalDepartamentos()" 
+    (page)="paginar($event)">
+  </mat-paginator>
+
+  <div *ngIf="departamentos().length === 0" style="text-align: center; padding: 20px; color: #666;">
+    Nenhum departamento registado no momento.
+  </div>
+</div>

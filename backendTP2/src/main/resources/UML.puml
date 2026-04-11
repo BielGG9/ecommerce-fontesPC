@@ -1,0 +1,125 @@
+@startuml Ecommerce_FontesPC
+
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam roundcorner 10
+skinparam shadowing true
+
+package "Autenticação e Utilizadores" {
+    abstract class Pessoa {
+        - id: Long
+        - nome: String
+        - email: String
+        - idKeycloak: String
+    }
+
+    class PessoaFisica extends Pessoa {
+        - cpf: String
+        - rg: String
+    }
+
+    class PessoaJuridica extends Pessoa {
+        - cnpj: String
+        - inscricaoEstadual: String
+    }
+
+    class Fornecedor extends PessoaJuridica {
+        - razaoSocial: String
+    }
+
+    class Cliente extends PessoaFisica {
+        - dataCadastro: LocalDate
+    }
+
+    class Funcionario extends PessoaFisica {
+        - cargo: String
+        - dataAdmissao: LocalDate
+    }
+
+    class Departamento {
+        - id: Long
+        - sigla: String
+        - descricao: String
+    }
+
+    Funcionario "N" --> "1" Departamento : trabalha em >
+}
+
+package "Catálogo de Produtos (Vitrine)" {
+    class Marca {
+        - id: Long
+        - nome: String
+    }
+
+    class Modelo {
+        - id: Long
+        - numeracao: String
+    }
+
+    class Fonte {
+        - id: Long
+        - nome: String
+        - preco: Double
+        - potencia: Integer
+        - estoque: Integer
+        - certificacao: Certificacao
+    }
+
+    Modelo "N" --> "1" Marca : associado a >
+    Fonte "N" --> "1" Modelo : possui >
+    Fonte "N" --> "N" Fornecedor : fornecida por >
+}
+
+package "Carrinho e Pedidos" {
+    class Pedido {
+        - id: Long
+        - dataHora: LocalDateTime
+        - valorTotal: Double
+        - status: StatusPedido
+    }
+
+    class ItemPedido {
+        - id: Long
+        - quantidade: Integer
+        - precoUnitario: Double
+        - subTotal: Double
+    }
+
+    Cliente "1" --> "N" Pedido : realiza >
+    Pedido "1" *-- "N" ItemPedido : contém >
+    ItemPedido "N" --> "1" Fonte : refere-se a >
+}
+
+package "Logística e Pagamento" {
+    class Endereco {
+        - id: Long
+        - cep: String
+        - logradouro: String
+        - cidade: String
+    }
+
+    abstract class Pagamento {
+        - id: Long
+        - valor: Double
+        - dataPagamento: LocalDateTime
+    }
+
+    class Pix extends Pagamento {
+        - chavePix: String
+    }
+
+    class Boleto extends Pagamento {
+        - codigoBarras: String
+        - dataVencimento: LocalDate
+    }
+
+    class Cartao extends Pagamento {
+        - numeroFinal: String
+        - bandeira: String
+    }
+
+    Cliente "1" --> "N" Endereco : possui >
+    Pedido "1" --> "1" Endereco : entregue em >
+    Pedido "1" --> "1" Pagamento : pago via >
+}
+@enduml

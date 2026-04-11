@@ -1,0 +1,17 @@
+<div class="dialog-container">
+  
+  <h2 class="dialog-titulo">Escolha a Certificação</h2>
+  
+  <mat-list>
+    <mat-list-item *ngFor="let cert of listaCertificacoes" 
+                   (click)="selecionar(cert)" 
+                   class="item-clicavel">
+      <span style="font-size: 16px; color: #333;">{{ cert.fontcert }}</span>
+    </mat-list-item>
+  </mat-list>
+
+  <div class="dialog-rodape">
+    <button mat-button color="warn" (click)="cancelar()">Cancelar</button>
+  </div>
+
+</div>

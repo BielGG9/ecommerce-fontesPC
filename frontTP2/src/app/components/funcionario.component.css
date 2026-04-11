@@ -1,0 +1,26 @@
+/* ==========================================================================
+   ESTILOS DO COMPONENTE DE FUNCIONARIO
+   ========================================================================== */
+
+/* Container principal: Centraliza o conteúdo e define um limite de largura */
+.marca-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* --- ESTILOS DO ANGULAR MATERIAL --- */
+
+.material-card {
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 30px;
+}
+
+.card-header-azul {
+  background-color: #3f51b5; /* O azul clássico do Indigo/Pink */
+  color: white;
+  padding: 16px;
+  text-align: center;
+  font-weight: bold;
+}

@@ -1,0 +1,5 @@
+/* Garante que o badge (número) fique bem posicionado e visível */
+.mat-badge-content {
+  font-size: 12px;
+  font-weight: bold;
+}

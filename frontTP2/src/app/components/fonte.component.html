@@ -1,0 +1,173 @@
+<div class="fonte-container">
+  
+  <mat-card class="material-card">
+    <div class="card-header-azul">
+      <h2 style="margin: 0; font-size: 20px;">Gestão de Fontes</h2>
+    </div>
+    <div style="margin-bottom: 20px; display: flex; align-items: center;">
+      <button mat-button color="primary" (click)="navegarParaHome()">
+        <mat-icon>arrow_back</mat-icon>
+        Voltar para a Loja
+      </button>
+    </div>
+
+    <form [formGroup]="fonteForm" (ngSubmit)="salvar()">
+      <mat-card-content style="padding-top: 20px;">
+
+        <div class="form-row">
+            <mat-form-field appearance="outline" style="width: 100%;">
+                <mat-label>Nome da Fonte</mat-label>
+                <input matInput formControlName="nome" maxlength="100" placeholder="Ex: CX650, RM850x...">
+                @if (fonteForm.get('nome')?.invalid && fonteForm.get('nome')?.touched) {
+                    <mat-error>{{ obterMensagemErro('nome', 'Nome da Fonte') }}</mat-error>
+                }
+            </mat-form-field>
+        </div>
+
+        <div class="form-row">
+                <mat-form-field appearance="outline" style="flex: 1;">
+                    <mat-label>Potência (W)</mat-label>
+                    <input matInput type="number" formControlName="potencia" maxlength="5" placeholder="Ex: 650">
+                    <span matTextSuffix>W</span>
+                    @if (fonteForm.get('potencia')?.invalid && fonteForm.get('potencia')?.touched) {
+                        <mat-error>{{ obterMensagemErro('potencia', 'Potência') }}</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" style="flex: 1;">
+                    <mat-label>Preço</mat-label>
+                    <span matTextPrefix>€&nbsp;</span>
+                    <input matInput type="number" formControlName="preco" maxlength="10" placeholder="0.00">
+                    @if (fonteForm.get('preco')?.invalid && fonteForm.get('preco')?.touched) {
+                        <mat-error>{{ obterMensagemErro('preco', 'Preço') }}</mat-error>
+                    }
+                </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field-full">
+            <mat-label>Selecione a Marca</mat-label>
+            <mat-select formControlName="idMarca">
+              <mat-option *ngFor="let m of marcas()" [value]="m.id">
+                {{ m.nome }}
+              </mat-option>
+            </mat-select>
+            @if (fonteForm.get('idMarca')?.invalid && fonteForm.get('idMarca')?.touched) {
+              <mat-error>{{ obterMensagemErro('idMarca', 'Marca') }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+        
+        <div class="form-row" style="align-items: center; margin-top: 10px;">
+          <mat-form-field appearance="outline" class="form-field-full">
+            <mat-label>Selecione o Modelo</mat-label>
+            <mat-select formControlName="idModelo">
+              <mat-option *ngFor="let mod of modelos()" [value]="mod.id">
+                {{ mod.numeracao }}
+              </mat-option>
+            </mat-select>
+            @if (fonteForm.get('idModelo')?.invalid && fonteForm.get('idModelo')?.touched) {
+              <mat-error>{{ obterMensagemErro('idModelo', 'Modelo') }}</mat-error>
+            }
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline" class="form-field-full" style="flex: 2; margin-left: 15px;">
+            <mat-label>Selecione os Fornecedores</mat-label>
+            <mat-select formControlName="idFornecedores" multiple>
+              <mat-option *ngFor="let f of fornecedores()" [value]="f.id">
+                {{ f.razaoSocial }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline" style="flex: 2;">
+            <mat-label>Certificação 80 Plus</mat-label>
+            <input matInput formControlName="certificacaoNome" placeholder="Clique no botão ao lado ->" readonly>
+            @if (fonteForm.get('certificacaoNome')?.invalid && fonteForm.get('certificacaoNome')?.touched) {
+              <mat-error>{{ obterMensagemErro('certificacaoNome', 'Certificação') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <button mat-raised-button color="accent" type="button" (click)="abrirDialogCertificacao()" style="flex: 1; height: 50px; margin-bottom: 20px; margin-left: 15px;">
+            <mat-icon>verified</mat-icon>
+            Escolher Certificação
+          </button>
+
+        </div>
+
+      </mat-card-content>
+
+      <mat-card-actions align="end" style="padding: 16px;">
+        <button mat-button type="button" (click)="resetForm()">Cancelar</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="fonteForm.invalid">
+          Salvar
+        </button>
+      </mat-card-actions>
+    </form>
+  </mat-card>
+
+  <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: baseline; margin-top: 30px;">
+  <mat-form-field appearance="outline" style="flex: 1;">
+    <mat-label>Pesquisar Fonte por Nome</mat-label>
+    <input matInput #inputPesquisa (keyup.enter)="buscar(inputPesquisa.value)" placeholder="Ex: Corsair ou RM750x">
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+  
+  <button mat-raised-button color="primary" (click)="buscar(inputPesquisa.value)" style="height: 50px;">
+    Buscar
+  </button>
+</div>
+
+  <table mat-table [dataSource]="fontes()" class="mat-elevation-z8" style="width: 100%; border-radius: 8px; margin-bottom: 30px;">
+
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef style="width: 60px; font-weight: bold;"> ID </th>
+      <td mat-cell *matCellDef="let f"> {{f.id}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="nome">
+      <th mat-header-cell *matHeaderCellDef style="font-weight: bold;"> Nome </th>
+      <td mat-cell *matCellDef="let f"> {{f.nome}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="potencia">
+      <th mat-header-cell *matHeaderCellDef style="font-weight: bold;"> Potência </th>
+      <td mat-cell *matCellDef="let f"> {{f.potencia}}W </td>
+    </ng-container>
+
+    <ng-container matColumnDef="preco">
+      <th mat-header-cell *matHeaderCellDef style="font-weight: bold;"> Preço </th>
+      <td mat-cell *matCellDef="let f"> R$ {{f.preco}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="marca">
+      <th mat-header-cell *matHeaderCellDef style="font-weight: bold;"> Marca </th>
+      <td mat-cell *matCellDef="let f"> {{f.marca}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="acoes">
+      <th mat-header-cell *matHeaderCellDef style="width: 120px; text-align: center; font-weight: bold;"> Ações </th>
+      <td mat-cell *matCellDef="let f" style="text-align: center;">
+        <button mat-icon-button color="primary" title="Editar" (click)="editar(f)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" title="Excluir" (click)="excluir(f.id)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="coluna"></tr>
+    <tr mat-row *matRowDef="let row; columns: coluna;"></tr>
+  </table>
+  
+  <mat-paginator 
+    [pageSizeOptions]="[2, 4, 8, 16]" 
+    [pageSize]="pageSize" 
+    [length]="totalFontes()" 
+    (page)="paginar($event)">
+</mat-paginator>
+
+  <div *ngIf="fontes().length === 0" style="text-align: center; padding: 20px; color: #666;">
+    Nenhuma fonte registada no momento.
+  </div>
+
+</div>

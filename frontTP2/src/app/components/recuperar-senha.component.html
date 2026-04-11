@@ -1,0 +1,47 @@
+<div class="login-container">
+  <mat-card class="login-card mat-elevation-z8">
+    <div class="card-header">
+      <h2>Recuperação de Senha</h2>
+      <p>Introduza o seu e-mail</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="enviarEmail()">
+      <mat-card-content class="form-content">
+        
+        @if (mensagemErro) {
+          <div class="error-message">
+            {{ mensagemErro }}
+          </div>
+        }
+
+        @if (mensagemSucesso) {
+          <div class="success-message" style="color: green; text-align: center; margin-bottom: 15px; font-weight: bold;">
+            {{ mensagemSucesso }}
+          </div>
+        }
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email" placeholder="Digite o seu email cadastrado">
+        </mat-form-field>
+
+      </mat-card-content>
+
+      <mat-card-actions class="login-actions">
+        <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || enviando" class="full-width-btn">
+          @if (enviando) {
+            A enviar...
+          } @else if (sucesso) {
+            Enviado!
+          } @else {
+            Enviar Link de Recuperação
+          }
+        </button>
+      </mat-card-actions>
+      
+      <div class="signup-link">
+        Lembrou-se da senha? <a routerLink="/login">Voltar ao Login</a>
+      </div>
+    </form>
+  </mat-card>
+</div>
