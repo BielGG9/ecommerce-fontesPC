@@ -28,6 +28,9 @@ export class MarcaComponent implements OnInit {
 
   private router = inject(Router);
   colunas: string[] = ['id', 'nome', 'acoes'];
+  
+  // Controle de Tela (Lista x Formulário)
+  isFormVisible = false;
 
   marcas = signal<Marca[]>([]);
 
@@ -88,6 +91,7 @@ export class MarcaComponent implements OnInit {
         next: () => {
           alert('Marca atualizada com sucesso!');
           this.resetForm();
+          this.isFormVisible = false;
           this.carregarMarcas();
         }
       });
@@ -97,6 +101,7 @@ export class MarcaComponent implements OnInit {
         next: () => {
           alert('Marca criada com sucesso!');
           this.resetForm();
+          this.isFormVisible = false;
           this.carregarMarcas();
         }
       });
@@ -109,6 +114,16 @@ export class MarcaComponent implements OnInit {
       id: marca.id,
       nome: marca.nome
     });
+    this.isFormVisible = true;
+  }
+
+  novaMarca() {
+    this.resetForm();
+    this.isFormVisible = true;
+  }
+
+  voltarParaLista() {
+    this.isFormVisible = false;
   }
 
   excluir(id: number) {

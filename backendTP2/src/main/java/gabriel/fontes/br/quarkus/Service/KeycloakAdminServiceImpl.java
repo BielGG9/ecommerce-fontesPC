@@ -20,14 +20,14 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
 
     @Override
     public void enviarEmailRecuperacaoSenha(String email) {
-        java.util.List<UserRepresentation> users = keycloak.realm("meu-realm").users().search(null, null, null, email, 0, 1);
+        java.util.List<UserRepresentation> users = keycloak.realm("TP2").users().search(null, null, null, email, 0, 1);
         
         if (users == null || users.isEmpty()) {
             throw new jakarta.ws.rs.NotFoundException("Utilizador não encontrado no Keycloak.");
         }
         
         String userId = users.get(0).getId();
-        keycloak.realm("meu-realm").users().get(userId).executeActionsEmail(java.util.Collections.singletonList("UPDATE_PASSWORD"));
+        keycloak.realm("TP2").users().get(userId).executeActionsEmail(java.util.Collections.singletonList("UPDATE_PASSWORD"));
     }
 
     @Override
@@ -48,7 +48,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             usuario.setCredentials(Collections.singletonList(credencial));
 
             // 3. Enviar o pedido para o Keycloak
-            try (Response response = keycloak.realm("meu-realm").users().create(usuario)) {
+            try (Response response = keycloak.realm("TP2").users().create(usuario)) {
                 if (response.getStatus() != 201) {
                     throw new RuntimeException("Erro ao criar utilizador no Keycloak. Status: " + response.getStatus() + " - " + response.getStatusInfo().getReasonPhrase());
                 }

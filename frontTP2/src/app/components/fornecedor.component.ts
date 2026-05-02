@@ -30,6 +30,9 @@ export class FornecedorComponent implements OnInit {
   
   colunas: string[] = ['id', 'nome', 'cnpj', 'razaoSocial', 'acoes'];
 
+  // Controle de Tela (Lista x Formulário)
+  isFormVisible = false;
+
   fornecedores = signal<Fornecedor[]>([]);
   
   totalFornecedores = signal(0);
@@ -91,6 +94,7 @@ export class FornecedorComponent implements OnInit {
         next: () => {
           alert('Fornecedor atualizado com sucesso!');
           this.resetForm();
+          this.isFormVisible = false;
           this.carregarFornecedores();
         }
       });
@@ -99,6 +103,7 @@ export class FornecedorComponent implements OnInit {
         next: () => {
           alert('Fornecedor criado com sucesso!');
           this.resetForm();
+          this.isFormVisible = false;
           this.carregarFornecedores();
         }
       });
@@ -114,6 +119,16 @@ export class FornecedorComponent implements OnInit {
       cnpj: fornecedor.cnpj,
       inscricaoEstadual: fornecedor.inscricaoEstadual
     });
+    this.isFormVisible = true;
+  }
+
+  novoFornecedor() {
+    this.resetForm();
+    this.isFormVisible = true;
+  }
+
+  voltarParaLista() {
+    this.isFormVisible = false;
   }
 
   excluir(id: number) {

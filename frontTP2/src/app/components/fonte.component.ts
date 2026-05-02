@@ -42,6 +42,9 @@ export class FonteComponent implements OnInit {
   private router = inject(Router);
 
   coluna: string[] = ['id', 'nome', 'potencia', 'preco', 'marca', 'acoes'];
+  
+  // Controle de Tela (Lista x Formulário)
+  isFormVisible = false;
 
   // --- Configuração da Paginação ---
   totalFontes = signal(0); // Quantidade total de itens no servidor
@@ -178,6 +181,7 @@ export class FonteComponent implements OnInit {
         next: () => {
           alert('Fonte atualizada com sucesso!');
           this.resetForm(); // Usamos o cancelar para limpar tudo direitinho
+          this.isFormVisible = false;
           this.carregarFontes();
         },
         error: (err) => {
@@ -191,6 +195,7 @@ export class FonteComponent implements OnInit {
         next: () => {
           alert('Fonte guardada com sucesso!');
           this.resetForm(); 
+          this.isFormVisible = false;
           this.carregarFontes();
         },
         error: (err) => {
@@ -212,6 +217,18 @@ export class FonteComponent implements OnInit {
       certificacaoNome: nomeCert,
       certificacao: nomeCert ? nomeCert.replace('80 Plus ', '').toUpperCase() : ''
     });
+    
+    // Mostra o formulário
+    this.isFormVisible = true;
+  }
+
+  novaFonte() {
+    this.resetForm();
+    this.isFormVisible = true;
+  }
+
+  voltarParaLista() {
+    this.isFormVisible = false;
   }
 
   excluir(id: number | undefined) {

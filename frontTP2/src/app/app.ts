@@ -36,6 +36,10 @@ export class App implements OnInit, OnDestroy {
     }
   }
 
+  get isAdminRoute(): boolean {
+    return this.router.url.startsWith('/admin');
+  }
+
   sair() {
     this.authService.limparSessao();
     this.router.navigate(['/login']);

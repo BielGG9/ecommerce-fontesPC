@@ -34,6 +34,9 @@ export class FuncionarioComponent implements OnInit {
   
   colunas: string[] = ['id', 'nome', 'cpf', 'cargo', 'departamento', 'acoes'];
 
+  // Controle de Tela (Lista x Formulário)
+  isFormVisible = false;
+
   funcionarios = signal<Funcionario[]>([]);
   departamentos = signal<Departamento[]>([]);
 
@@ -108,6 +111,7 @@ export class FuncionarioComponent implements OnInit {
         next: () => {
           alert('Funcionário atualizado com sucesso!');
           this.resetForm();
+          this.isFormVisible = false;
           this.carregarFuncionarios();
         }
       });
@@ -116,6 +120,7 @@ export class FuncionarioComponent implements OnInit {
         next: () => {
           alert('Funcionário criado com sucesso!');
           this.resetForm();
+          this.isFormVisible = false;
           this.carregarFuncionarios();
         }
       });
@@ -141,6 +146,16 @@ export class FuncionarioComponent implements OnInit {
       dataAdmissao: dataFormatada,
       idDepartamento: idDepto
     });
+    this.isFormVisible = true;
+  }
+
+  novoFuncionario() {
+    this.resetForm();
+    this.isFormVisible = true;
+  }
+
+  voltarParaLista() {
+    this.isFormVisible = false;
   }
 
   excluir(id: number) {

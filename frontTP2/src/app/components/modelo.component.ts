@@ -19,6 +19,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { PaginatorIntlPtBr } from '../paginator-ptbr';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-modelo',
@@ -43,7 +44,7 @@ export class ModeloComponent implements OnInit {
   private modeloService = inject(ModeloService);
   private marcaService = inject(MarcaService);
   private fb = inject(FormBuilder);
-
+  private router = inject(Router);
 
   modelos = signal<Modelo[]>([]);
   marcas = signal<Marca[]>([]); 
@@ -52,6 +53,9 @@ export class ModeloComponent implements OnInit {
   pageSize = 2;
   page = 0;
   nomeBusca = '';
+  
+  // Controle de Tela (Lista x Formulário)
+  isFormVisible = false;
 
   // Colunas da nossa tabela de Modelos
   colunasExibidas: string[] = ['id', 'numeracao', 'marca', 'acoes'];
@@ -120,6 +124,7 @@ export class ModeloComponent implements OnInit {
          next: () => {
            alert('Modelo atualizado com sucesso!');
            this.modeloForm.reset();
+           this.isFormVisible = false;
            this.carregarModelos();
          },
          error: (err) => {
@@ -132,6 +137,7 @@ export class ModeloComponent implements OnInit {
         next: () => {
           alert('Modelo guardado com sucesso!');
           this.modeloForm.reset();
+          this.isFormVisible = false;
           this.carregarModelos();
         },
         error: (err) => {
@@ -154,8 +160,14 @@ export class ModeloComponent implements OnInit {
     return '';
   }
 
-  cancelar() {
+  voltarParaLista() {
     this.modeloForm.reset();
+    this.isFormVisible = false;
+  }
+  
+  novoModelo() {
+    this.modeloForm.reset();
+    this.isFormVisible = true;
   }
 
   editar(modelo: Modelo) {
@@ -164,6 +176,7 @@ export class ModeloComponent implements OnInit {
       numeracao: modelo.numeracao.toString(),
       idMarca: modelo.idMarca as any
     });
+    this.isFormVisible = true;
   }
 
   excluir(id: number) {
@@ -186,5 +199,9 @@ export class ModeloComponent implements OnInit {
         }
       });
     }
+  }
+
+  navegarParaHome() {
+    this.router.navigate(['/home']);
   }
 }

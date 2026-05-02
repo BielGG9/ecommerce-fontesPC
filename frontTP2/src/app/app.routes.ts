@@ -10,6 +10,7 @@ import { CadastroClienteComponent } from './components/cadastro-cliente.componen
 import { LoginComponent } from './components/login.component';
 import { RecuperarSenhaComponent } from './components/recuperar-senha.component';
 import { PedidoComponent } from './components/pedido/pedido.component';
+import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
 import { AuthService } from './services/auth.service';
 import { canActivateAuthRole } from './guards/auth.guard';
 
@@ -25,5 +26,6 @@ export const routes: Routes = [
   { path: 'fornecedores', component: FornecedorComponent, canActivate: [canActivateAuthRole] },
   { path: 'cadastro-cliente', component: CadastroClienteComponent },
   { path: 'recuperar-senha', component: RecuperarSenhaComponent },
+  { path: 'admin', component: AdminDashboardComponent, canActivate: [canActivateAuthRole] },
   { path: 'admin/pedidos', component: PedidoComponent, canActivate: [canActivateAuthRole]},
 ];

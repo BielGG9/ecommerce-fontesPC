@@ -58,7 +58,7 @@ export class LoginComponent {
       this.erroLogin = null;
       const { email, senha } = this.loginForm.value;
 
-      const url = 'http://localhost:8080/realms/meu-realm/protocol/openid-connect/token';
+      const url = 'http://localhost:8080/realms/TP2/protocol/openid-connect/token';
       const body = new HttpParams()
         .set('client_id', 'quarkuss')
         .set('grant_type', 'password')
