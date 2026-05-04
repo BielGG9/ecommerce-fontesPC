@@ -2,13 +2,7 @@
     ![Angular](https://img.shields.io/badge/angular-%23DD0031.svg?style=for-the-badge&logo=angular&logoColor=white)
     ![Quarkus](https://img.shields.io/badge/Quarkus-%234695EB.svg?style=for-the-badge&logo=Quarkus&logoColor=white)
     ```
-
-O que achou dessa estrutura? Quer que eu mude algum detalhe ou adicione mais alguma seção específicaUm **README** bem estruturado é o "cartão de visitas" do seu projeto, Gabriel. Como você é estudante de Sistemas e está construindo um software robusto com Quarkus e Angular, um bom documento no GitHub demonstra profissionalismo e facilita a vida de quem for avaliar seu código (professores ou recrutadores).
-
-Aqui está um modelo de **README.md** moderno e organizado, pronto para você copiar e adaptar:
-
----
-
+    
 # ⚡ Fontes PC - Sistema de Gestão de E-commerce
 
 Este é um sistema de gerenciamento para e-commerce de fontes de PC, desenvolvido como parte do projeto **TP2** do curso de Sistemas de Informação. O projeto foca em uma arquitetura moderna com backend em microserviços e frontend responsivo, integrando autenticação robusta via Keycloak.
