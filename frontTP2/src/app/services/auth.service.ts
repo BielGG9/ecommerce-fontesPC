@@ -6,6 +6,9 @@ import { BehaviorSubject, Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthService {
+  getNomeUsuario() {
+    throw new Error('Method not implemented.');
+  }
   
   public usuarioLogado$ = new BehaviorSubject<string | null>(null);
   private http = inject(HttpClient);

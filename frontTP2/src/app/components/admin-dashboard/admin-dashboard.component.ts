@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -9,11 +11,34 @@ import { RouterModule } from '@angular/router';
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.css']
 })
-export class AdminDashboardComponent {
+export class AdminDashboardComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
+  private authService = inject(AuthService);
+  private authSub!: Subscription;
+
+  nomeUsuario: string | null = '';
+
   // Controle do estado da Sidebar
   isCollapsed = false;
   // Controle de Tema Claro/Escuro
   isDarkMode = false;
+
+  ngOnInit() {
+    this.authSub = this.authService.usuarioLogado$.subscribe(nome => {
+      this.nomeUsuario = nome;
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.authSub) {
+      this.authSub.unsubscribe();
+    }
+  }
+
+  sair() {
+    this.authService.limparSessao();
+    this.router.navigate(['/login']);
+  }
 
   // Organização do menu em um array para facilitar a manutenção
   menuItems = [

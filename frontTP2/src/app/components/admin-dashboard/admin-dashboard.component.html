@@ -23,25 +23,54 @@
   <div id="page-content-wrapper" class="bg-light-custom" [ngClass]="{'collapsed': isCollapsed}">
     
     <!-- Topbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom topbar px-4">
-      <div class="d-flex align-items-center w-100">
-        <!-- Hamburguer Toggle Button -->
-        <button class="btn btn-light me-3 d-flex align-items-center justify-content-center border-0 shadow-sm rounded-circle p-2" (click)="toggleSidebar()" id="menu-toggle">
-          <i class="bi bi-list fs-4"></i>
-        </button>
-
-        <!-- Dark/Light Mode Toggle -->
-        <button class="btn btn-light me-3 d-flex align-items-center justify-content-center border-0 shadow-sm rounded-circle p-2 theme-toggle" (click)="toggleTheme()" title="Alternar Tema">
-          <i class="bi" [ngClass]="isDarkMode ? 'bi-sun-fill text-warning' : 'bi-moon-fill text-primary'" class="fs-5"></i>
-        </button>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom topbar px-4 sticky-top">
+      <div class="d-flex align-items-center w-100 justify-content-between">
         
-        <!-- Search Bar -->
-        <form class="d-none d-md-flex ms-2 w-50">
-          <div class="input-group shadow-sm rounded-pill overflow-hidden">
-            <span class="input-group-text bg-light border-0 px-3"><i class="bi bi-search text-muted"></i></span>
-            <input type="text" class="form-control border-0 bg-light shadow-none" placeholder="Pesquisar registros, módulos..." aria-label="Pesquisar">
+        <!-- Esquerda: Toggle Sidebar + Logo -->
+        <div class="d-flex align-items-center">
+          <!-- Hamburguer Toggle Button -->
+          <button class="btn btn-light me-3 d-flex align-items-center justify-content-center border-0 shadow-sm rounded-circle p-2" (click)="toggleSidebar()" id="menu-toggle">
+            <i class="bi bi-list fs-4"></i>
+          </button>
+          
+          <!-- Branding (Fontes PC) -->
+          <a class="navbar-brand fw-bold text-primary d-flex align-items-center me-4" [routerLink]="['/']">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 35px; height: 35px;">
+              <i class="bi bi-lightning-fill"></i>
+            </div>
+            <span class="d-none d-sm-inline">Fontes PC</span>
+          </a>
+
+          <!-- Search Bar -->
+          <form class="d-none d-md-flex">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden">
+              <span class="input-group-text bg-light border-0 px-3"><i class="bi bi-search text-muted"></i></span>
+              <input type="text" class="form-control border-0 bg-light shadow-none" placeholder="Pesquisar..." aria-label="Pesquisar">
+            </div>
+          </form>
+        </div>
+
+        <!-- Direita: Tema + Info Usuário -->
+        <div class="d-flex align-items-center">
+          <!-- Dark/Light Mode Toggle -->
+          <button class="btn btn-light me-3 d-flex align-items-center justify-content-center border-0 shadow-sm rounded-circle p-2 theme-toggle" (click)="toggleTheme()" title="Alternar Tema">
+            <i class="bi" [ngClass]="isDarkMode ? 'bi-sun-fill text-warning' : 'bi-moon-fill text-primary'" class="fs-5"></i>
+          </button>
+
+          <!-- User Information -->
+          <div class="d-flex align-items-center bg-light rounded-pill px-3 py-1 border shadow-sm transition-all hover-shadow">
+            <span class="me-3 fw-medium text-secondary d-none d-sm-inline">
+              Olá, <span class="fw-bold text-primary">{{ nomeUsuario || 'Admin' }}</span>!
+            </span>
+            <span class="me-2 fw-medium text-secondary d-inline d-sm-none" title="Olá, {{ nomeUsuario || 'Admin' }}!">
+              <i class="bi bi-person-circle fs-5 text-primary"></i>
+            </span>
+            <button class="btn btn-sm btn-outline-danger rounded-pill fw-bold px-3" (click)="sair()">
+              Sair
+            </button>
           </div>
-        </form>
+        </div>
+
       </div>
     </nav>
 
