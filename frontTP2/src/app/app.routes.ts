@@ -28,4 +28,6 @@ export const routes: Routes = [
   { path: 'recuperar-senha', component: RecuperarSenhaComponent },
   { path: 'admin', component: AdminDashboardComponent, canActivate: [canActivateAuthRole] },
   { path: 'admin/pedidos', component: PedidoComponent, canActivate: [canActivateAuthRole]},
+  { path: 'carrinho', loadComponent: () => import('./components/carrinho/carrinho.component').then(c => c.CarrinhoComponent) },
+  { path: 'checkout', loadComponent: () => import('./components/checkout/checkout.component').then(c => c.CheckoutComponent), canActivate: [canActivateAuthRole] }
 ];

@@ -15,4 +15,8 @@ export class ClienteService {
   registrar(cliente: Cliente): Observable<Cliente> {
     return this.http.post<Cliente>(this.apiUrl, cliente);
   }
+
+  getMeuPerfil(): Observable<Cliente> {
+    return this.http.get<Cliente>(`${this.apiUrl}/meu-perfil`);
+  }
 }

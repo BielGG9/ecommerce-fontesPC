@@ -11,8 +11,18 @@
         Fontes PC
       </a>
 
-      <!-- User Information Container -->
-      <div class="d-flex align-items-center">
+      <!-- User Information & Cart Container -->
+      <div class="d-flex align-items-center gap-3">
+        <!-- Carrinho -->
+        <button [routerLink]="['/carrinho']" class="btn btn-outline-primary position-relative rounded-circle p-2 border-0 shadow-sm" title="Ir para o Carrinho">
+          <i class="bi bi-cart3 fs-5"></i>
+          @if (carrinhoService.quantidadeTotal() > 0) {
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65em;">
+              {{ carrinhoService.quantidadeTotal() }}
+            </span>
+          }
+        </button>
+
         @if (usuarioLogado) {
           <div class="d-flex align-items-center bg-light rounded-pill px-3 py-1 border shadow-sm hover-shadow transition-all">
             <!-- Texto visível em telas maiores -->

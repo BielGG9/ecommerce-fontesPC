@@ -1,0 +1,94 @@
+<div class="container py-5 mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-primary mb-0"><i class="bi bi-cart3 me-2"></i>Seu Carrinho</h2>
+    <button [routerLink]="['/']" class="btn btn-outline-secondary rounded-pill shadow-sm">
+      <i class="bi bi-arrow-left me-2"></i>Continuar Comprando
+    </button>
+  </div>
+
+  @if (carrinhoService.itens().length === 0) {
+    <div class="text-center py-5 bg-white rounded-4 shadow-sm border">
+      <i class="bi bi-cart-x fs-1 text-muted mb-3 d-block"></i>
+      <h4 class="text-muted">Seu carrinho está vazio</h4>
+      <p class="text-secondary mb-4">Adicione algumas fontes para dar energia ao seu PC!</p>
+      <button [routerLink]="['/']" class="btn btn-primary rounded-pill px-4 py-2 fw-bold">
+        Ver Vitrine
+      </button>
+    </div>
+  } @else {
+    <div class="row g-4">
+      <!-- Lista de Itens -->
+      <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+          <div class="card-body p-0">
+            <ul class="list-group list-group-flush">
+              @for (item of carrinhoService.itens(); track item.fonte?.id) {
+                <li class="list-group-item p-4 d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center">
+                    <div class="bg-light rounded p-3 me-3 text-center" style="width: 80px; height: 80px;">
+                      <i class="bi bi-lightning-charge fs-1 text-primary"></i>
+                    </div>
+                    <div>
+                      <h5 class="mb-1 fw-bold">{{ item.fonte?.nome }}</h5>
+                      <p class="text-muted small mb-0">{{ item.fonte?.marca }} | {{ item.fonte?.potencia }}W</p>
+                      <span class="badge bg-primary mt-2">{{ item.fonte?.certificacao?.fontcert }}</span>
+                    </div>
+                  </div>
+                  
+                  <div class="d-flex flex-column align-items-end">
+                    <div class="d-flex align-items-center mb-2">
+                      <button class="btn btn-sm btn-outline-secondary rounded-circle" (click)="diminuirQuantidade(item)" [disabled]="item.quantidade <= 1">
+                        <i class="bi bi-dash"></i>
+                      </button>
+                      <span class="mx-3 fw-bold">{{ item.quantidade }}</span>
+                      <button class="btn btn-sm btn-outline-secondary rounded-circle" (click)="aumentarQuantidade(item)" [disabled]="item.quantidade >= (item.fonte?.estoque || 0)">
+                        <i class="bi bi-plus"></i>
+                      </button>
+                    </div>
+                    <div class="fw-bold fs-5 text-dark mb-1">
+                      {{ (item.precoUnitario * item.quantidade) | currency:'BRL' }}
+                    </div>
+                    <button class="btn btn-sm btn-link text-danger text-decoration-none p-0" (click)="removerItem(item)">
+                      <i class="bi bi-trash me-1"></i> Remover
+                    </button>
+                  </div>
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumo do Pedido -->
+      <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 100px;">
+          <div class="card-body p-4">
+            <h4 class="fw-bold border-bottom pb-3 mb-3">Resumo do Pedido</h4>
+            
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-secondary">Itens ({{ carrinhoService.quantidadeTotal() }})</span>
+              <span class="fw-medium">{{ carrinhoService.valorTotal() | currency:'BRL' }}</span>
+            </div>
+            
+            <div class="d-flex justify-content-between mb-4">
+              <span class="text-secondary">Frete</span>
+              <span class="text-success fw-bold">Grátis</span>
+            </div>
+            
+            <div class="d-flex justify-content-between border-top pt-3 mb-4">
+              <span class="fw-bold fs-5">Total</span>
+              <span class="fw-bold fs-4 text-primary">{{ carrinhoService.valorTotal() | currency:'BRL' }}</span>
+            </div>
+
+            <button class="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow-sm" (click)="irParaCheckout()">
+              <i class="bi bi-check-circle me-2"></i> Finalizar Compra
+            </button>
+            <div class="text-center mt-3 text-muted small">
+              <i class="bi bi-shield-lock me-1"></i> Compra Segura
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

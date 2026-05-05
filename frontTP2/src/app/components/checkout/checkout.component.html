@@ -1,0 +1,152 @@
+<div class="container py-5 mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-primary mb-0"><i class="bi bi-bag-check me-2"></i>Checkout</h2>
+    <button [routerLink]="['/carrinho']" class="btn btn-outline-secondary rounded-pill shadow-sm">
+      <i class="bi bi-arrow-left me-2"></i>Voltar ao Carrinho
+    </button>
+  </div>
+
+  <div class="row g-4">
+    <!-- Formulário de Checkout -->
+    <div class="col-lg-8">
+      <form [formGroup]="checkoutForm" (ngSubmit)="finalizarPedido()">
+        <!-- Dados do Cliente -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <h4 class="fw-bold border-bottom pb-3 mb-3">Seus Dados</h4>
+            <div class="mb-3">
+              <label class="form-label text-muted">Nome do Destinatário</label>
+              <input type="text" class="form-control form-control-lg" formControlName="nomeCliente" placeholder="Para quem é a entrega?">
+            </div>
+          </div>
+        </div>
+
+        <!-- Endereço de Entrega -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <h4 class="fw-bold border-bottom pb-3 mb-3">Endereço de Entrega</h4>
+            
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label text-muted">CEP</label>
+                <input type="text" class="form-control" formControlName="cep" placeholder="00000-000">
+              </div>
+              <div class="col-md-8">
+                <label class="form-label text-muted">Rua / Logradouro</label>
+                <input type="text" class="form-control" formControlName="rua">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label text-muted">Número</label>
+                <input type="text" class="form-control" formControlName="numero">
+              </div>
+              <div class="col-md-8">
+                <label class="form-label text-muted">Complemento</label>
+                <input type="text" class="form-control" formControlName="complemento" placeholder="Apto, Bloco, etc.">
+              </div>
+              <div class="col-md-5">
+                <label class="form-label text-muted">Bairro</label>
+                <input type="text" class="form-control" formControlName="bairro">
+              </div>
+              <div class="col-md-5">
+                <label class="form-label text-muted">Cidade</label>
+                <input type="text" class="form-control" formControlName="cidade">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label text-muted">UF</label>
+                <input type="text" class="form-control" formControlName="estado" placeholder="SP">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagamento -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <h4 class="fw-bold border-bottom pb-3 mb-3">Forma de Pagamento</h4>
+            
+            <div class="d-flex gap-3 mb-4">
+              <div class="flex-fill">
+                <input type="radio" class="btn-check" name="pagamento" id="pagPix" value="pix" formControlName="pagamento">
+                <label class="btn btn-outline-primary w-100 py-3 rounded-3" for="pagPix">
+                  <i class="bi bi-qr-code fs-4 d-block mb-1"></i> PIX
+                </label>
+              </div>
+              <div class="flex-fill">
+                <input type="radio" class="btn-check" name="pagamento" id="pagBoleto" value="boleto" formControlName="pagamento">
+                <label class="btn btn-outline-primary w-100 py-3 rounded-3" for="pagBoleto">
+                  <i class="bi bi-upc-scan fs-4 d-block mb-1"></i> Boleto
+                </label>
+              </div>
+              <div class="flex-fill">
+                <input type="radio" class="btn-check" name="pagamento" id="pagCartao" value="cartao" formControlName="pagamento">
+                <label class="btn btn-outline-primary w-100 py-3 rounded-3" for="pagCartao">
+                  <i class="bi bi-credit-card fs-4 d-block mb-1"></i> Cartão
+                </label>
+              </div>
+            </div>
+
+            <!-- Dados do Cartão -->
+            @if (checkoutForm.get('pagamento')?.value === 'cartao') {
+              <div class="bg-light p-4 rounded-3 border">
+                <h5 class="mb-3"><i class="bi bi-credit-card-2-front me-2"></i>Dados do Cartão de Crédito</h5>
+                <div class="row g-3">
+                  <div class="col-12">
+                    <label class="form-label text-muted small">Nome Impresso no Cartão</label>
+                    <input type="text" class="form-control" formControlName="nomeImpresso">
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label text-muted small">Número do Cartão</label>
+                    <input type="text" class="form-control" formControlName="numeroCartao" placeholder="0000 0000 0000 0000">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label text-muted small">Validade (MM/AA)</label>
+                    <input type="text" class="form-control" formControlName="validadeCartao" placeholder="12/30">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label text-muted small">CVV</label>
+                    <input type="text" class="form-control" formControlName="cvv" placeholder="123">
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill py-3 fw-bold shadow mt-2" [disabled]="checkoutForm.invalid || processando()">
+          @if (processando()) {
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            Processando...
+          } @else {
+            <i class="bi bi-lock-fill me-2"></i> Finalizar Compra Segura
+          }
+        </button>
+      </form>
+    </div>
+
+    <!-- Resumo Lateral -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 100px;">
+        <div class="card-body p-4">
+          <h4 class="fw-bold border-bottom pb-3 mb-3">Sua Compra</h4>
+          
+          <div class="checkout-items mb-3" style="max-height: 300px; overflow-y: auto;">
+            @for (item of carrinhoService.itens(); track item.fonte?.id) {
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                  <span class="text-secondary small d-block text-truncate" style="max-width: 180px;">{{ item.fonte?.nome }}</span>
+                  <span class="text-muted small">{{ item.quantidade }}x</span>
+                </div>
+                <span class="fw-medium small">{{ (item.precoUnitario * item.quantidade) | currency:'BRL' }}</span>
+              </div>
+            }
+          </div>
+          
+          <div class="d-flex justify-content-between border-top pt-3 mt-2">
+            <span class="fw-bold">Total a Pagar</span>
+            <span class="fw-bold text-primary fs-5">{{ carrinhoService.valorTotal() | currency:'BRL' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
