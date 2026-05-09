@@ -11,7 +11,7 @@ import { MatIcon } from "@angular/material/icon";
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, MatIcon, MatBadgeModule, MatIconModule],
+  imports: [CommonModule, RouterOutlet, RouterLink, MatBadgeModule, MatIconModule],
   templateUrl: './components/app.component.html'
 })
 export class App implements OnInit, OnDestroy {

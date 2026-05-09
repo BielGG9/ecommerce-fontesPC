@@ -45,11 +45,23 @@ public class ClienteServiceImpl implements ClienteService {
      * Caso o usuário já esteja cadastrado como cliente, lança ForbiddenException.
      */
     @Override
+    @Transactional
     public ClienteResponse getMeuPerfil() {
         String idUsuarioKeycloak = jwt.getSubject();
+        String emailUsuario = jwt.getClaim("email");
 
         // Busca cliente atrelado ao ID do Keycloak
         Cliente cliente = repository.findByIdKeycloak(idUsuarioKeycloak);
+
+        // Fallback: se não achar pelo ID, tenta pelo e-mail (pois idKeycloak pode estar nulo)
+        if (cliente == null && emailUsuario != null) {
+            cliente = repository.findByEmail(emailUsuario);
+            // Atualiza o idKeycloak para consertar o registro e evitar erro futuro
+            if (cliente != null && cliente.getIdKeycloak() == null) {
+                cliente.setIdKeycloak(idUsuarioKeycloak);
+                repository.persist(cliente);
+            }
+        }
 
         if (cliente == null) {
             throw new NotFoundException("Cliente não encontrado para o usuário autenticado.");

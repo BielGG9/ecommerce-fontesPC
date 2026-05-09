@@ -41,7 +41,7 @@ export class FonteComponent implements OnInit {
 
   private router = inject(Router);
 
-  coluna: string[] = ['id', 'nome', 'potencia', 'preco', 'marca', 'acoes'];
+  coluna: string[] = ['id', 'nome', 'potencia', 'preco', 'marca', 'imagens', 'acoes'];
   
   // Controle de Tela (Lista x Formulário)
   isFormVisible = false;
@@ -286,5 +286,45 @@ export class FonteComponent implements OnInit {
 
   navegarParaHome() {
     this.router.navigate(['/home']);
+  }
+
+  // --- Gerenciamento de Imagens ---
+  onFileSelected(event: any, fonteId: number) {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.fonteService.uploadImagem(fonteId, file).subscribe({
+        next: () => {
+          alert('Imagem enviada com sucesso!');
+          this.carregarFontes();
+        },
+        error: (err) => {
+          console.error('Erro no upload da imagem', err);
+          alert('Erro ao enviar imagem.');
+        }
+      });
+    }
+    // Limpa o input file para permitir selecionar o mesmo arquivo novamente se necessário
+    event.target.value = '';
+  }
+
+  excluirImagem(fidUrl: string) {
+    const partes = fidUrl.split('/');
+    const fid = partes[partes.length - 1];
+    
+    if (confirm('Deseja realmente remover esta imagem?')) {
+      this.fonteService.deleteImagem(fid).subscribe({
+        next: () => {
+          this.carregarFontes();
+        },
+        error: (err) => {
+          console.error('Erro ao remover imagem', err);
+          alert('Erro ao remover imagem.');
+        }
+      });
+    }
+  }
+
+  getImagemUrl(url: string): string {
+    return `http://localhost:8081${url}`;
   }
 }

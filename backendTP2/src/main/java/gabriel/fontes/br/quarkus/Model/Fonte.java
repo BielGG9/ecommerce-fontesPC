@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -44,6 +45,10 @@ private List<Fornecedor> fornecedores;
 
     @Enumerated(EnumType.STRING)
     private Certificacao certificacao;
+
+    @OneToMany(fetch = jakarta.persistence.FetchType.EAGER, orphanRemoval = true, cascade = { jakarta.persistence.CascadeType.PERSIST, jakarta.persistence.CascadeType.MERGE })
+    @JoinTable(name = "fonte_arquivo", joinColumns = @JoinColumn(name = "fonte_id"), inverseJoinColumns = @JoinColumn(name = "arquivo_id", unique = true))
+    private List<Arquivo> arquivos = new java.util.ArrayList<>();
 
     public Fonte() {
     }
@@ -101,5 +106,25 @@ private List<Fornecedor> fornecedores;
     }
     public void setFornecedores(List<Fornecedor> fornecedores) {
         this.fornecedores = fornecedores;
+    }
+
+    public List<Arquivo> getArquivos() {
+        return arquivos;
+    }
+
+    public void setArquivos(List<Arquivo> arquivos) {
+        this.arquivos = arquivos;
+    }
+
+    public void addArquivo(Arquivo arquivo) {
+        if (arquivo != null) {
+            this.arquivos.add(arquivo);
+        }
+    }
+
+    public void removeArquivo(Arquivo arquivo) {
+        if (arquivo != null) {
+            this.arquivos.remove(arquivo);
+        }
     }
 }

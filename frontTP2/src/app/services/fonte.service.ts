@@ -51,4 +51,15 @@ export class FonteService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  uploadImagem(idFonte: number, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('idFonte', idFonte.toString());
+    formData.append('file', file);
+    return this.http.patch(`${this.apiUrl}/image/upload`, formData);
+  }
+
+  deleteImagem(fid: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/image/${fid}`);
+  }
 }

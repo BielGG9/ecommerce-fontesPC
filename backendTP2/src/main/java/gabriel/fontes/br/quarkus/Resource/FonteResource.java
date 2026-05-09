@@ -79,4 +79,48 @@ public class FonteResource {
         logger.info("Fonte atualizada: " + fonteAtualizada.id());
         return Response.ok(fonteAtualizada).build();
     }
+
+    @Inject
+    gabriel.fontes.br.quarkus.Service.FileService fileService;
+
+    @GET
+    @Path("/image/download/{fid}")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @PermitAll
+    public Response downloadImage(@PathParam("fid") String fid) {
+        gabriel.fontes.br.quarkus.Service.ArquivoDownload download = fileService.download(fid);
+        Response.ResponseBuilder response = Response.ok(download.content(), download.contentType());
+        response.header("Content-Disposition", "attachment; filename=\"" + download.fileName().replace("\"", "") + "\"");
+        return response.build();
+    }
+
+    @PATCH
+    @Path("/image/upload")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @RolesAllowed("ADM")
+    public Response salvarImagem(
+            @org.jboss.resteasy.reactive.RestForm("idFonte") 
+            Long idFonte,
+            @org.jboss.resteasy.reactive.RestForm("file") 
+            org.jboss.resteasy.reactive.multipart.FileUpload file) {
+
+        if (idFonte == null || file == null) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("idFonte ou arquivo ausente").build();
+        }
+
+        try {
+            fileService.salvar(idFonte, file);
+            return Response.noContent().build();
+        } catch (java.io.IOException e) {
+            return Response.status(Response.Status.CONFLICT).entity("Erro ao salvar o arquivo.").build();
+        }
+    }
+
+    @DELETE
+    @Path("/image/{fid}")
+    @RolesAllowed("ADM")
+    public Response removerImagem(@PathParam("fid") String fid) {
+        fileService.remover(fid);
+        return Response.noContent().build();
+    }
 }

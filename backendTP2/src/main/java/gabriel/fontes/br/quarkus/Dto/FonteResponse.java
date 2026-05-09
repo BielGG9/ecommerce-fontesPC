@@ -13,11 +13,16 @@ public record FonteResponse(
     Long idMarca,
     Long idModelo,
     Certificacao certificacao,
-    java.util.List<Long> idFornecedores
+    java.util.List<Long> idFornecedores,
+    java.util.List<ArquivoResponse> imagens
 ) {
     public static FonteResponse fromEntity(Fonte fonte) {
         java.util.List<Long> fornecedoresIds = (fonte.getFornecedores() != null)
             ? fonte.getFornecedores().stream().map(f -> f.getId()).collect(java.util.stream.Collectors.toList())
+            : new java.util.ArrayList<>();
+
+        java.util.List<ArquivoResponse> arquivosList = (fonte.getArquivos() != null)
+            ? fonte.getArquivos().stream().map(ArquivoResponse::fromEntity).collect(java.util.stream.Collectors.toList())
             : new java.util.ArrayList<>();
 
         return new FonteResponse(
@@ -30,7 +35,8 @@ public record FonteResponse(
             fonte.getModelo().getMarca().getId(),
             fonte.getModelo().getId(),
             fonte.getCertificacao(),
-            fornecedoresIds
+            fornecedoresIds,
+            arquivosList
         );
     }
 }

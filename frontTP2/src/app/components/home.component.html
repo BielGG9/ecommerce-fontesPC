@@ -12,6 +12,9 @@
           <mat-card-subtitle>{{ fonte.marca || 'Marca não informada' }}</mat-card-subtitle>
         </mat-card-header>
         
+        <img mat-card-image *ngIf="fonte.imagens && fonte.imagens.length > 0" [src]="getImagemUrl(fonte.imagens[0].url)" alt="Imagem da Fonte" style="height: 200px; object-fit: contain; margin-top: 10px;">
+
+        
         <mat-card-content>
           <p class="preco">{{ fonte.preco | currency:'BRL' }}</p>
           

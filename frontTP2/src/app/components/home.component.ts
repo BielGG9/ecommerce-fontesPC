@@ -64,4 +64,7 @@ export class HomeComponent implements OnInit {
     }
   }
 
+  getImagemUrl(url: string): string {
+    return `http://localhost:8081${url}`;
+  }
 }

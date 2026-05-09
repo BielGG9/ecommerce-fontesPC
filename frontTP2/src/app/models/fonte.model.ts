@@ -16,4 +16,5 @@ export interface Fonte {
     idModelo?: number;
     modelo?: Modelo;
     fornecedores?: Fornecedor[]; // Relacionamento Muitos-para-Muitos (N:N)
+    imagens?: any[];
 }
