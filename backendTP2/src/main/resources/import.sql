@@ -11,6 +11,7 @@ SELECT setval('fonte_id_seq', 20, true);
 SELECT setval('pedido_id_seq', 1, false);
 SELECT setval('item_pedido_id_seq', 1, false);
 SELECT setval('cartao_id_seq', 10, true);
+SELECT setval('pagamento_id_seq', 10, true);
 
 
 -- 1. MARCAS (10)

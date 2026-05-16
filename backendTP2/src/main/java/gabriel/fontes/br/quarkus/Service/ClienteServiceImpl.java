@@ -53,11 +53,23 @@ public class ClienteServiceImpl implements ClienteService {
         // Busca cliente atrelado ao ID do Keycloak
         Cliente cliente = repository.findByIdKeycloak(idUsuarioKeycloak);
 
-        // Fallback: se não achar pelo ID, tenta pelo e-mail (pois idKeycloak pode estar nulo)
+        // Fallback: se não achar pelo ID, tenta pelo e-mail
         if (cliente == null && emailUsuario != null) {
             cliente = repository.findByEmail(emailUsuario);
-            // Atualiza o idKeycloak para consertar o registro e evitar erro futuro
-            if (cliente != null && cliente.getIdKeycloak() == null) {
+            
+            if (cliente == null) {
+                // Sincronização automática: O usuário existe no Keycloak mas sumiu do Postgres (ex: drop-and-create)
+                Cliente novoCliente = new Cliente();
+                novoCliente.setNome(jwt.getName() != null ? jwt.getName() : "Usuário " + emailUsuario);
+                novoCliente.setEmail(emailUsuario);
+                novoCliente.setCpf("00000000000"); // CPF genérico para auto-sync
+                novoCliente.setRg("0000000");      // RG genérico para auto-sync
+                novoCliente.setIdKeycloak(idUsuarioKeycloak);
+                novoCliente.setDataCadastro(LocalDateTime.now());
+                repository.persist(novoCliente);
+                cliente = novoCliente;
+            } else if (cliente.getIdKeycloak() == null) {
+                // Atualiza o idKeycloak para consertar o registro antigo
                 cliente.setIdKeycloak(idUsuarioKeycloak);
                 repository.persist(cliente);
             }
@@ -119,8 +131,7 @@ public class ClienteServiceImpl implements ClienteService {
         }
 
         // 2. Ordem Correta: PRIMEIRO cria no Keycloak
-        // O IdKeycloak fica nulo por enquanto. Se modificar o keycloakAdminService no futuro para extrair a String do header Location, pode preencher!
-        keycloakAdminService.criarUsuario(dto.nome(), dto.email(), dto.senha());
+        String idKeycloak = keycloakAdminService.criarUsuario(dto.username(), dto.nome(), dto.email(), dto.senha());
 
         // 3. Ordem Correta: SEGUNDO instanciar e popular
         Cliente novoCliente = new Cliente();
@@ -129,7 +140,7 @@ public class ClienteServiceImpl implements ClienteService {
         novoCliente.setCpf(dto.cpf());
         novoCliente.setRg(dto.rg());
         novoCliente.setDataCadastro(LocalDateTime.now());
-        novoCliente.setIdKeycloak(null); // idKeycloak nulo temporariamente para parar o Erro 500
+        novoCliente.setIdKeycloak(idKeycloak); // Salva o ID real do Keycloak na base de dados
 
         // 4. Ordem Correta: TERCEIRO persistir
         repository.persist(novoCliente);

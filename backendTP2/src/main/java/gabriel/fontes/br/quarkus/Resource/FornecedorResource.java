@@ -28,9 +28,14 @@ public class FornecedorResource {
     @Transactional
     @RolesAllowed("ADM")
     public Response create(FornecedorRequest fornecedorRequest) {
-        FornecedorResponse fornecedorCriado = service.create(fornecedorRequest);
-        logger.info("Fornecedor criado: " + fornecedorCriado.id());
-        return Response.status(Response.Status.CREATED).entity(fornecedorCriado).build();
+        try {
+            FornecedorResponse fornecedorCriado = service.create(fornecedorRequest);
+            logger.info("Fornecedor criado: " + fornecedorCriado.id());
+            return Response.status(Response.Status.CREATED).entity(fornecedorCriado).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity("ERRO INTERNO: " + e.getMessage() + " | Causa: " + (e.getCause() != null ? e.getCause().getMessage() : "null")).build();
+        }
     }
 
     @GET
@@ -76,8 +81,13 @@ public class FornecedorResource {
     @Transactional
     @RolesAllowed("ADM")
     public Response update(@PathParam("id") Long id, FornecedorRequest fornecedorRequest) {
-        FornecedorResponse fornecedorAtualizado = service.update(id, fornecedorRequest);
-        logger.info("Fornecedor atualizado: " + fornecedorAtualizado.id());
-        return Response.ok(fornecedorAtualizado).build();
+        try {
+            FornecedorResponse fornecedorAtualizado = service.update(id, fornecedorRequest);
+            logger.info("Fornecedor atualizado: " + fornecedorAtualizado.id());
+            return Response.ok(fornecedorAtualizado).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity("ERRO INTERNO: " + e.getMessage() + " | Causa: " + (e.getCause() != null ? e.getCause().getMessage() : "null")).build();
+        }
     }
 }

@@ -27,9 +27,14 @@ public class EnderecoResource {
     @Transactional
     @RolesAllowed({"USER", "ADM"})
     public Response create(EnderecoRequest enderecoRequest) {
-        EnderecoResponse enderecoCriado = service.create(enderecoRequest);
-        logger.info("Endereço criado: " + enderecoCriado.id());
-        return Response.status(Response.Status.CREATED).entity(enderecoCriado).build();
+        try {
+            EnderecoResponse enderecoCriado = service.create(enderecoRequest);
+            logger.info("Endereço criado: " + enderecoCriado.id());
+            return Response.status(Response.Status.CREATED).entity(enderecoCriado).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity("ERRO INTERNO NO ENDEREÇO: " + e.getMessage() + " | Causa: " + (e.getCause() != null ? e.getCause().getMessage() : "null")).build();
+        }
     }
 
     @GET
@@ -53,7 +58,7 @@ public class EnderecoResource {
     @DELETE
     @Path("/{id}")
     @Transactional
-    @RolesAllowed("ADM")
+    @RolesAllowed({"USER", "ADM"})
     public Response delete(@PathParam("id") Long id) {
         EnderecoResponse enderecoDeletado = service.delete(id);
         logger.info("Endereço deletado: " + enderecoDeletado.id());
@@ -63,7 +68,7 @@ public class EnderecoResource {
     @PUT
     @Path("/{id}")
     @Transactional
-    @RolesAllowed("ADM")
+    @RolesAllowed({"USER", "ADM"})
     public Response update(@PathParam("id") Long id, EnderecoRequest enderecoRequest) {
         EnderecoResponse enderecoAtualizado = service.update(id, enderecoRequest);
         logger.info("Endereço atualizado: " + enderecoAtualizado.id());

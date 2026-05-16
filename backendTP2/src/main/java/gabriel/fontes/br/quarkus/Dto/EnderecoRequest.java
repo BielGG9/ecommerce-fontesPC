@@ -2,6 +2,7 @@ package gabriel.fontes.br.quarkus.Dto;
 
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record EnderecoRequest( 
 
@@ -25,7 +26,7 @@ public record EnderecoRequest(
     @NotBlank(message = "O CEP não pode ser vazio")
     String cep,
 
-    @NotBlank(message = "O ID da pessoa não pode ser nulo")
+    @NotNull(message = "O ID da pessoa não pode ser nulo")
     Long idPessoa
 ) {
 

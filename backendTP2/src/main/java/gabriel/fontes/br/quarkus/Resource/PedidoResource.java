@@ -55,9 +55,14 @@ public class PedidoResource {
     @Transactional
     @RolesAllowed({"USER", "ADM"})
     public Response create(PedidoRequest request) {
-        PedidoResponse response = service.create(request);  
-        logger.info("Pedido Criado: " + response.id());
-        return Response.created(URI.create("/pedidos/" + response.id())).entity(response).build();
+        try {
+            PedidoResponse response = service.create(request);  
+            logger.info("Pedido Criado: " + response.id());
+            return Response.created(URI.create("/pedidos/" + response.id())).entity(response).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity("ERRO INTERNO: " + e.getMessage() + " | Causa: " + (e.getCause() != null ? e.getCause().getMessage() : "null")).build();
+        }
     }
 
     @PUT

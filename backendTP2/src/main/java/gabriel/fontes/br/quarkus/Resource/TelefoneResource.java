@@ -24,7 +24,7 @@ public class TelefoneResource {
 
     @POST
     @Transactional
-    @RolesAllowed("ADM")
+    @RolesAllowed({"USER", "ADM"})
     public Response create(TelefoneRequest telefoneRequest) {
         TelefoneResponse telefoneCriado = service.create(telefoneRequest);
         return Response.status(Response.Status.CREATED).entity(telefoneCriado).build();
@@ -50,7 +50,7 @@ public class TelefoneResource {
     @DELETE
     @Path("/{id}")
     @Transactional
-    @RolesAllowed("ADM")
+    @RolesAllowed({"USER", "ADM"})
     public Response delete(@PathParam("id") Long id) {
         TelefoneResponse telefoneDeletado = service.delete(id);
         logger.info("Delentendo telefone: " + telefoneDeletado);
@@ -60,7 +60,7 @@ public class TelefoneResource {
     @PUT
     @Path("/{id}")
     @Transactional
-    @RolesAllowed("ADM")
+    @RolesAllowed({"USER", "ADM"})
     public Response update(@PathParam("id") Long id, TelefoneRequest telefoneRequest) {
         TelefoneResponse telefoneAtualizado = service.update(id, telefoneRequest);
         logger.info("Atualizando telefone: " + telefoneAtualizado);

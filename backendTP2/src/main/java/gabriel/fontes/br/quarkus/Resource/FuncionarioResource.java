@@ -28,9 +28,14 @@ public class FuncionarioResource {
     @Transactional
     @RolesAllowed("ADM")
     public Response create(FuncionarioRequest funcionarioRequest) {
-        FuncionarioResponse funcionarioCriado = service.create(funcionarioRequest);
-        logger.info("Funcionario criado: " + funcionarioCriado.id());
-        return Response.status(Response.Status.CREATED).entity(funcionarioCriado).build();
+        try {
+            FuncionarioResponse funcionarioCriado = service.create(funcionarioRequest);
+            logger.info("Funcionario criado: " + funcionarioCriado.id());
+            return Response.status(Response.Status.CREATED).entity(funcionarioCriado).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity("ERRO INTERNO: " + e.getMessage() + " | Causa: " + (e.getCause() != null ? e.getCause().getMessage() : "null")).build();
+        }
     }
 
     @GET
@@ -76,8 +81,13 @@ public class FuncionarioResource {
     @Transactional
     @RolesAllowed("ADM")
     public Response update(@PathParam("id") Long id, FuncionarioRequest funcionarioRequest) {   
-        FuncionarioResponse funcionarioAtualizado = service.update(id, funcionarioRequest);
-        logger.info("Funcionario atualizado: " + funcionarioAtualizado.id());
-        return Response.ok(funcionarioAtualizado).build();
+        try {
+            FuncionarioResponse funcionarioAtualizado = service.update(id, funcionarioRequest);
+            logger.info("Funcionario atualizado: " + funcionarioAtualizado.id());
+            return Response.ok(funcionarioAtualizado).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity("ERRO INTERNO: " + e.getMessage() + " | Causa: " + (e.getCause() != null ? e.getCause().getMessage() : "null")).build();
+        }
     }
 }

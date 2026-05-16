@@ -70,9 +70,20 @@ public class PedidoServiceImpl implements PedidoService {
         // Buscar o cliente autenticado no banco de dados
         Cliente clienteAutenticado = clienteRepository.findByIdKeycloak(idUsuarioKeycloak);
 
+        if (clienteAutenticado == null) {
+            String email = jwt.getClaim("email");
+            if (email != null) {
+                clienteAutenticado = clienteRepository.findByEmail(email);
+                if (clienteAutenticado != null && clienteAutenticado.getIdKeycloak() == null) {
+                    clienteAutenticado.setIdKeycloak(idUsuarioKeycloak);
+                    clienteRepository.persist(clienteAutenticado);
+                }
+            }
+        }
+
         // Verificar se o cliente autenticado foi encontrado
         if (clienteAutenticado == null) {
-            throw new ForbiddenException("Cadastro de cliente não encontrado para o usuário autenticado.");
+            throw new BadRequestException("Cadastro de cliente não encontrado para o usuário autenticado.");
         }
 
         // Validar o endereço de entrega
@@ -81,7 +92,7 @@ public class PedidoServiceImpl implements PedidoService {
 
         // Verificar se o endereço pertence ao cliente autenticado
         if (!enderecoBanco.getPessoa().getId().equals(clienteAutenticado.getId())) {
-            throw new ForbiddenException("O endereço informado não pertence ao cliente autenticado.");
+            throw new BadRequestException("O endereço informado não pertence ao cliente autenticado.");
         }
 
         // 3. Mapear Pedido
@@ -113,13 +124,14 @@ public class PedidoServiceImpl implements PedidoService {
             Fonte fonte = fonteRepository.findByIdOptional(itemDto.fonteId())
                     .orElseThrow(() -> new BadRequestException("Fonte não encontrada: " + itemDto.fonteId()));
 
-            // Verificar estoque
-            if (fonte.getEstoque() < itemDto.quantidade()) {
+            // Verificar estoque (evitar NullPointerException)
+            Integer estoqueAtual = fonte.getEstoque() != null ? fonte.getEstoque() : 0;
+            if (estoqueAtual < itemDto.quantidade()) {
                 throw new BadRequestException("Estoque insuficiente para a fonte: " + fonte.getNome());
             }
 
             // Baixar estoque
-            fonte.setEstoque(fonte.getEstoque() - itemDto.quantidade());
+            fonte.setEstoque(estoqueAtual - itemDto.quantidade());
 
             // Mapear ItemPedido
             ItemPedido itemPedido = new ItemPedido();

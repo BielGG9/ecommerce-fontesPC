@@ -31,7 +31,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
     }
 
     @Override
-    public void criarUsuario(String nome, String email, String senha) {
+    public String criarUsuario(String username, String nome, String email, String senha) {
         try {
             // 1. Criar a credencial (senha)
             CredentialRepresentation credencial = new CredentialRepresentation();
@@ -41,16 +41,48 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
 
             // 2. Criar a representação do utilizador
             UserRepresentation usuario = new UserRepresentation();
-            usuario.setUsername(nome);
-            usuario.setFirstName(nome);
+            usuario.setUsername(username);
+            
+            // Separar Nome Completo em First Name e Last Name
+            String firstName = nome;
+            String lastName = "";
+            if (nome != null && nome.trim().contains(" ")) {
+                int primeiroEspaco = nome.trim().indexOf(" ");
+                firstName = nome.trim().substring(0, primeiroEspaco);
+                lastName = nome.trim().substring(primeiroEspaco + 1);
+            }
+            
+            usuario.setFirstName(firstName);
+            if (!lastName.isEmpty()) {
+                usuario.setLastName(lastName);
+            }
             usuario.setEmail(email);
             usuario.setEnabled(true);
             usuario.setCredentials(Collections.singletonList(credencial));
 
             // 3. Enviar o pedido para o Keycloak
             try (Response response = keycloak.realm("TP2").users().create(usuario)) {
-                if (response.getStatus() != 201) {
-                    throw new RuntimeException("Erro ao criar utilizador no Keycloak. Status: " + response.getStatus() + " - " + response.getStatusInfo().getReasonPhrase());
+                if (response.getStatus() == 201) {
+                    // Extrair ID do usuário criado
+                    String path = response.getLocation().getPath();
+                    String userId = path.substring(path.lastIndexOf('/') + 1);
+
+                    // Associar role 'USER' padrão
+                    try {
+                        org.keycloak.representations.idm.RoleRepresentation userRole = keycloak.realm("TP2").roles().get("USER").toRepresentation();
+                        keycloak.realm("TP2").users().get(userId).roles().realmLevel().add(Collections.singletonList(userRole));
+                    } catch (Exception ex) {
+                        System.err.println("Aviso: Falha ao atribuir role USER ao novo usuário " + email + ". Certifique-se de que a role 'USER' existe no Keycloak.");
+                    }
+                    
+                    return userId;
+                } else if (response.getStatus() == 409) {
+                    throw new WebApplicationException(
+                        Response.status(409).entity(java.util.Map.of("message", "Este e-mail já está cadastrado no sistema Keycloak. Se você limpou o banco local recentemente, precisará deletar seu usuário no painel do Keycloak ou usar outro e-mail.")).build()
+                    );
+                } else {
+                    String errorBody = response.readEntity(String.class);
+                    throw new RuntimeException("Erro ao criar utilizador no Keycloak. Status: " + response.getStatus() + " - " + response.getStatusInfo().getReasonPhrase() + " - Detalhes: " + errorBody);
                 }
             }
 
@@ -59,10 +91,14 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             throw e;
         } catch (ProcessingException e) {
             // ProcessingException mapeia erros de comunicação JAX-RS (Servidor caiu, Timeout, etc)
-            throw new WebApplicationException("Erro de comunicação com o servidor Keycloak. Certifique-se de que ele se encontra online.", 500);
+            throw new WebApplicationException(
+                Response.status(500).entity(java.util.Map.of("message", "Erro de comunicação com o servidor Keycloak. Certifique-se de que ele se encontra online.")).build()
+            );
         } catch (Exception e) {
             // Captura de segurança genérica
-            throw new WebApplicationException("Ocorreu um erro inesperado ao registar o utilizador no Keycloak: " + e.getMessage(), 500);
+            throw new WebApplicationException(
+                Response.status(500).entity(java.util.Map.of("message", "Ocorreu um erro inesperado ao registar o utilizador no Keycloak: " + e.getMessage())).build()
+            );
         }
     }
 }

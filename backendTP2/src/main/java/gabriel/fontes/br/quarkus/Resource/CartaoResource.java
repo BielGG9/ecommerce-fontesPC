@@ -49,7 +49,7 @@ public class CartaoResource {
 
     @PUT
     @Path("/{id}")
-    @RolesAllowed("ADM")
+    @RolesAllowed({"USER", "ADM"})
     public CartaoResponse update(@PathParam("id") Long id, CartaoRequest dto) {
         logger.info("Atualizando cartao com ID: " + id);
         return service.update(id, dto);
@@ -57,7 +57,7 @@ public class CartaoResource {
 
     @DELETE
     @Path("/{id}")
-    @RolesAllowed("ADM")
+    @RolesAllowed({"USER", "ADM"})
     public Response delete(@PathParam("id") Long id) {
         CartaoResponse cartaoDeletado = service.delete(id);
         logger.info("Cartao deletado: " + cartaoDeletado.id());
