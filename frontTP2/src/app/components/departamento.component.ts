@@ -35,6 +35,9 @@ export class DepartamentoComponent implements OnInit {
   page = 0;
   nomeBusca = '';
 
+  // Controle de Tela (Lista x Formulário)
+  isFormVisible = false;
+
   departamentos = signal<Departamento[]>([]);
   
   departamentoForm = this.fb.group({
@@ -88,7 +91,14 @@ export class DepartamentoComponent implements OnInit {
         next: () => {
           alert('Departamento atualizado com sucesso!');
           this.resetForm();
+          this.isFormVisible = false;
           this.carregarDepartamentos();
+        },
+        error: (err) => {
+          console.error('Erro ao atualizar departamento', err);
+          const msg = typeof err.error === 'string' ? err.error : JSON.stringify(err.error);
+          if (err.status === 403) alert('Acesso negado. Apenas administradores podem atualizar departamentos.');
+          else alert('Erro ao atualizar departamento: ' + msg);
         }
       });
     } else {
@@ -96,7 +106,14 @@ export class DepartamentoComponent implements OnInit {
         next: () => {
           alert('Departamento criado com sucesso!');
           this.resetForm();
+          this.isFormVisible = false;
           this.carregarDepartamentos();
+        },
+        error: (err) => {
+          console.error('Erro ao criar departamento', err);
+          const msg = typeof err.error === 'string' ? err.error : JSON.stringify(err.error);
+          if (err.status === 403) alert('Acesso negado. Apenas administradores podem cadastrar departamentos.');
+          else alert('Erro ao criar departamento: ' + msg);
         }
       });
     }
@@ -108,6 +125,16 @@ export class DepartamentoComponent implements OnInit {
       sigla: departamento.sigla,
       descricao: departamento.descricao
     });
+    this.isFormVisible = true;
+  }
+
+  novoDepartamento() {
+    this.resetForm();
+    this.isFormVisible = true;
+  }
+
+  voltarParaLista() {
+    this.isFormVisible = false;
   }
 
   excluir(id: number) {

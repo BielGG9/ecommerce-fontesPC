@@ -31,7 +31,7 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
     }
 
     @Override
-    public String criarUsuario(String username, String nome, String email, String senha) {
+    public String criarUsuario(String username, String nome, String email, String senha, String cpf, String rg) {
         try {
             // 1. Criar a credencial (senha)
             CredentialRepresentation credencial = new CredentialRepresentation();
@@ -59,6 +59,12 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             usuario.setEmail(email);
             usuario.setEnabled(true);
             usuario.setCredentials(Collections.singletonList(credencial));
+
+            // Adiciona atributos customizados para CPF e RG no Keycloak
+            usuario.setAttributes(java.util.Map.of(
+                "cpf", java.util.Collections.singletonList(cpf),
+                "rg", java.util.Collections.singletonList(rg)
+            ));
 
             // 3. Enviar o pedido para o Keycloak
             try (Response response = keycloak.realm("TP2").users().create(usuario)) {
@@ -100,5 +106,35 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
                 Response.status(500).entity(java.util.Map.of("message", "Ocorreu um erro inesperado ao registar o utilizador no Keycloak: " + e.getMessage())).build()
             );
         }
+    }
+
+    @Override
+    public boolean validarSenhaUsuario(String username, String senha) {
+        try {
+            org.keycloak.admin.client.Keycloak tempKeycloak = org.keycloak.admin.client.KeycloakBuilder.builder()
+                .serverUrl("http://localhost:8080")
+                .realm("TP2")
+                .clientId("quarkuss")
+                .username(username)
+                .password(senha)
+                .build();
+            
+            tempKeycloak.tokenManager().getAccessToken();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
+    public void enviarEmailVerificacao(String email) {
+        java.util.List<UserRepresentation> users = keycloak.realm("TP2").users().search(null, null, null, email, 0, 1);
+        
+        if (users == null || users.isEmpty()) {
+            throw new jakarta.ws.rs.NotFoundException("Utilizador não encontrado no Keycloak.");
+        }
+        
+        String userId = users.get(0).getId();
+        keycloak.realm("TP2").users().get(userId).executeActionsEmail(java.util.Collections.singletonList("VERIFY_EMAIL"));
     }
 }

@@ -4,6 +4,12 @@ import { Endereco } from './endereco.model'; // Certifique-se de ter este modelo
 // Herança: Cliente "é uma" Pessoa
 export interface Cliente extends Pessoa {
     cpf: string;
-    login: string;
+    rg?: string;
+    login?: string;
+    username?: string;
+    senha?: string;
     enderecoPrincipal?: Endereco; // Relacionamento 1:1
+    telefones?: any[];
+    enderecos?: any[];
+    cartoes?: any[];
 }

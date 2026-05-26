@@ -15,4 +15,5 @@ public interface ClienteService {
     ClienteResponse getMeuPerfil();
     
     void recuperarSenha(String email);
+    void solicitarAlteracaoSegura(String senha);
 }

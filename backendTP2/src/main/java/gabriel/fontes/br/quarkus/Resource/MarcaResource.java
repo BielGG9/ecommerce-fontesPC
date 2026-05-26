@@ -79,4 +79,37 @@ public class MarcaResource {
         logger.info("Marca deletada: " + marcaDeletada.id());
         return Response.ok(marcaDeletada).build();
     }
+
+    @Inject
+    gabriel.fontes.br.quarkus.Service.MarcaFileService fileService;
+
+    @PATCH
+    @Path("/image/upload")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @RolesAllowed("ADM")
+    public Response salvarImagem(
+            @org.jboss.resteasy.reactive.RestForm("idMarca") 
+            Long idMarca,
+            @org.jboss.resteasy.reactive.RestForm("file") 
+            org.jboss.resteasy.reactive.multipart.FileUpload file) {
+
+        if (idMarca == null || file == null) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("idMarca ou arquivo ausente").build();
+        }
+
+        try {
+            fileService.salvar(idMarca, file);
+            return Response.noContent().build();
+        } catch (java.io.IOException e) {
+            return Response.status(Response.Status.CONFLICT).entity("Erro ao salvar o arquivo.").build();
+        }
+    }
+
+    @DELETE
+    @Path("/image/{fid}")
+    @RolesAllowed("ADM")
+    public Response removerImagem(@PathParam("fid") String fid) {
+        fileService.remover(fid);
+        return Response.noContent().build();
+    }
 }

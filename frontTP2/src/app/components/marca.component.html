@@ -82,6 +82,30 @@
           <td mat-cell *matCellDef="let marca"> {{marca.nome}} </td>
         </ng-container>
 
+        <ng-container matColumnDef="imagens">
+          <th mat-header-cell *matHeaderCellDef style="font-weight: bold; text-align: center;"> Imagens </th>
+          <td mat-cell *matCellDef="let marca" style="text-align: center; vertical-align: middle;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 5px 0;">
+              
+              <!-- Se tiver imagens, mostra -->
+              <div *ngIf="marca.imagens && marca.imagens.length > 0" style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;">
+                <div *ngFor="let img of marca.imagens" style="position: relative; display: inline-block;">
+                  <img [src]="getImagemUrl(img.url)" alt="Marca" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ccc;">
+                  <button mat-icon-button color="warn" style="position: absolute; top: -10px; right: -10px; transform: scale(0.6);" (click)="excluirImagem(img.url)">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Input de file sempre disponível (escondido) -->
+              <input type="file" #fileInput style="display: none" accept="image/*" (change)="onFileSelected($event, marca.id)">
+              <button mat-stroked-button color="primary" style="font-size: 11px; line-height: 24px; padding: 0 10px;" (click)="fileInput.click()">
+                <mat-icon style="font-size: 16px; width: 16px; height: 16px; line-height: 16px;">add_photo_alternate</mat-icon> Upload
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="acoes">
           <th mat-header-cell *matHeaderCellDef style="width: 120px; text-align: center; font-weight: bold;"> Ações </th>
           <td mat-cell *matCellDef="let marca" style="text-align: center;">

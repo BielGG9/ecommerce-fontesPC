@@ -25,6 +25,7 @@ export class CadastroClienteComponent {
 
   cadastroForm = this.fb.group({
     nome: ['', [Validators.required, Validators.maxLength(100)]],
+    username: ['', [Validators.required, Validators.maxLength(50)]],
     email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
     cpf: ['', [Validators.required, Validators.maxLength(11), Validators.minLength(11)]],
     rg: ['', [Validators.required, Validators.maxLength(20)]],

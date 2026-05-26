@@ -96,6 +96,12 @@ export class FornecedorComponent implements OnInit {
           this.resetForm();
           this.isFormVisible = false;
           this.carregarFornecedores();
+        },
+        error: (err) => {
+          console.error('Erro ao atualizar fornecedor', err);
+          const msg = typeof err.error === 'string' ? err.error : JSON.stringify(err.error);
+          if (err.status === 403) alert('Acesso negado. Apenas administradores podem atualizar fornecedores.');
+          else alert('Erro ao atualizar fornecedor: ' + msg);
         }
       });
     } else {
@@ -105,6 +111,12 @@ export class FornecedorComponent implements OnInit {
           this.resetForm();
           this.isFormVisible = false;
           this.carregarFornecedores();
+        },
+        error: (err) => {
+          console.error('Erro ao criar fornecedor', err);
+          const msg = typeof err.error === 'string' ? err.error : JSON.stringify(err.error);
+          if (err.status === 403) alert('Acesso negado. Apenas administradores podem cadastrar fornecedores.');
+          else alert('Erro ao criar fornecedor: ' + msg);
         }
       });
     }

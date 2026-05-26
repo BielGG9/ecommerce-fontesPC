@@ -45,8 +45,30 @@ export class AuthService {
     return this.http.post(url, { email });
   }
 
+  isTokenExpired(token: string): boolean {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      
+      const payload = JSON.parse(jsonPayload);
+      if (payload.exp) {
+        return Math.floor(new Date().getTime() / 1000) >= payload.exp;
+      }
+      return false;
+    } catch (e) {
+      return true;
+    }
+  }
+
   private extrairNomeDoToken(token: string): string | null {
     try {
+      if (this.isTokenExpired(token)) {
+        this.limparSessao();
+        return null;
+      }
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
       const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
@@ -62,7 +84,7 @@ export class AuthService {
 
   hasRole(role: string): boolean {
     const token = localStorage.getItem('token');
-    if (!token) return false;
+    if (!token || this.isTokenExpired(token)) return false;
     
     try {
       const base64Url = token.split('.')[1];
@@ -85,6 +107,21 @@ export class AuthService {
       return false;
     } catch (e) {
       return false;
+    }
+  }
+
+  obterDadosToken(): any {
+    const token = localStorage.getItem('token');
+    if (!token || this.isTokenExpired(token)) return null;
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      return null;
     }
   }
 }

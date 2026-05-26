@@ -21,3 +21,18 @@ export const canActivateAuthRole: CanActivateFn = async (route, state) => {
 
   return true;
 };
+
+export const canActivateUser: CanActivateFn = async (route, state) => {
+  const router = inject(Router);
+  const authService = inject(AuthService);
+
+  const logado = !!localStorage.getItem('token');
+
+  if (!logado) {
+    alert('Você precisa estar logado para finalizar a compra!');
+    router.navigate(['/login']);
+    return false;
+  }
+  
+  return true;
+};

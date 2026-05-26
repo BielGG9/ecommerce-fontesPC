@@ -45,4 +45,15 @@ export class MarcaService {
     delete(id: number): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
+
+    uploadImagem(idMarca: number, file: File): Observable<any> {
+        const formData = new FormData();
+        formData.append('idMarca', idMarca.toString());
+        formData.append('file', file);
+        return this.http.patch(`${this.apiUrl}/image/upload`, formData);
+    }
+
+    deleteImagem(fid: string): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/image/${fid}`);
+    }
 }

@@ -11,12 +11,14 @@ services:
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: password
     ports:
-      - "5433:5432" # Porta alternativa para não conflitar com outros bancos
+      - "5433:5432" 
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
-    container_name: keycloak_server
-    command: start-dev
+    container_name: keycloak_server 
+    command: start-dev --import-realm
+    volumes:
+      - ./export:/opt/keycloak/data/import
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres-keycloak:5432/keycloak
@@ -28,6 +30,12 @@ services:
       - "8080:8080"
     depends_on:
       - postgres-keycloak
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit_server
+    ports:
+      - "8025:8025" # Porta da interface web (onde você vai ler os e-mails)
+      - "1025:1025" # Porta SMTP (onde o Keycloak vai entregar os e-mails)
 
 volumes:
   postgres_data:

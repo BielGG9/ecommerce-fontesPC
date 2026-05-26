@@ -41,7 +41,14 @@ export class CheckoutComponent implements OnInit {
         this.nomePessoa = perfil.nome;
         this.checkoutForm.patchValue({ nomeCliente: perfil.nome });
       },
-      error: (err) => console.error('Erro ao buscar perfil:', err)
+      error: (err) => {
+        console.error('Erro ao buscar perfil:', err);
+        if (err.status === 404) {
+          alert('O seu cadastro de cliente não foi encontrado no banco de dados local! Isso acontece porque ao reiniciar o backend (em modo dev), o banco é apagado, mas o Keycloak mantém o login. Por favor, crie uma nova conta com outro e-mail para prosseguir.');
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        }
+      }
     });
 
     this.checkoutForm = this.fb.group({
@@ -107,7 +114,8 @@ export class CheckoutComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erro ao criar endereço', err);
-        alert('Erro ao processar o endereço.');
+        const backendMsg = err.error ? (typeof err.error === 'string' ? err.error : JSON.stringify(err.error)) : '';
+        alert('Erro ao processar o endereço: ' + backendMsg);
         this.processando.set(false);
       }
     });
@@ -143,7 +151,8 @@ export class CheckoutComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erro ao criar pedido', err);
-        alert('Erro ao finalizar o pedido. Verifique os dados ou o estoque.');
+        const backendMsg = err.error ? (typeof err.error === 'string' ? err.error : JSON.stringify(err.error)) : '';
+        alert('Erro ao finalizar o pedido: ' + backendMsg);
         this.processando.set(false);
       }
     });

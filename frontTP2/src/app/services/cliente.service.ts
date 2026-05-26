@@ -19,4 +19,12 @@ export class ClienteService {
   getMeuPerfil(): Observable<Cliente> {
     return this.http.get<Cliente>(`${this.apiUrl}/meu-perfil`);
   }
+
+  update(id: number | undefined, cliente: Partial<Cliente>): Observable<Cliente> {
+    return this.http.put<Cliente>(`${this.apiUrl}/${id}`, cliente);
+  }
+
+  validarSenhaESolicitarAlteracao(senha: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/solicitar-alteracao-segura`, { senha });
+  }
 }

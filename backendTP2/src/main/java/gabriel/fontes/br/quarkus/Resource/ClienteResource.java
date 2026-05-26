@@ -76,7 +76,7 @@ public class ClienteResource {
     @PUT
     @Path("/{id}")
     @Transactional
-    @RolesAllowed("ADM")
+    @PermitAll
     public ClienteResponse update(@PathParam("id")Long id, ClienteRequest request) {
         logger.info("Atualizando cliente com ID: " + id);
         return service.update(id, request);
@@ -92,4 +92,14 @@ public Response delete(@PathParam("id") Long id) {
     logger.info("Cliente deletado: " + clienteDeletado.id());
     return Response.noContent().build(); 
 }
+
+    public record SolicitarAlteracaoRequest(String senha) {}
+
+    @POST
+    @Path("/solicitar-alteracao-segura")
+    @PermitAll
+    public Response solicitarAlteracaoSegura(SolicitarAlteracaoRequest request) {
+        service.solicitarAlteracaoSegura(request.senha());
+        return Response.ok(java.util.Map.of("message", "E-mail de verificação enviado!")).build();
+    }
 }

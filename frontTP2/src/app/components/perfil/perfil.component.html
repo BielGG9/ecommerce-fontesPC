@@ -1,0 +1,113 @@
+<div class="perfil-container">
+  <div class="max-width-wrapper">
+
+    @if (cliente) {
+      
+      <!-- Top Banner -->
+      <div class="perfil-banner">
+        <div class="user-info">
+          <!-- Placeholder de avatar (Luffy como na imagem) -->
+          <img src="https://i.pinimg.com/736x/21/e4/f0/21e4f0c4bb7c4e57cdccbc412ca671c6.jpg" alt="Avatar" class="avatar">
+          <div class="user-details">
+            <h2>Bem-vindo, {{ cliente.nome }}</h2>
+            <p><i class="bi bi-envelope-fill" style="color: #ff6b00;"></i> {{ cliente.email }}</p>
+          </div>
+        </div>
+        <button class="btn-editar-dados" [routerLink]="['/minha-conta/meus-dados']">
+          <i class="bi bi-pencil-fill"></i> EDITAR DADOS
+        </button>
+      </div>
+
+      <!-- Atalhos Title -->
+      <h3 class="section-title">
+        <i class="bi bi-grid-3x3-gap-fill"></i> :: ATALHOS
+      </h3>
+
+      <!-- Grid de Atalhos -->
+      <div class="atalhos-grid">
+        
+        <div class="atalho-card" [routerLink]="['/minha-conta/pedidos']">
+          <div class="atalho-icon"><i class="bi bi-bag-fill"></i></div>
+          <div class="atalho-text">MEUS PEDIDOS</div>
+        </div>
+
+        <div class="atalho-card" [routerLink]="['/minha-conta/meus-dados']">
+          <div class="atalho-icon"><i class="bi bi-person-fill"></i></div>
+          <div class="atalho-text">MEUS DADOS</div>
+        </div>
+
+        <div class="atalho-card" [routerLink]="['/minha-conta/enderecos']">
+          <div class="atalho-icon"><i class="bi bi-geo-alt-fill"></i></div>
+          <div class="atalho-text">ENDEREÇOS</div>
+        </div>
+
+        <div class="atalho-card" [routerLink]="['/minha-conta/cartoes']">
+          <div class="atalho-icon"><i class="bi bi-credit-card-fill"></i></div>
+          <div class="atalho-text">CARTEIRA</div>
+        </div>
+
+        <div class="atalho-card" [routerLink]="['/minha-conta/telefones']">
+          <div class="atalho-icon"><i class="bi bi-telephone-fill"></i></div>
+          <div class="atalho-text">TELEFONES</div>
+        </div>
+
+        <div class="atalho-card" [routerLink]="['/minha-conta/favoritos']">
+          <div class="atalho-icon"><i class="bi bi-heart-fill"></i></div>
+          <div class="atalho-text">FAVORITOS</div>
+        </div>
+
+      </div>
+
+      <!-- Último Pedido -->
+      <h3 class="section-title mt-5">
+        <i class="bi bi-cart-check-fill"></i> RESUMO DO SEU ÚLTIMO PEDIDO
+      </h3>
+      
+      @if (carregandoPedido) {
+        <div class="text-center p-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Carregando seu último pedido...</span>
+          </div>
+          <p class="mt-2 text-muted">Carregando seu último pedido...</p>
+        </div>
+      } @else if (ultimoPedido) {
+        <div class="ultimo-pedido-card">
+          <div class="pedido-header">
+            <div class="pedido-info">
+              Pedido: <strong>#{{ ultimoPedido.id }}</strong> <!-- Data no banco não tem na listagem, se tiver a gente ajusta -->
+            </div>
+            <div>
+              <button class="btn-gerenciar-pedido" [routerLink]="['/minha-conta/pedidos']"><i class="bi bi-gear-fill"></i> GERENCIAR PEDIDO</button>
+            </div>
+          </div>
+          <div class="pedido-status">
+            Pedido processado pelo sistema.
+          </div>
+          <div class="pedido-pagamento">
+            <i class="bi bi-credit-card-fill" style="color: #8a05be;"></i> Pagamento via Sistema
+          </div>
+          <div class="pedido-produto">
+            <div class="produto-detalhes">
+              <div class="produto-vendido-por">Vendido e entregue por: <strong>Fontes PC</strong></div>
+              <div class="produto-nome">Valor Total do Pedido: R$ {{ ultimoPedido.valorTotal.toFixed(2) }}</div>
+              <div class="produto-qtd">Verifique os detalhes na aba Meus Pedidos.</div>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="ultimo-pedido-card p-4 text-center">
+          <p class="text-muted mb-0"><i class="bi bi-emoji-frown fs-4"></i><br>Você ainda não realizou nenhum pedido na nossa loja.</p>
+        </div>
+      }
+
+    } @else {
+      <div class="loading-state" style="text-align: center; padding: 100px;">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+          <span class="visually-hidden">Carregando painel de controle...</span>
+        </div>
+        <p class="mt-3">Carregando painel de controle...</p>
+      </div>
+    }
+
+  </div>
+</div>

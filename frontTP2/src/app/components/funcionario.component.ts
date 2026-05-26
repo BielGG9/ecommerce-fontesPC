@@ -113,6 +113,12 @@ export class FuncionarioComponent implements OnInit {
           this.resetForm();
           this.isFormVisible = false;
           this.carregarFuncionarios();
+        },
+        error: (err) => {
+          console.error('Erro ao atualizar funcionário', err);
+          const msg = typeof err.error === 'string' ? err.error : JSON.stringify(err.error);
+          if (err.status === 403) alert('Acesso negado. Apenas administradores podem atualizar funcionários.');
+          else alert('Erro ao atualizar funcionário: ' + msg);
         }
       });
     } else {
@@ -122,6 +128,12 @@ export class FuncionarioComponent implements OnInit {
           this.resetForm();
           this.isFormVisible = false;
           this.carregarFuncionarios();
+        },
+        error: (err) => {
+          console.error('Erro ao criar funcionário', err);
+          const msg = typeof err.error === 'string' ? err.error : JSON.stringify(err.error);
+          if (err.status === 403) alert('Acesso negado. Apenas administradores podem cadastrar funcionários.');
+          else alert('Erro ao criar funcionário: ' + msg);
         }
       });
     }

@@ -24,6 +24,14 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nome de Usuário</mat-label>
+          <input matInput formControlName="username" placeholder="Ex: bielgg" maxlength="50">
+          @if (cadastroForm.get('username')?.invalid && cadastroForm.get('username')?.touched) {
+            <mat-error>{{ obterMensagemErro('username', 'Nome de Usuário') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
           <mat-label>E-mail</mat-label>
           <input matInput formControlName="email" type="email" placeholder="Digite o seu e-mail" maxlength="100">
           @if (cadastroForm.get('email')?.invalid && cadastroForm.get('email')?.touched) {

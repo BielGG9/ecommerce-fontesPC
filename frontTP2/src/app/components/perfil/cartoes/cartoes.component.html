@@ -1,0 +1,86 @@
+<div class="active-section-container">
+  <div class="active-section-header">
+    <h3>
+      <i class="bi bi-credit-card-fill" style="color: #ff6b00; margin-right: 10px;"></i>
+      Minha Carteira
+    </h3>
+    <button class="btn btn-sm btn-outline-secondary" [routerLink]="['/perfil']">
+      <i class="bi bi-arrow-left"></i> Voltar ao Painel
+    </button>
+  </div>
+
+  @if (!isFormVisible) {
+    <!-- Listagem -->
+    <div class="d-flex justify-content-end mb-3">
+      <button class="btn btn-primary fw-bold" (click)="novoCartao()">
+        <i class="bi bi-plus-lg"></i> Novo Cartão
+      </button>
+    </div>
+
+    @if (cartoes.length === 0) {
+      <div class="text-center py-4 text-muted">
+        <i class="bi bi-credit-card fs-1"></i>
+        <p class="mt-2">Você ainda não possui cartões cadastrados.</p>
+      </div>
+    } @else {
+      <div class="row">
+        @for (cartao of cartoes; track cartao.id) {
+          <div class="col-md-6 mb-3">
+            <div class="card h-100 shadow-sm border-0 address-card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h5 class="card-title fw-bold text-dark mb-0">{{ cartao.bandeira | uppercase }}</h5>
+                  <i class="bi bi-credit-card-2-front text-muted fs-4"></i>
+                </div>
+                <h6 class="card-subtitle mb-2 text-muted mt-2">Final {{ cartao.numero.slice(-4) }}</h6>
+                <p class="card-text mb-1 text-uppercase">{{ cartao.nomeImpresso }}</p>
+                <div class="mt-3">
+                  <button class="btn btn-sm btn-outline-primary me-2" (click)="editarCartao(cartao)"><i class="bi bi-pencil"></i> Editar</button>
+                  <button class="btn btn-sm btn-outline-danger" (click)="excluirCartao(cartao.id)"><i class="bi bi-trash"></i> Excluir</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  } @else {
+    <!-- Formulário -->
+    <div class="form-wrapper bg-light p-4 rounded border">
+      <h4 class="mb-4">{{ editingId ? 'Editar Cartão' : 'Novo Cartão' }}</h4>
+      <form [formGroup]="formGroup" (ngSubmit)="salvar()">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Número do Cartão</label>
+            <input type="text" class="form-control" formControlName="numero" placeholder="0000 0000 0000 0000">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Nome Impresso no Cartão</label>
+            <input type="text" class="form-control" formControlName="nomeImpresso" placeholder="Ex: JOAO A SILVA">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Bandeira</label>
+            <select class="form-select" formControlName="bandeira">
+              <option value="">Selecione...</option>
+              <option value="Visa">Visa</option>
+              <option value="Mastercard">Mastercard</option>
+              <option value="Elo">Elo</option>
+              <option value="Amex">American Express</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">CPF/CNPJ do Titular</label>
+            <input type="text" class="form-control" formControlName="cpfCnpj" placeholder="000.000.000-00">
+          </div>
+        </div>
+
+        <div class="mt-3 text-end">
+          <button type="button" class="btn btn-secondary me-2" (click)="cancelar()">Cancelar</button>
+          <button type="submit" class="btn btn-success fw-bold" [disabled]="formGroup.invalid">
+            <i class="bi bi-check-circle-fill"></i> Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+</div>

@@ -27,7 +27,7 @@ export class MarcaComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   private router = inject(Router);
-  colunas: string[] = ['id', 'nome', 'acoes'];
+  colunas: string[] = ['id', 'nome', 'imagens', 'acoes'];
   
   // Controle de Tela (Lista x Formulário)
   isFormVisible = false;
@@ -164,5 +164,44 @@ export class MarcaComponent implements OnInit {
 
   navegarParaHome() {
     this.router.navigate(['/home']);
+  }
+
+  // --- Gerenciamento de Imagens ---
+  onFileSelected(event: any, marcaId: number) {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.marcaService.uploadImagem(marcaId, file).subscribe({
+        next: () => {
+          alert('Imagem enviada com sucesso!');
+          this.carregarMarcas();
+        },
+        error: (err) => {
+          console.error('Erro no upload da imagem', err);
+          alert('Erro ao enviar imagem.');
+        }
+      });
+    }
+    event.target.value = '';
+  }
+
+  excluirImagem(fidUrl: string) {
+    const partes = fidUrl.split('/');
+    const fid = partes[partes.length - 1];
+    
+    if (confirm('Deseja realmente remover esta imagem?')) {
+      this.marcaService.deleteImagem(fid).subscribe({
+        next: () => {
+          this.carregarMarcas();
+        },
+        error: (err) => {
+          console.error('Erro ao remover imagem', err);
+          alert('Erro ao remover imagem.');
+        }
+      });
+    }
+  }
+
+  getImagemUrl(url: string): string {
+    return `http://localhost:8081${url}`;
   }
 }

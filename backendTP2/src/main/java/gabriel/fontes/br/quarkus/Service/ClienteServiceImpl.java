@@ -62,8 +62,29 @@ public class ClienteServiceImpl implements ClienteService {
                 Cliente novoCliente = new Cliente();
                 novoCliente.setNome(jwt.getName() != null ? jwt.getName() : "Usuário " + emailUsuario);
                 novoCliente.setEmail(emailUsuario);
-                novoCliente.setCpf("00000000000"); // CPF genérico para auto-sync
-                novoCliente.setRg("0000000");      // RG genérico para auto-sync
+
+                // Tenta extrair CPF e RG das claims personalizadas do JWT (com fallback robusto)
+                String cpfClaim = jwt.getClaim("cpf");
+                String rgClaim = jwt.getClaim("rg");
+
+                if (cpfClaim == null && jwt.containsClaim("attributes")) {
+                    Object attribs = jwt.getClaim("attributes");
+                    if (attribs instanceof jakarta.json.JsonObject) {
+                        jakarta.json.JsonObject attributesJson = (jakarta.json.JsonObject) attribs;
+                        jakarta.json.JsonArray cpfArray = attributesJson.getJsonArray("cpf");
+                        if (cpfArray != null && !cpfArray.isEmpty()) {
+                            cpfClaim = cpfArray.getString(0);
+                        }
+                        jakarta.json.JsonArray rgArray = attributesJson.getJsonArray("rg");
+                        if (rgArray != null && !rgArray.isEmpty()) {
+                            rgClaim = rgArray.getString(0);
+                        }
+                    }
+                }
+
+                novoCliente.setCpf(cpfClaim != null ? cpfClaim : "00000000000");
+                novoCliente.setRg(rgClaim != null ? rgClaim : "0000000");
+
                 novoCliente.setIdKeycloak(idUsuarioKeycloak);
                 novoCliente.setDataCadastro(LocalDateTime.now());
                 repository.persist(novoCliente);
@@ -131,7 +152,7 @@ public class ClienteServiceImpl implements ClienteService {
         }
 
         // 2. Ordem Correta: PRIMEIRO cria no Keycloak
-        String idKeycloak = keycloakAdminService.criarUsuario(dto.username(), dto.nome(), dto.email(), dto.senha());
+        String idKeycloak = keycloakAdminService.criarUsuario(dto.username(), dto.nome(), dto.email(), dto.senha(), dto.cpf(), dto.rg());
 
         // 3. Ordem Correta: SEGUNDO instanciar e popular
         Cliente novoCliente = new Cliente();
@@ -207,5 +228,24 @@ public class ClienteServiceImpl implements ClienteService {
     @Override
     public void recuperarSenha(String email) {
         keycloakAdminService.enviarEmailRecuperacaoSenha(email);
+    }
+
+    @Override
+    public void solicitarAlteracaoSegura(String senha) {
+        String emailUsuario = jwt.getClaim("email");
+        String usernameUsuario = jwt.getClaim("preferred_username");
+
+        if (emailUsuario == null || usernameUsuario == null) {
+            throw new jakarta.ws.rs.NotAuthorizedException("Usuário não autenticado.");
+        }
+
+        boolean senhaValida = keycloakAdminService.validarSenhaUsuario(usernameUsuario, senha);
+        if (!senhaValida) {
+            throw new jakarta.ws.rs.WebApplicationException(
+                jakarta.ws.rs.core.Response.status(401).entity(java.util.Map.of("message", "Senha incorreta. Não foi possível validar a sua identidade.")).build()
+            );
+        }
+
+        keycloakAdminService.enviarEmailVerificacao(emailUsuario);
     }
 }

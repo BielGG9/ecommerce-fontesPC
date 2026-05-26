@@ -1,0 +1,149 @@
+<div class="perfil-container">
+  <div class="max-width-wrapper">
+    
+    <!-- Breadcrumb e Voltar -->
+    <div class="breadcrumb d-flex justify-content-between align-items-center">
+      <span class="text-muted fw-semibold">Central Minha Conta / Meus Dados</span>
+      <a [routerLink]="['/minha-conta']" class="text-decoration-none fw-bold" style="color: #ff6b00;">
+        <i class="bi bi-arrow-left"></i> Voltar aos Atalhos
+      </a>
+    </div>
+
+    <!-- Título Principal -->
+    <div class="page-header mt-4 mb-4">
+      <h2 class="fw-bold" style="color: #333; display: flex; align-items: center; gap: 10px;">
+        <i class="bi bi-person-fill" style="color: #ff6b00;"></i> MEUS DADOS
+      </h2>
+    </div>
+
+    <!-- Formulário Estilo Kabum -->
+    <div class="form-card">
+      
+      <div class="text-end mb-4">
+        <a href="javascript:void(0)" class="fw-bold text-dark text-decoration-none" style="font-size: 13px; text-transform: uppercase;">
+          Alterar E-mail
+        </a>
+      </div>
+
+      <form [formGroup]="formGroup" (ngSubmit)="salvar()">
+        
+        <div class="row">
+          <!-- E-mail -->
+          <div class="col-md-12 mb-4 position-relative">
+            <label class="floating-label">E-mail</label>
+            <input type="email" class="form-control custom-input editable" formControlName="email">
+          </div>
+
+          <!-- CPF -->
+          <div class="col-md-6 mb-4">
+            <label class="floating-label">CPF</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0" *ngIf="cpfBloqueado" style="border-radius: 6px 0 0 6px;">
+                <i class="bi bi-lock-fill text-muted"></i>
+              </span>
+              <input type="text" class="form-control custom-input" [class.editable]="!cpfBloqueado" [readOnly]="cpfBloqueado" formControlName="cpf" maxlength="11" (keypress)="apenasNumeros($event)" style="border-radius: 0 6px 6px 0;">
+              <button class="btn btn-outline-secondary px-3" type="button" *ngIf="cpfBloqueado" (click)="abrirModalSeguranca('cpf')" style="font-weight: bold; border-color: #ddd;">
+                <i class="bi bi-pencil-square"></i> Alterar
+              </button>
+            </div>
+          </div>
+
+          <!-- RG -->
+          <div class="col-md-6 mb-4">
+            <label class="floating-label">RG</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0" *ngIf="rgBloqueado" style="border-radius: 6px 0 0 6px;">
+                <i class="bi bi-lock-fill text-muted"></i>
+              </span>
+              <input type="text" class="form-control custom-input" [class.editable]="!rgBloqueado" [readOnly]="rgBloqueado" formControlName="rg" maxlength="15" (keypress)="apenasNumeros($event)" style="border-radius: 0 6px 6px 0;">
+              <button class="btn btn-outline-secondary px-3" type="button" *ngIf="rgBloqueado" (click)="abrirModalSeguranca('rg')" style="font-weight: bold; border-color: #ddd;">
+                <i class="bi bi-pencil-square"></i> Alterar
+              </button>
+            </div>
+          </div>
+
+          <!-- Nome Completo (Editável) -->
+          <div class="col-md-6 mb-4">
+            <label class="floating-label">Nome completo*</label>
+            <input type="text" class="form-control custom-input editable" formControlName="nome">
+          </div>
+
+          <!-- Username (Editável) -->
+          <div class="col-md-6 mb-4">
+            <label class="floating-label">Nome de usuário*</label>
+            <input type="text" class="form-control custom-input editable" formControlName="username">
+          </div>
+        </div>
+
+        <div class="mb-4 text-muted" style="font-size: 12px;">
+          (*) Campos obrigatórios
+        </div>
+
+        <div class="form-check mb-5">
+          <input class="form-check-input" type="checkbox" id="ofertasCheck" checked>
+          <label class="form-check-label text-muted" for="ofertasCheck" style="font-size: 14px;">
+            Quero receber ofertas e novidades por e-mail, SMS, WhatsApp ou mensagens nos Apps's FontesPC
+          </label>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="action-footer d-flex justify-content-between align-items-center mt-4">
+          <div>
+            <a href="javascript:void(0)" class="fw-bold text-decoration-none" style="color: #ff6b00; font-size: 14px; text-transform: uppercase;">
+              Alterar Senha
+            </a>
+          </div>
+          <button type="submit" class="btn btn-save" [disabled]="formGroup.invalid || !formGroup.dirty">
+            SALVAR ALTERAÇÕES
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Footer Danger Action -->
+    <div class="mt-4">
+      <a href="javascript:void(0)" class="text-dark fw-bold text-decoration-none" style="font-size: 13px; text-transform: uppercase;">
+        <i class="bi bi-trash-fill"></i> Excluir Minha Conta
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal de Segurança Customizado (Bootstrap 5) -->
+<div class="modal-backdrop fade show" *ngIf="mostrarModalSeguranca" style="background-color: rgba(0,0,0,0.5); z-index: 1040;"></div>
+<div class="modal fade show d-block" tabindex="-1" *ngIf="mostrarModalSeguranca" style="z-index: 1050; top: 15%;">
+  <div class="modal-dialog">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header text-white border-0" style="background-color: #ff6b00; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;">
+        <h5 class="modal-title fw-bold" style="margin: 0;">
+          <i class="bi bi-shield-lock-fill me-2"></i> Validação de Segurança
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="fecharModalSeguranca()" style="box-shadow: none;"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="text-muted" style="font-size: 14px; line-height: 1.5; margin-bottom: 20px;">
+          Para liberar a edição deste campo, confirme sua senha. Um e-mail de alerta de segurança também será enviado ao seu endereço.
+        </p>
+        
+        <div class="mb-3">
+          <label class="form-label fw-semibold" style="color: #444; font-size: 14px; display: block; margin-bottom: 8px;">Digite sua Senha Atual</label>
+          <input type="password" class="form-control" [value]="senhaConfirmacao" (input)="atualizarSenhaModal($event)" placeholder="Sua senha secreta" style="height: 45px; border-radius: 6px; border: 1px solid #ced4da;">
+        </div>
+
+        <!-- Alertas de Sucesso / Erro -->
+        <div class="alert alert-danger p-2" *ngIf="erroModal" style="font-size: 13px; border-radius: 4px; margin-top: 15px;">
+          <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ erroModal }}
+        </div>
+        <div class="alert alert-success p-2" *ngIf="sucessoModal" style="font-size: 13px; border-radius: 4px; margin-top: 15px;">
+          <i class="bi bi-check-circle-fill me-1"></i> {{ sucessoModal }}
+        </div>
+      </div>
+      <div class="modal-footer border-0 p-3" style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn btn-light px-4" (click)="fecharModalSeguranca()" style="font-weight: bold; border-radius: 6px; border: 1px solid #ddd; height: 40px;">Cancelar</button>
+        <button type="button" class="btn btn-save px-4 m-0" (click)="confirmarSeguranca()" style="font-weight: bold; border-radius: 6px; height: 40px; display: flex; align-items: center; justify-content: center;">Confirmar e Enviar</button>
+      </div>
+    </div>
+  </div>
+</div>
