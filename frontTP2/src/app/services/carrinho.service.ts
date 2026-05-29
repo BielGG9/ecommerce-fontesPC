@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, effect } from '@angular/core';
 import { Fonte } from '../models/fonte.model';
 import { ItemPedido } from '../models/item-pedido.model';
 
@@ -13,6 +13,24 @@ export class CarrinhoService {
   // O Angular 'computed' calcula os totais automaticamente sempre que um item for adicionado!
   quantidadeTotal = computed(() => this.itens().reduce((acc, item) => acc + item.quantidade, 0));
   valorTotal = computed(() => this.itens().reduce((acc, item) => acc + (item.precoUnitario * item.quantidade), 0));
+
+  constructor() {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const localData = localStorage.getItem('carrinho_itens');
+      if (localData) {
+        try {
+          this.itens.set(JSON.parse(localData));
+        } catch (e) {
+          console.error('Erro ao ler carrinho do localStorage', e);
+        }
+      }
+
+      // Efeito reativo para salvar no localStorage sempre que itens mudar
+      effect(() => {
+        localStorage.setItem('carrinho_itens', JSON.stringify(this.itens()));
+      });
+    }
+  }
 
   adicionar(fonte: Fonte) {
     this.itens.update(itensAtuais => {

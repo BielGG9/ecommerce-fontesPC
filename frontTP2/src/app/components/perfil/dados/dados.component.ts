@@ -5,6 +5,7 @@ import { ClienteService } from '../../../services/cliente.service';
 import { AuthService } from '../../../services/auth.service';
 import { Cliente } from '../../../models/cliente.model';
 import { RouterModule } from '@angular/router';
+import { DialogService } from '../../../services/dialog.service';
 
 @Component({
   selector: 'app-perfil-dados',
@@ -20,6 +21,7 @@ export class DadosComponent implements OnInit {
   fb = inject(FormBuilder);
   private cdr = inject(ChangeDetectorRef);
   private ngZone = inject(NgZone);
+  private dialogService = inject(DialogService);
 
   cliente: Cliente | null = null;
   formGroup!: FormGroup;
@@ -151,7 +153,7 @@ export class DadosComponent implements OnInit {
     this.clienteService.update(this.cliente.id, dadosAtualizados).subscribe({
       next: (res: Cliente) => {
         this.cliente = res;
-        alert('Dados atualizados com sucesso!');
+        this.dialogService.showSuccess('Dados atualizados com sucesso!');
         // Mark form as pristine so the button gets disabled again
         this.formGroup.markAsPristine();
       },

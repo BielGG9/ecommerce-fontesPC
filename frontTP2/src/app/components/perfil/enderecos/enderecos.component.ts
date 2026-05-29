@@ -5,6 +5,7 @@ import { EnderecoService } from '../../../services/endereco.service';
 import { ClienteService } from '../../../services/cliente.service';
 import { Cliente } from '../../../models/cliente.model';
 import { RouterModule } from '@angular/router';
+import { DialogService } from '../../../services/dialog.service';
 
 @Component({
   selector: 'app-perfil-enderecos',
@@ -17,6 +18,7 @@ export class EnderecosComponent implements OnInit {
   enderecoService = inject(EnderecoService);
   clienteService = inject(ClienteService);
   fb = inject(FormBuilder);
+  dialogService = inject(DialogService);
 
   cliente: Cliente | null = null;
   enderecos: any[] = []; // Assuming we get a list from cliente.enderecos or similar
@@ -92,7 +94,7 @@ export class EnderecosComponent implements OnInit {
     if (this.editingId) {
       this.enderecoService.update(this.editingId, request).subscribe({
         next: () => {
-          alert('Endereço atualizado com sucesso!');
+          this.dialogService.showSuccess('Endereço atualizado com sucesso!');
           this.cancelar();
           this.carregarDados();
         },
@@ -103,7 +105,7 @@ export class EnderecosComponent implements OnInit {
     } else {
       this.enderecoService.create(request).subscribe({
         next: () => {
-          alert('Endereço adicionado com sucesso!');
+          this.dialogService.showSuccess('Endereço adicionado com sucesso!');
           this.cancelar();
           this.carregarDados();
         },
@@ -118,7 +120,7 @@ export class EnderecosComponent implements OnInit {
     if (confirm('Tem certeza que deseja excluir este endereço?')) {
       this.enderecoService.delete(id).subscribe({
         next: () => {
-          alert('Endereço excluído!');
+          this.dialogService.showSuccess('Endereço excluído!');
           this.carregarDados();
         },
         error: (err) => alert('Erro ao excluir: ' + (err.error || err.message))

@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { PedidoService } from '../../services/pedido.service';
 import { Pedido } from '../../models/pedido.model';
+import { DialogService } from '../../services/dialog.service';
 
 @Component({
   selector: 'app-pedido',
@@ -24,7 +25,7 @@ export class PedidoComponent implements OnInit {
   pedidos: Pedido[] = [];
   colunasExibidas: string[] = ['id', 'dataHora', 'cliente', 'valorTotal', 'acoes'];
 
-  constructor(private pedidoService: PedidoService) {}
+  constructor(private pedidoService: PedidoService, private dialogService: DialogService) {}
 
   ngOnInit(): void {
     this.carregarPedidos();
@@ -57,6 +58,6 @@ export class PedidoComponent implements OnInit {
   verItens(pedido: Pedido): void {
     // Para já, vamos apenas mostrar um alerta com a quantidade de itens.
     // Depois podemos criar um modal (Dialog) bonito para listar os itens!
-    alert(`Este pedido possui ${pedido.itens?.length || 0} itens. O valor total é R$ ${pedido.valorTotal}`);
+    this.dialogService.showInfo(`Este pedido possui ${pedido.itens?.length || 0} itens. O valor total é R$ ${pedido.valorTotal}`, 'Detalhes do Pedido');
   }
 }

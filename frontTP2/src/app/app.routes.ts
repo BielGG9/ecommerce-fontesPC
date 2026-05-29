@@ -39,6 +39,6 @@ export const routes: Routes = [
   { path: 'minha-conta/cartoes', loadComponent: () => import('./components/perfil/cartoes/cartoes.component').then(c => c.CartoesComponent), canActivate: [canActivateUser] },
   
   // Rotas não implementadas ainda
-  { path: 'minha-conta/pedidos', loadComponent: () => import('./components/perfil/perfil.component').then(c => c.PerfilComponent), canActivate: [canActivateUser] },
+  { path: 'minha-conta/pedidos', loadComponent: () => import('./components/perfil/pedidos/pedidos.component').then(c => c.PedidosComponent), canActivate: [canActivateUser] },
   { path: 'minha-conta/favoritos', loadComponent: () => import('./components/perfil/perfil.component').then(c => c.PerfilComponent), canActivate: [canActivateUser] }
 ];

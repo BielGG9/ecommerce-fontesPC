@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DepartamentoService } from '../services/departamento.service';
 import { Departamento } from '../models/departamento.model';
+import { DialogService } from '../services/dialog.service';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -27,6 +28,7 @@ export class DepartamentoComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   private router = inject(Router);
+  private dialogService = inject(DialogService);
   
   colunas: string[] = ['id', 'sigla', 'descricao', 'acoes'];
 
@@ -89,7 +91,7 @@ export class DepartamentoComponent implements OnInit {
     if (departamento.id) {
       this.departamentoService.update(departamento).subscribe({
         next: () => {
-          alert('Departamento atualizado com sucesso!');
+          this.dialogService.showSuccess('Departamento atualizado com sucesso!');
           this.resetForm();
           this.isFormVisible = false;
           this.carregarDepartamentos();
@@ -104,7 +106,7 @@ export class DepartamentoComponent implements OnInit {
     } else {
       this.departamentoService.save(departamento).subscribe({
         next: () => {
-          alert('Departamento criado com sucesso!');
+          this.dialogService.showSuccess('Departamento criado com sucesso!');
           this.resetForm();
           this.isFormVisible = false;
           this.carregarDepartamentos();
@@ -141,7 +143,7 @@ export class DepartamentoComponent implements OnInit {
     if (confirm('Tem a certeza que deseja eliminar este departamento?')) {
       this.departamentoService.delete(id).subscribe({
         next: () => {
-          alert('Departamento eliminado!');
+          this.dialogService.showSuccess('Departamento eliminado!');
           this.resetForm();
           this.carregarDepartamentos();
         },

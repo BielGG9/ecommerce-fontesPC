@@ -7,6 +7,7 @@ import { ModeloService } from '../services/modelo.service';
 import { MarcaService } from '../services/marca.service';
 import { Modelo } from '../models/modelo.models';
 import { Marca } from '../models/marca.model';
+import { DialogService } from '../services/dialog.service';
 
 
 // Peças do Angular Material
@@ -45,6 +46,7 @@ export class ModeloComponent implements OnInit {
   private marcaService = inject(MarcaService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private dialogService = inject(DialogService);
 
   modelos = signal<Modelo[]>([]);
   marcas = signal<Marca[]>([]); 
@@ -122,7 +124,7 @@ export class ModeloComponent implements OnInit {
        novoModelo.id = this.modeloForm.value.id;
        this.modeloService.update(novoModelo).subscribe({
          next: () => {
-           alert('Modelo atualizado com sucesso!');
+           this.dialogService.showSuccess('Modelo atualizado com sucesso!');
            this.modeloForm.reset();
            this.isFormVisible = false;
            this.carregarModelos();
@@ -135,7 +137,7 @@ export class ModeloComponent implements OnInit {
     } else {
       this.modeloService.save(novoModelo).subscribe({
         next: () => {
-          alert('Modelo guardado com sucesso!');
+          this.dialogService.showSuccess('Modelo guardado com sucesso!');
           this.modeloForm.reset();
           this.isFormVisible = false;
           this.carregarModelos();
@@ -183,7 +185,7 @@ export class ModeloComponent implements OnInit {
     if (confirm('Tem a certeza que deseja eliminar este modelo?')) {
       this.modeloService.delete(id).subscribe({
         next: () => {
-          alert('Modelo eliminado!');
+          this.dialogService.showSuccess('Modelo eliminado!');
           this.modeloForm.reset();
           this.carregarModelos();
         },

@@ -1,0 +1,105 @@
+<div class="pedidos-container">
+  <div class="max-width-wrapper">
+
+    <!-- Header com botão voltar -->
+    <div class="perfil-header-nav">
+      <button mat-button class="btn-voltar" [routerLink]="['/minha-conta']">
+        <mat-icon>arrow_back</mat-icon> Voltar para o Painel
+      </button>
+      <h2>Histórico de Pedidos</h2>
+    </div>
+
+    @if (carregando()) {
+      <div class="loading-state">
+        <mat-icon class="spinner-icon">sync</mat-icon>
+        <p>Carregando seus pedidos...</p>
+      </div>
+    } @else if (pedidos().length === 0) {
+      <div class="empty-state-card">
+        <mat-icon class="empty-icon">sentiment_dissatisfied</mat-icon>
+        <h3>Você ainda não realizou compras.</h3>
+        <p>Visite nossa loja e encontre a fonte de energia perfeita para o seu setup!</p>
+        <button mat-flat-button class="btn-comprar" [routerLink]="['/']">ir para a loja</button>
+      </div>
+    } @else {
+      <!-- Listagem de Pedidos -->
+      <div class="pedidos-list">
+        @for (pedido of pedidos(); track pedido.id) {
+          <div class="pedido-card" [class.expanded]="expandedPedidoId() === pedido.id">
+            
+            <div class="pedido-summary" (click)="toggleExpandir(pedido.id)">
+              <div class="summary-col info-col">
+                <span class="label">NÚMERO</span>
+                <span class="value">#{{ pedido.id }}</span>
+              </div>
+              <div class="summary-col data-col">
+                <span class="label">DATA</span>
+                <span class="value">{{ formatDate(pedido.dataHora) }}</span>
+              </div>
+              <div class="summary-col total-col">
+                <span class="label">VALOR TOTAL</span>
+                <span class="value total-price">R$ {{ pedido.valorTotal.toFixed(2) }}</span>
+              </div>
+              <div class="summary-col status-col">
+                <span class="label">STATUS</span>
+                <span class="status-badge success">Processado</span>
+              </div>
+              <div class="summary-col action-col">
+                <button mat-icon-button class="btn-toggle">
+                  <mat-icon>{{ expandedPedidoId() === pedido.id ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </button>
+              </div>
+            </div>
+
+            <!-- Detalhes Expandidos (Composição de Itens) -->
+            @if (expandedPedidoId() === pedido.id) {
+              <div class="pedido-details animate-expand">
+                <h4>Itens do Pedido</h4>
+                <div class="items-table-wrapper">
+                  <table class="items-table">
+                    <thead>
+                      <tr>
+                        <th>Produto</th>
+                        <th class="text-center">Quantidade</th>
+                        <th class="text-right">Preço Unitário</th>
+                        <th class="text-right">Subtotal</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (item of pedido.itens; track item.id) {
+                        <tr>
+                          <td>
+                            <div class="product-info">
+                              <span class="product-name">{{ item.fonte?.nome || 'Fonte de Alimentação' }}</span>
+                              <span class="product-brand" *ngIf="item.fonte?.marca?.nome">{{ item.fonte?.marca?.nome }}</span>
+                            </div>
+                          </td>
+                          <td class="text-center">{{ item.quantidade }}x</td>
+                          <td class="text-right">R$ {{ item.precoUnitario.toFixed(2) }}</td>
+                          <td class="text-right subtotal">R$ {{ (item.precoUnitario * item.quantidade).toFixed(2) }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="details-footer">
+                  <div class="shipping-info">
+                    <mat-icon>local_shipping</mat-icon>
+                    <span>Entregue por <strong>Fontes PC</strong></span>
+                  </div>
+                  <div class="payment-info">
+                    <mat-icon>credit_card</mat-icon>
+                    <span>Pagamento via Sistema</span>
+                  </div>
+                </div>
+              </div>
+            }
+
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+</div>

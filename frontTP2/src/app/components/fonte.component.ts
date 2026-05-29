@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FonteService } from '../services/fonte.service';
 import { Fonte } from '../models/fonte.model';
+import { DialogService } from '../services/dialog.service';
 
 import { MarcaService } from '../services/marca.service';
 import { Marca } from '../models/marca.model';
@@ -40,6 +41,7 @@ export class FonteComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   private router = inject(Router);
+  private dialogService = inject(DialogService);
 
   coluna: string[] = ['id', 'nome', 'potencia', 'preco', 'marca', 'imagens', 'acoes'];
   
@@ -179,7 +181,7 @@ export class FonteComponent implements OnInit {
       // TEM ID: Vamos chamar o método de atualizar
       this.fonteService.update(fontePronta).subscribe({
         next: () => {
-          alert('Fonte atualizada com sucesso!');
+          this.dialogService.showSuccess('Fonte atualizada com sucesso!');
           this.resetForm(); // Usamos o cancelar para limpar tudo direitinho
           this.isFormVisible = false;
           this.carregarFontes();
@@ -193,7 +195,7 @@ export class FonteComponent implements OnInit {
       // NÃO TEM ID: É uma fonte nova 
       this.fonteService.save(fontePronta).subscribe({
         next: () => {
-          alert('Fonte guardada com sucesso!');
+          this.dialogService.showSuccess('Fonte guardada com sucesso!');
           this.resetForm(); 
           this.isFormVisible = false;
           this.carregarFontes();
@@ -237,7 +239,7 @@ export class FonteComponent implements OnInit {
     if (confirm('Tem a certeza que deseja eliminar esta fonte?')) {
       this.fonteService.delete(id).subscribe({
         next: () => {
-          alert('Fonte eliminada com sucesso!');
+          this.dialogService.showSuccess('Fonte eliminada com sucesso!');
           this.resetForm();
           this.carregarFontes();
         },
@@ -294,7 +296,7 @@ export class FonteComponent implements OnInit {
     if (file) {
       this.fonteService.uploadImagem(fonteId, file).subscribe({
         next: () => {
-          alert('Imagem enviada com sucesso!');
+          this.dialogService.showSuccess('Imagem enviada com sucesso!');
           this.carregarFontes();
         },
         error: (err) => {

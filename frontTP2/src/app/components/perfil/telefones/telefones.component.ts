@@ -5,6 +5,7 @@ import { TelefoneService } from '../../../services/telefone.service';
 import { ClienteService } from '../../../services/cliente.service';
 import { Cliente } from '../../../models/cliente.model';
 import { RouterModule } from '@angular/router';
+import { DialogService } from '../../../services/dialog.service';
 
 @Component({
   selector: 'app-perfil-telefones',
@@ -17,6 +18,7 @@ export class TelefonesComponent implements OnInit {
   telefoneService = inject(TelefoneService);
   clienteService = inject(ClienteService);
   fb = inject(FormBuilder);
+  dialogService = inject(DialogService);
 
   cliente: Cliente | null = null;
   telefones: any[] = []; 
@@ -80,7 +82,7 @@ export class TelefonesComponent implements OnInit {
     if (this.editingId) {
       this.telefoneService.update(this.editingId, request).subscribe({
         next: () => {
-          alert('Telefone atualizado!');
+          this.dialogService.showSuccess('Telefone atualizado!');
           this.cancelar();
           this.carregarDados();
         },
@@ -89,7 +91,7 @@ export class TelefonesComponent implements OnInit {
     } else {
       this.telefoneService.create(request).subscribe({
         next: () => {
-          alert('Telefone adicionado!');
+          this.dialogService.showSuccess('Telefone adicionado!');
           this.cancelar();
           this.carregarDados();
         },
@@ -102,7 +104,7 @@ export class TelefonesComponent implements OnInit {
     if (confirm('Deseja excluir este telefone?')) {
       this.telefoneService.delete(id).subscribe({
         next: () => {
-          alert('Telefone excluído!');
+          this.dialogService.showSuccess('Telefone excluído!');
           this.carregarDados();
         },
         error: (err) => alert('Erro: ' + (err.error || err.message))

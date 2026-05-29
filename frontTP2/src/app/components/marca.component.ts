@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MarcaService } from '../services/marca.service';
 import { Marca } from '../models/marca.model';
+import { DialogService } from '../services/dialog.service';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -27,6 +28,7 @@ export class MarcaComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   private router = inject(Router);
+  private dialogService = inject(DialogService);
   colunas: string[] = ['id', 'nome', 'imagens', 'acoes'];
   
   // Controle de Tela (Lista x Formulário)
@@ -89,7 +91,7 @@ export class MarcaComponent implements OnInit {
       // Se tem ID, é porque estamos a atualizar um registo existente (PUT)
       this.marcaService.update(marca).subscribe({
         next: () => {
-          alert('Marca atualizada com sucesso!');
+          this.dialogService.showSuccess('Marca atualizada com sucesso!');
           this.resetForm();
           this.isFormVisible = false;
           this.carregarMarcas();
@@ -99,7 +101,7 @@ export class MarcaComponent implements OnInit {
       // Se não tem ID, é uma marca nova (POST)
       this.marcaService.save(marca).subscribe({
         next: () => {
-          alert('Marca criada com sucesso!');
+          this.dialogService.showSuccess('Marca criada com sucesso!');
           this.resetForm();
           this.isFormVisible = false;
           this.carregarMarcas();
@@ -130,7 +132,7 @@ export class MarcaComponent implements OnInit {
     if (confirm('Tem a certeza que deseja eliminar esta marca?')) {
       this.marcaService.delete(id).subscribe({
         next: () => {
-          alert('Marca eliminada!');
+          this.dialogService.showSuccess('Marca eliminada!');
           this.resetForm();
           this.carregarMarcas();
         },
@@ -172,7 +174,7 @@ export class MarcaComponent implements OnInit {
     if (file) {
       this.marcaService.uploadImagem(marcaId, file).subscribe({
         next: () => {
-          alert('Imagem enviada com sucesso!');
+          this.dialogService.showSuccess('Imagem enviada com sucesso!');
           this.carregarMarcas();
         },
         error: (err) => {

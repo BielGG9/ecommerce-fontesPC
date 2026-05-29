@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FonteService } from '../services/fonte.service';
 import { Fonte } from '../models/fonte.model';
 import { CarrinhoService } from '../services/carrinho.service';
+import { DialogService } from '../services/dialog.service';
 
 
 // --- FERRAMENTAS VISUAIS QUE VAMOS USAR NA VITRINE ---
@@ -29,6 +30,7 @@ import { MatGridListModule } from '@angular/material/grid-list'; // Para organiz
 export class HomeComponent implements OnInit {
   private fonteService = inject(FonteService);
   private carrinhoService = inject(CarrinhoService);
+  private dialogService = inject(DialogService);
   
   // Guardamos as fontes que vão aparecer na vitrine
   fontes = signal<Fonte[]>([]);
@@ -58,9 +60,9 @@ export class HomeComponent implements OnInit {
       );
 
       // Mostra quantos itens já temos guardados
-      alert(`${fonte.nome} adicionado! O seu carrinho tem agora ${this.carrinhoService.quantidadeTotal()} itens.`);
+      this.dialogService.showSuccess(`${fonte.nome} adicionado! O seu carrinho tem agora ${this.carrinhoService.quantidadeTotal()} itens.`, 'Adicionado!');
     } else {
-      alert(`Desculpe, ${fonte.nome} está esgotada!`);
+      this.dialogService.showWarning(`Desculpe, ${fonte.nome} está esgotada!`, 'Esgotado');
     }
   }
 

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FornecedorService } from '../services/fornecedor.service';
 import { Fornecedor } from '../models/fornecedor.model';
+import { DialogService } from '../services/dialog.service';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -27,6 +28,7 @@ export class FornecedorComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   private router = inject(Router);
+  private dialogService = inject(DialogService);
   
   colunas: string[] = ['id', 'nome', 'cnpj', 'razaoSocial', 'acoes'];
 
@@ -92,7 +94,7 @@ export class FornecedorComponent implements OnInit {
     if (fornecedor.id) {
       this.fornecedorService.update(fornecedor).subscribe({
         next: () => {
-          alert('Fornecedor atualizado com sucesso!');
+          this.dialogService.showSuccess('Fornecedor atualizado com sucesso!');
           this.resetForm();
           this.isFormVisible = false;
           this.carregarFornecedores();
@@ -107,7 +109,7 @@ export class FornecedorComponent implements OnInit {
     } else {
       this.fornecedorService.save(fornecedor).subscribe({
         next: () => {
-          alert('Fornecedor criado com sucesso!');
+          this.dialogService.showSuccess('Fornecedor criado com sucesso!');
           this.resetForm();
           this.isFormVisible = false;
           this.carregarFornecedores();
@@ -147,7 +149,7 @@ export class FornecedorComponent implements OnInit {
     if (confirm('Tem a certeza que deseja eliminar este fornecedor?')) {
       this.fornecedorService.delete(id).subscribe({
         next: () => {
-          alert('Fornecedor eliminado!');
+          this.dialogService.showSuccess('Fornecedor eliminado!');
           this.resetForm();
           this.carregarFornecedores();
         },

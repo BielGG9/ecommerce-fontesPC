@@ -8,6 +8,7 @@ import { EnderecoService } from '../../services/endereco.service';
 import { ClienteService } from '../../services/cliente.service';
 import { PedidoRequest } from '../../models/pedido-request.model';
 import { Endereco } from '../../models/endereco.model';
+import { DialogService } from '../../services/dialog.service';
 
 @Component({
   selector: 'app-checkout',
@@ -23,6 +24,7 @@ export class CheckoutComponent implements OnInit {
   clienteService = inject(ClienteService);
   fb = inject(FormBuilder);
   router = inject(Router);
+  dialogService = inject(DialogService);
 
   checkoutForm!: FormGroup;
   processando = signal(false);
@@ -145,7 +147,7 @@ export class CheckoutComponent implements OnInit {
 
     this.pedidoService.create(pedidoRequest).subscribe({
       next: (pedido) => {
-        alert('Pedido realizado com sucesso!');
+        this.dialogService.showSuccess('Pedido realizado com sucesso!');
         this.carrinhoService.limparCarrinho();
         this.router.navigate(['/']);
       },

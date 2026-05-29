@@ -5,6 +5,7 @@ import { CartaoService } from '../../../services/cartao.service';
 import { ClienteService } from '../../../services/cliente.service';
 import { Cliente } from '../../../models/cliente.model';
 import { RouterModule } from '@angular/router';
+import { DialogService } from '../../../services/dialog.service';
 
 @Component({
   selector: 'app-perfil-cartoes',
@@ -17,6 +18,7 @@ export class CartoesComponent implements OnInit {
   cartaoService = inject(CartaoService);
   clienteService = inject(ClienteService);
   fb = inject(FormBuilder);
+  dialogService = inject(DialogService);
 
   cliente: Cliente | null = null;
   cartoes: any[] = []; 
@@ -83,7 +85,7 @@ export class CartoesComponent implements OnInit {
     if (this.editingId) {
       this.cartaoService.update(this.editingId, request).subscribe({
         next: () => {
-          alert('Cartão atualizado com sucesso!');
+          this.dialogService.showSuccess('Cartão atualizado com sucesso!');
           this.cancelar();
           this.carregarDados();
         },
@@ -92,7 +94,7 @@ export class CartoesComponent implements OnInit {
     } else {
       this.cartaoService.create(request).subscribe({
         next: () => {
-          alert('Cartão adicionado com sucesso!');
+          this.dialogService.showSuccess('Cartão adicionado com sucesso!');
           this.cancelar();
           this.carregarDados();
         },
@@ -105,7 +107,7 @@ export class CartoesComponent implements OnInit {
     if (confirm('Tem certeza que deseja excluir este cartão?')) {
       this.cartaoService.delete(id).subscribe({
         next: () => {
-          alert('Cartão excluído!');
+          this.dialogService.showSuccess('Cartão excluído!');
           this.carregarDados();
         },
         error: (err) => alert('Erro: ' + (err.error || err.message))

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FuncionarioService } from '../services/funcionario.service';
 import { Funcionario } from '../models/funcionario.model';
+import { DialogService } from '../services/dialog.service';
 import { DepartamentoService } from '../services/departamento.service';
 import { Departamento } from '../models/departamento.model';
 
@@ -31,6 +32,7 @@ export class FuncionarioComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   private router = inject(Router);
+  private dialogService = inject(DialogService);
   
   colunas: string[] = ['id', 'nome', 'cpf', 'cargo', 'departamento', 'acoes'];
 
@@ -109,7 +111,7 @@ export class FuncionarioComponent implements OnInit {
     if (funcionario.id) {
       this.funcionarioService.update(funcionario).subscribe({
         next: () => {
-          alert('Funcionário atualizado com sucesso!');
+          this.dialogService.showSuccess('Funcionário atualizado com sucesso!');
           this.resetForm();
           this.isFormVisible = false;
           this.carregarFuncionarios();
@@ -124,7 +126,7 @@ export class FuncionarioComponent implements OnInit {
     } else {
       this.funcionarioService.save(funcionario).subscribe({
         next: () => {
-          alert('Funcionário criado com sucesso!');
+          this.dialogService.showSuccess('Funcionário criado com sucesso!');
           this.resetForm();
           this.isFormVisible = false;
           this.carregarFuncionarios();
@@ -174,7 +176,7 @@ export class FuncionarioComponent implements OnInit {
     if (confirm('Tem a certeza que deseja eliminar este funcionário?')) {
       this.funcionarioService.delete(id).subscribe({
         next: () => {
-          alert('Funcionário eliminado!');
+          this.dialogService.showSuccess('Funcionário eliminado!');
           this.resetForm();
           this.carregarFuncionarios();
         }
