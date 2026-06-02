@@ -89,8 +89,12 @@
         <!-- Botões de Ação -->
         <div class="action-footer d-flex justify-content-between align-items-center mt-4">
           <div>
-            <a href="javascript:void(0)" class="fw-bold text-decoration-none" style="color: #ff6b00; font-size: 14px; text-transform: uppercase;">
-              Alterar Senha
+            <!-- LINK REAL para alterar senha — abre o modal no modo 'senha' -->
+            <a href="javascript:void(0)"
+               class="fw-bold text-decoration-none"
+               style="color: #ff6b00; font-size: 14px; text-transform: uppercase;"
+               (click)="abrirModalAlterarSenha()">
+              <i class="bi bi-key-fill me-1"></i> Alterar Senha
             </a>
           </div>
           <button type="submit" class="btn btn-save" [disabled]="formGroup.invalid || !formGroup.dirty">
@@ -111,39 +115,166 @@
   </div>
 </div>
 
-<!-- Modal de Segurança Customizado (Bootstrap 5) -->
+<!-- Backdrop do Modal -->
 <div class="modal-backdrop fade show" *ngIf="mostrarModalSeguranca" style="background-color: rgba(0,0,0,0.5); z-index: 1040;"></div>
-<div class="modal fade show d-block" tabindex="-1" *ngIf="mostrarModalSeguranca" style="z-index: 1050; top: 15%;">
-  <div class="modal-dialog">
+
+<!-- Modal de Segurança (Modo Duplo) -->
+<div class="modal fade show d-block" tabindex="-1" *ngIf="mostrarModalSeguranca" style="z-index: 1050; top: 10%;">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg">
-      <div class="modal-header text-white border-0" style="background-color: #ff6b00; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;">
+
+      <!-- Header (adapta o título ao modo) -->
+      <div class="modal-header text-white border-0"
+           style="background-color: #ff6b00; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;">
         <h5 class="modal-title fw-bold" style="margin: 0;">
-          <i class="bi bi-shield-lock-fill me-2"></i> Validação de Segurança
+          <ng-container *ngIf="modalModo === 'campo'">
+            <i class="bi bi-shield-lock-fill me-2"></i> Validação de Segurança
+          </ng-container>
+          <ng-container *ngIf="modalModo === 'senha'">
+            <i class="bi bi-key-fill me-2"></i> Alterar Senha
+          </ng-container>
         </h5>
         <button type="button" class="btn-close btn-close-white" (click)="fecharModalSeguranca()" style="box-shadow: none;"></button>
       </div>
-      <div class="modal-body p-4">
-        <p class="text-muted" style="font-size: 14px; line-height: 1.5; margin-bottom: 20px;">
-          Para liberar a edição deste campo, confirme sua senha. Um e-mail de alerta de segurança também será enviado ao seu endereço.
-        </p>
-        
-        <div class="mb-3">
-          <label class="form-label fw-semibold" style="color: #444; font-size: 14px; display: block; margin-bottom: 8px;">Digite sua Senha Atual</label>
-          <input type="password" class="form-control" [value]="senhaConfirmacao" (input)="atualizarSenhaModal($event)" placeholder="Sua senha secreta" style="height: 45px; border-radius: 6px; border: 1px solid #ced4da;">
-        </div>
 
-        <!-- Alertas de Sucesso / Erro -->
-        <div class="alert alert-danger p-2" *ngIf="erroModal" style="font-size: 13px; border-radius: 4px; margin-top: 15px;">
+      <div class="modal-body p-4">
+
+        <!-- ════════════════════════════════════════════════════════════════ -->
+        <!-- MODO: 'campo' → Desbloqueio de CPF / RG com confirmação de senha -->
+        <!-- ════════════════════════════════════════════════════════════════ -->
+        <ng-container *ngIf="modalModo === 'campo'">
+          <p class="text-muted" style="font-size: 14px; line-height: 1.5; margin-bottom: 20px;">
+            Para liberar a edição deste campo, confirme sua senha. Um e-mail de alerta de segurança também será enviado ao seu endereço.
+          </p>
+          <div class="mb-3">
+            <label class="form-label fw-semibold" style="color: #444; font-size: 14px; display: block; margin-bottom: 8px;">Digite sua Senha Atual</label>
+            <input type="password"
+                   id="modal-senha-campo"
+                   class="form-control"
+                   [value]="senhaConfirmacao"
+                   (input)="atualizarSenhaModal($event)"
+                   placeholder="Sua senha secreta"
+                   style="height: 45px; border-radius: 6px; border: 1px solid #ced4da;">
+          </div>
+        </ng-container>
+
+        <!-- ════════════════════════════════════════════════════════════════ -->
+        <!-- MODO: 'senha' → Formulário de Alteração de Senha               -->
+        <!-- ════════════════════════════════════════════════════════════════ -->
+        <ng-container *ngIf="modalModo === 'senha'">
+          <div [formGroup]="senhaForm">
+            <p class="text-muted" style="font-size: 14px; line-height: 1.5; margin-bottom: 20px;">
+              Preencha os campos abaixo para redefinir sua senha. A nova senha deve ter pelo menos 6 caracteres.
+            </p>
+
+            <!-- Senha Atual -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold" style="color: #444; font-size: 14px; display: block; margin-bottom: 6px;">
+                <i class="bi bi-lock-fill me-1" style="color: #ff6b00;"></i> Senha Atual
+              </label>
+              <input type="password"
+                     id="modal-senha-atual"
+                     class="form-control"
+                     formControlName="senhaAtual"
+                     placeholder="Sua senha atual"
+                     style="height: 45px; border-radius: 6px; border: 1px solid #ced4da;">
+              <small class="text-danger"
+                *ngIf="senhaForm.get('senhaAtual')?.errors?.['required'] 
+                && senhaForm.get('senhaAtual')?.touched">
+                Campo obrigatório.
+              </small>
+            </div>
+
+            <!-- Nova Senha -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold" style="color: #444; font-size: 14px; display: block; margin-bottom: 6px;">
+                <i class="bi bi-unlock-fill me-1" style="color: #ff6b00;"></i> Nova Senha
+              </label>
+              <input type="password"
+                     id="modal-nova-senha"
+                     class="form-control"
+                     formControlName="novaSenha"
+                     placeholder="Mínimo 6 caracteres"
+                     style="height: 45px; border-radius: 6px; border: 1px solid #ced4da;">
+              <small class="text-danger"
+                *ngIf="senhaForm.get('novaSenha')?.errors?.['minlength'] 
+                && senhaForm.get('novaSenha')?.touched">
+                Mínimo 6 caracteres.
+              </small>
+            </div>
+
+            <!-- Confirmar Nova Senha -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold" style="color: #444; font-size: 14px; display: block; margin-bottom: 6px;">
+                <i class="bi bi-check-circle-fill me-1" style="color: #ff6b00;"></i> Confirmar Nova Senha
+              </label>
+              <input type="password"
+                     id="modal-confirmar-nova-senha"
+                     class="form-control"
+                     formControlName="confirmarSenha"
+                     placeholder="Repita a nova senha"
+                     [class.is-invalid]="senhaForm.errors?.['senhasDiferentes'] && senhaForm.get('confirmarSenha')?.touched"
+                     style="height: 45px; border-radius: 6px; border: 1px solid #ced4da;">
+              <small class="text-danger"
+                *ngIf="senhaForm.errors?.['senhasDiferentes'] 
+                && senhaForm.get('confirmarSenha')?.touched">
+                As senhas não coincidem.
+              </small>
+            </div>
+
+            <!-- Erro de backend -->
+            <div class="alert alert-danger mt-2" *ngIf="erroSenha">
+              {{ erroSenha }}
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Alertas de Sucesso / Erro (compartilhados pelos dois modos) -->
+        <div class="alert alert-danger p-2 mt-3 mb-0" *ngIf="erroModal" style="font-size: 13px; border-radius: 4px;">
           <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ erroModal }}
         </div>
-        <div class="alert alert-success p-2" *ngIf="sucessoModal" style="font-size: 13px; border-radius: 4px; margin-top: 15px;">
+        <div class="alert alert-success p-2 mt-3 mb-0" *ngIf="sucessoModal" style="font-size: 13px; border-radius: 4px;">
           <i class="bi bi-check-circle-fill me-1"></i> {{ sucessoModal }}
         </div>
       </div>
+
+      <!-- Footer do Modal -->
       <div class="modal-footer border-0 p-3" style="display: flex; justify-content: flex-end; gap: 10px;">
-        <button type="button" class="btn btn-light px-4" (click)="fecharModalSeguranca()" style="font-weight: bold; border-radius: 6px; border: 1px solid #ddd; height: 40px;">Cancelar</button>
-        <button type="button" class="btn btn-save px-4 m-0" (click)="confirmarSeguranca()" style="font-weight: bold; border-radius: 6px; height: 40px; display: flex; align-items: center; justify-content: center;">Confirmar e Enviar</button>
+        <button type="button" class="btn btn-light px-4" (click)="fecharModalSeguranca()" style="font-weight: bold; border-radius: 6px; border: 1px solid #ddd; height: 40px;">
+          Cancelar
+        </button>
+        
+        <button type="button"
+                *ngIf="modalModo === 'campo'"
+                class="btn btn-save px-4 m-0"
+                (click)="confirmarSeguranca()"
+                [disabled]="processandoModal"
+                style="font-weight: bold; border-radius: 6px; height: 40px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span *ngIf="processandoModal" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          <ng-container *ngIf="!processandoModal">
+            Confirmar e Enviar
+          </ng-container>
+          <ng-container *ngIf="processandoModal">
+            Aguarde...
+          </ng-container>
+        </button>
+
+        <button type="button"
+                *ngIf="modalModo === 'senha'"
+                class="btn btn-save px-4 m-0"
+                (click)="alterarSenha()"
+                [disabled]="senhaForm.invalid || processandoModal"
+                style="font-weight: bold; border-radius: 6px; height: 40px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span *ngIf="processandoModal" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          <ng-container *ngIf="!processandoModal">
+            Alterar Senha
+          </ng-container>
+          <ng-container *ngIf="processandoModal">
+            Aguarde...
+          </ng-container>
+        </button>
       </div>
+
     </div>
   </div>
 </div>

@@ -15,7 +15,10 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @ApplicationScoped 
@@ -73,30 +76,83 @@ public class FonteServiceImpl implements FonteService {
     }
 
     
-   @Override
-    public List<FonteResponse> findAll(int page, int pageSize, String nome) {
-        // Converter a lista de entidades Fonte para uma lista de DTOs FonteResponse
+    @Override
+    public List<FonteResponse> findAll(int page, int pageSize, String nome, Long idMarca, String categoria) {
+        StringBuilder queryStr = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
 
-        var query = (nome != null && !nome.isEmpty())
-        ? repository.find("nome LIKE ?1", "%" + nome + "%")
-        : repository.findAll();
-        
-        // Retorna a lista paginada de fontes
+        if (nome != null && !nome.isEmpty()) {
+            queryStr.append("LOWER(nome) LIKE :nome");
+            params.put("nome", "%" + nome.toLowerCase() + "%");
+        }
+
+        if (idMarca != null) {
+            if (queryStr.length() > 0) queryStr.append(" AND ");
+            queryStr.append("modelo.marca.id = :idMarca");
+            params.put("idMarca", idMarca);
+        }
+
+        if (categoria != null && !categoria.isEmpty()) {
+            try {
+                Certificacao cert = Certificacao.valueOf(categoria.toUpperCase());
+                if (queryStr.length() > 0) queryStr.append(" AND ");
+                queryStr.append("certificacao = :certificacao");
+                params.put("certificacao", cert);
+            } catch (IllegalArgumentException e) {
+                // Ignore if invalid enum value
+            }
+        }
+
+        var query = queryStr.length() > 0 
+            ? repository.find(queryStr.toString(), params)
+            : repository.findAll();
+
         return query.page(page, pageSize)
-        .list()
-        .stream()
-        .map(FonteResponse::fromEntity)
-        .collect(Collectors.toList());
+            .list()
+            .stream()
+            .map(FonteResponse::fromEntity)
+            .collect(Collectors.toList());
     }
 
     @Override
-    public long count(String search) {
-        // O contador precisa saber se estamos a filtrar ou não para devolver o total certo
-        var query = (search != null && !search.isEmpty())
-        ? repository.find("nome LIKE ?1", "%" + search + "%")
-        : repository.findAll();
-        
+    public long count(String nome, Long idMarca, String categoria) {
+        StringBuilder queryStr = new StringBuilder();
+        Map<String, Object> params = new HashMap<>();
+
+        if (nome != null && !nome.isEmpty()) {
+            queryStr.append("LOWER(nome) LIKE :nome");
+            params.put("nome", "%" + nome.toLowerCase() + "%");
+        }
+
+        if (idMarca != null) {
+            if (queryStr.length() > 0) queryStr.append(" AND ");
+            queryStr.append("modelo.marca.id = :idMarca");
+            params.put("idMarca", idMarca);
+        }
+
+        if (categoria != null && !categoria.isEmpty()) {
+            try {
+                Certificacao cert = Certificacao.valueOf(categoria.toUpperCase());
+                if (queryStr.length() > 0) queryStr.append(" AND ");
+                queryStr.append("certificacao = :certificacao");
+                params.put("certificacao", cert);
+            } catch (IllegalArgumentException e) {
+                // Ignore if invalid enum value
+            }
+        }
+
+        var query = queryStr.length() > 0 
+            ? repository.find(queryStr.toString(), params)
+            : repository.findAll();
+
         return query.count();
+    }
+
+    @Override
+    public List<String> getCertificacoes() {
+        return Arrays.stream(Certificacao.values())
+                .map(Enum::name)
+                .toList();
     }
     
     @Override
@@ -106,6 +162,7 @@ public class FonteServiceImpl implements FonteService {
         Fonte fonte = repository.findByIdOptional(id)
             .orElseThrow(() -> new NotFoundException("Fonte com ID " + id + " não encontrada."));
         
+        // Retorna o FonteResponse com o mapeamento correto garantido via fromEntity
        return FonteResponse.fromEntity(fonte);
     }
 

@@ -9,11 +9,15 @@ import { ClienteService } from '../../services/cliente.service';
 import { PedidoRequest } from '../../models/pedido-request.model';
 import { Endereco } from '../../models/endereco.model';
 import { DialogService } from '../../services/dialog.service';
+import { CupomService, CupomResponse } from '../../services/cupom.service';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, MatFormFieldModule, MatInputModule, MatButtonModule],
   templateUrl: './checkout.component.html',
   styleUrl: './checkout.component.css'
 })
@@ -30,6 +34,14 @@ export class CheckoutComponent implements OnInit {
   processando = signal(false);
   idPessoa: number | null = null;
   nomePessoa: string = '';
+  meusEnderecos: Endereco[] = [];
+  selectedEnderecoId: number | null = null;
+  adicionandoNovoEndereco: boolean = false;
+  cupomService = inject(CupomService);
+
+  cupomAplicado: CupomResponse | null = null;
+  erroCupom: string | null = null;
+  totalComDesconto: number = 0;
 
   ngOnInit() {
     if (this.carrinhoService.itens().length === 0) {
@@ -42,6 +54,23 @@ export class CheckoutComponent implements OnInit {
         this.idPessoa = perfil.id || null;
         this.nomePessoa = perfil.nome;
         this.checkoutForm.patchValue({ nomeCliente: perfil.nome });
+        
+        // Carrega os endereços do cliente logado
+        this.enderecoService.getMeusEnderecos().subscribe({
+          next: (enderecos) => {
+            this.meusEnderecos = enderecos;
+            this.adicionandoNovoEndereco = enderecos.length === 0;
+            if (enderecos.length > 0) {
+              this.selectedEnderecoId = enderecos[0].id || null;
+            }
+            this.updateEnderecoValidators();
+          },
+          error: (err) => {
+            console.error('Erro ao buscar endereços:', err);
+            this.adicionandoNovoEndereco = true;
+            this.updateEnderecoValidators();
+          }
+        });
       },
       error: (err) => {
         console.error('Erro ao buscar perfil:', err);
@@ -66,7 +95,8 @@ export class CheckoutComponent implements OnInit {
       nomeImpresso: [''],
       numeroCartao: [''],
       validadeCartao: [''],
-      cvv: ['']
+      cvv: [''],
+      cupom: ['']
     });
 
     this.checkoutForm.get('pagamento')?.valueChanges.subscribe(value => {
@@ -99,26 +129,82 @@ export class CheckoutComponent implements OnInit {
     this.processando.set(true);
     const formValue = this.checkoutForm.value;
 
-    const endereco: Endereco = {
-      rua: formValue.rua,
-      numero: formValue.numero,
-      complemento: formValue.complemento,
-      bairro: formValue.bairro,
-      cidade: formValue.cidade,
-      estado: formValue.estado,
-      cep: formValue.cep,
-      idPessoa: this.idPessoa
-    };
+    if (this.selectedEnderecoId !== null) {
+      // usa endereço existente — NÃO chama enderecoService.create()
+      this.criarPedido(this.selectedEnderecoId, formValue);
+    } else {
+      // cria novo endereço e usa o id retornado
+      const endereco: Endereco = {
+        rua: formValue.rua,
+        numero: formValue.numero,
+        complemento: formValue.complemento,
+        bairro: formValue.bairro,
+        cidade: formValue.cidade,
+        estado: formValue.estado,
+        cep: formValue.cep,
+        idPessoa: this.idPessoa
+      };
 
-    this.enderecoService.create(endereco).subscribe({
-      next: (endCriado) => {
-        this.criarPedido(endCriado.id!, formValue);
+      this.enderecoService.create(endereco).subscribe({
+        next: (endCriado) => {
+          this.criarPedido(endCriado.id!, formValue);
+        },
+        error: (err) => {
+          console.error('Erro ao criar endereço', err);
+          const backendMsg = err.error ? (typeof err.error === 'string' ? err.error : JSON.stringify(err.error)) : '';
+          alert('Erro ao processar o endereço: ' + backendMsg);
+          this.processando.set(false);
+        }
+      });
+    }
+  }
+
+  selecionarEndereco(id: number): void {
+    this.selectedEnderecoId = id;
+    this.adicionandoNovoEndereco = false;
+    this.updateEnderecoValidators();
+  }
+
+  selecionarNovoEndereco(): void {
+    this.selectedEnderecoId = null;
+    this.adicionandoNovoEndereco = true;
+    this.updateEnderecoValidators();
+  }
+
+  updateEnderecoValidators(): void {
+    const fields = ['rua', 'numero', 'bairro', 'cidade', 'estado', 'cep'];
+    fields.forEach(field => {
+      const control = this.checkoutForm.get(field);
+      if (this.adicionandoNovoEndereco) {
+        control?.setValidators(Validators.required);
+      } else {
+        control?.clearValidators();
+      }
+      control?.updateValueAndValidity();
+    });
+  }
+
+  calcularTotal(): number {
+    return this.carrinhoService.valorTotal();
+  }
+
+  aplicarCupom(): void {
+    const codigo = this.checkoutForm.get('cupom')?.value;
+    if (!codigo) return;
+    this.cupomService.validarCupom(codigo).subscribe({
+      next: (cupom) => {
+        if (cupom.valido) {
+          this.cupomAplicado = cupom;
+          this.erroCupom = null;
+          this.totalComDesconto = this.calcularTotal() * (1 - cupom.porcentagem! / 100);
+        } else {
+          this.erroCupom = 'Cupom inválido ou expirado.';
+          this.cupomAplicado = null;
+          this.totalComDesconto = this.calcularTotal();
+        }
       },
-      error: (err) => {
-        console.error('Erro ao criar endereço', err);
-        const backendMsg = err.error ? (typeof err.error === 'string' ? err.error : JSON.stringify(err.error)) : '';
-        alert('Erro ao processar o endereço: ' + backendMsg);
-        this.processando.set(false);
+      error: () => {
+        this.erroCupom = 'Erro ao validar cupom.';
       }
     });
   }
@@ -133,7 +219,8 @@ export class CheckoutComponent implements OnInit {
       nomeCliente: formValue.nomeCliente,
       idEnderecoEntrega: idEndereco,
       itensPedido: itensPedido,
-      pagamento: formValue.pagamento
+      pagamento: formValue.pagamento,
+      cupom: this.cupomAplicado?.codigo ?? null
     };
 
     if (formValue.pagamento === 'cartao') {

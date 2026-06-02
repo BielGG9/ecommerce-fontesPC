@@ -30,4 +30,8 @@ export class EnderecoService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  getMeusEnderecos(): Observable<Endereco[]> {
+    return this.http.get<Endereco[]>(`${this.apiUrl}/meus`);
+  }
 }

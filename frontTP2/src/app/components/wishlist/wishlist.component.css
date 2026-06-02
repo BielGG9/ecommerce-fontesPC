@@ -1,0 +1,111 @@
+.wishlist-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.wishlist-container h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+.desejo-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 24px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  background-color: #fafafa;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.desejo-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+
+.desejo-card img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  border-radius: 8px;
+  background-color: white;
+  border: 1px solid #f0f0f0;
+}
+
+.desejo-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.desejo-info h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+}
+
+.desejo-info p {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2e7d32;
+  margin: 0;
+}
+
+.desejo-acoes {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 16px;
+  text-align: center;
+}
+
+.vazio p {
+  font-size: 1.2rem;
+  color: #777;
+}
+
+@media (max-width: 576px) {
+  .desejo-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+  
+  .desejo-acoes {
+    width: 100%;
+    justify-content: center;
+    flex-direction: column;
+  }
+  
+  .desejo-acoes button {
+    width: 100%;
+  }
+}

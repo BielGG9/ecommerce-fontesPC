@@ -12,6 +12,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.logging.Logger;
 
+import gabriel.fontes.br.quarkus.Dto.AlteraSenhaRequest;
 import gabriel.fontes.br.quarkus.Dto.ClienteRequest;
 import gabriel.fontes.br.quarkus.Dto.ClienteResponse;
 import gabriel.fontes.br.quarkus.Service.ClienteService;
@@ -101,5 +102,35 @@ public Response delete(@PathParam("id") Long id) {
     public Response solicitarAlteracaoSegura(SolicitarAlteracaoRequest request) {
         service.solicitarAlteracaoSegura(request.senha());
         return Response.ok(java.util.Map.of("message", "E-mail de verificação enviado!")).build();
+    }
+
+    /**
+     * POST /clientes/alterar-senha
+     *
+     * Endpoint protegido para o usuário logado alterar sua própria senha.
+     * Requer a senha atual para autenticar a operação antes de aplicar a nova.
+     * O ID do usuário é extraído do token JWT — nenhum ID de rota é necessário.
+     */
+    @POST
+    @Path("/alterar-senha")
+    @RolesAllowed({"USER", "ADM"})
+    public Response alterarSenha(@jakarta.validation.Valid AlteraSenhaRequest request) {
+        try {
+            service.alterarSenha(request.senhaAtual(), request.novaSenha());
+            return Response.noContent().build(); // 204 No Content
+        } catch (jakarta.ws.rs.WebApplicationException e) {
+            if (e.getResponse().getStatus() == Response.Status.UNAUTHORIZED.getStatusCode() || 
+                e.getResponse().getStatus() == 400) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(java.util.Map.of("message", "Senha atual incorreta. Verifique e tente novamente."))
+                        .build(); // 400 Bad Request
+            }
+            throw e;
+        } catch (Exception e) {
+            logger.severe("Erro inesperado ao alterar senha: " + e.getMessage());
+            return Response.status(500)
+                    .entity(java.util.Map.of("message", "Ocorreu um erro interno. Por favor, tente novamente."))
+                    .build();
+        }
     }
 }

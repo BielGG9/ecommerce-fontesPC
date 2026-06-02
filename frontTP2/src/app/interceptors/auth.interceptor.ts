@@ -12,11 +12,17 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   let clonedReq = req;
   if (token) {
-    clonedReq = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    // Só injeta o token se ele NÃO estiver expirado
+    if (!authService.isTokenExpired(token)) {
+      clonedReq = req.clone({
+        setHeaders: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+    } else {
+      // Token expirado — limpa sessão silenciosamente (sem redirecionar)
+      authService.limparSessao();
+    }
   }
 
   return next(clonedReq).pipe(

@@ -38,6 +38,13 @@ public class EnderecoResource {
     }
 
     @GET
+    @Path("/meus")
+    @RolesAllowed({"USER", "ADM"})
+    public Response findMeusEnderecos() {
+        return Response.ok(service.findMeusEnderecos()).build();
+    }
+
+    @GET
     @RolesAllowed({"USER", "ADM"})
     public Response findAll() {
 

@@ -16,4 +16,12 @@ public interface ClienteService {
     
     void recuperarSenha(String email);
     void solicitarAlteracaoSegura(String senha);
+
+    /**
+     * Valida a senha atual do usuário logado e, se correta,
+     * altera para a nova senha diretamente no Keycloak.
+     */
+    void alterarSenha(String senhaAtual, String novaSenha);
+
+    gabriel.fontes.br.quarkus.Model.Cliente sincronizarUsuarioLogado();
 }

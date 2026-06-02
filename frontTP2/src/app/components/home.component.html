@@ -4,17 +4,58 @@
     <p>A energia que o seu setup merece, com as melhores marcas do mercado.</p>
   </div>
 
+  <div class="filtros-container">
+    <!-- Busca por nome -->
+    <mat-form-field appearance="outline">
+      <mat-label>Buscar produto</mat-label>
+      <input matInput [(ngModel)]="filtroNome" placeholder="Nome do produto..." />
+    </mat-form-field>
+
+    <!-- Filtro por marca -->
+    <mat-form-field appearance="outline">
+      <mat-label>Marca</mat-label>
+      <mat-select [(ngModel)]="filtroMarca">
+        <mat-option [value]="null">Todas</mat-option>
+        <mat-option *ngFor="let marca of marcas" [value]="marca.id">
+          {{ marca.nome }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Filtro por certificação -->
+    <mat-form-field appearance="outline">
+      <mat-label>Certificação</mat-label>
+      <mat-select [(ngModel)]="filtroCategoria">
+        <mat-option value="">Todas</mat-option>
+        <mat-option *ngFor="let cert of certificacoes" [value]="cert">
+          {{ cert }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Botões -->
+    <button mat-raised-button color="primary" (click)="buscar()">
+      Buscar
+    </button>
+    <button mat-stroked-button (click)="limparFiltros()">
+      Limpar
+    </button>
+  </div>
+
   <div class="grid-produtos">
     @for (fonte of fontes(); track fonte.id) {
-      <mat-card class="produto-card">
+      <mat-card class="produto-card" (click)="router.navigate(['/produto', fonte.id])" style="cursor: pointer;">
         <mat-card-header>
           <mat-card-title>{{ fonte.nome }}</mat-card-title>
           <mat-card-subtitle>{{ fonte.marca || 'Marca não informada' }}</mat-card-subtitle>
         </mat-card-header>
         
-        <img mat-card-image *ngIf="fonte.imagens && fonte.imagens.length > 0" [src]="getImagemUrl(fonte.imagens[0].url)" alt="Imagem da Fonte" style="height: 200px; object-fit: contain; margin-top: 10px;">
+        <img mat-card-image
+             *ngIf="getFirstImageUrl(fonte)"
+             [src]="getFirstImageUrl(fonte)!"
+             alt="Imagem da Fonte"
+             style="height: 200px; object-fit: contain; margin-top: 10px;">
 
-        
         <mat-card-content>
           <p class="preco">{{ fonte.preco | currency:'BRL' }}</p>
           
@@ -27,7 +68,7 @@
         </mat-card-content>
         
         <mat-card-actions class="acoes">
-          <button mat-raised-button color="primary" (click)="comprar(fonte)" [disabled]="(fonte.estoque ?? 0) === 0">
+          <button mat-raised-button color="primary" (click)="$event.stopPropagation(); comprar(fonte)" [disabled]="(fonte.estoque ?? 0) === 0">
             <mat-icon>shopping_cart</mat-icon> {{ (fonte.estoque ?? 0) > 0 ? 'Comprar' : 'Esgotado' }}
           </button>
         </mat-card-actions>

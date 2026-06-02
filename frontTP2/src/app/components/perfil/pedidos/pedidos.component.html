@@ -71,7 +71,7 @@
                           <td>
                             <div class="product-info">
                               <span class="product-name">{{ item.fonte?.nome || 'Fonte de Alimentação' }}</span>
-                              <span class="product-brand" *ngIf="item.fonte?.marca?.nome">{{ item.fonte?.marca?.nome }}</span>
+                              <span class="product-brand" *ngIf="item.fonte?.marca">{{ $any(item.fonte?.marca)?.nome || item.fonte?.marca }}</span>
                             </div>
                           </td>
                           <td class="text-center">{{ item.quantidade }}x</td>

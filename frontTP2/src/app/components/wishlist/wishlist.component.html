@@ -1,0 +1,32 @@
+<!-- Loading -->
+<div *ngIf="loading" class="loading-container">
+  <mat-spinner></mat-spinner>
+</div>
+
+<!-- Vazio -->
+<div *ngIf="!loading && desejos.length === 0" class="vazio">
+  <p>Sua lista de desejos está vazia.</p>
+  <button mat-raised-button routerLink="/">Ver produtos</button>
+</div>
+
+<!-- Lista -->
+<div *ngIf="!loading && desejos.length > 0" class="wishlist-container">
+  <h2>Minha Lista de Desejos</h2>
+  <div *ngFor="let desejo of desejos" class="desejo-card">
+    <img [src]="getImagemUrl(desejo.fonte)" [alt]="desejo.fonte.nome" />
+    <div class="desejo-info">
+      <h3>{{ desejo.fonte.nome }}</h3>
+      <p>R$ {{ desejo.fonte.preco | number:'1.2-2' }}</p>
+    </div>
+    <div class="desejo-acoes">
+      <button mat-raised-button color="primary"
+              (click)="adicionarAoCarrinho(desejo.fonte)">
+        Adicionar ao Carrinho
+      </button>
+      <button mat-icon-button color="warn"
+              (click)="remover(desejo.id)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

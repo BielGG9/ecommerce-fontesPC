@@ -1,0 +1,33 @@
+<div class="favoritos-container">
+  <h2 class="title"><mat-icon>favorite</mat-icon> Meus Favoritos</h2>
+
+  <div *ngIf="isLoading" class="loading-state">
+    <mat-spinner [diameter]="50"></mat-spinner>
+    <p>Carregando favoritos...</p>
+  </div>
+
+  <div *ngIf="!isLoading">
+    <div *ngIf="favoritos.length === 0" class="empty-state">
+      <mat-icon class="empty-icon">favorite_border</mat-icon>
+      <p>Você ainda não possui favoritos.</p>
+      <button mat-raised-button color="primary" routerLink="/">Explorar Produtos</button>
+    </div>
+
+    <div *ngIf="favoritos.length > 0" class="favoritos-list">
+      <div *ngFor="let item of favoritos" class="favoritos-item">
+        <div class="item-info">
+          <span class="item-name">{{ item.fonte?.nome || 'Produto Sem Nome' }}</span>
+          <span class="item-price">{{ (item.fonte?.preco || 0) | currency:'BRL':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="item-actions">
+          <button mat-raised-button color="primary" (click)="adicionarAoCarrinho(item)">
+            <mat-icon>shopping_cart</mat-icon> Adicionar ao Carrinho
+          </button>
+          <button mat-stroked-button color="warn" (click)="remover(item)">
+            <mat-icon>delete</mat-icon> Remover
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

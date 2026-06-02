@@ -10,7 +10,8 @@ public interface FonteService {
     FonteResponse create(FonteRequest dto);
     FonteResponse update(Long id, FonteRequest dto);
     FonteResponse delete(Long id);
-    List<FonteResponse> findAll(int page, int pageSize, String nome);
-    long count (String nome);
+    List<FonteResponse> findAll(int page, int pageSize, String nome, Long idMarca, String categoria);
+    long count(String nome, Long idMarca, String categoria);
     FonteResponse findById(Long id);
+    List<String> getCertificacoes();
 }

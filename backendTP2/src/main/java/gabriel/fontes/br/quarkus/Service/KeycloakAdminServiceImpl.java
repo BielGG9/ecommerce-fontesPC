@@ -137,4 +137,31 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
         String userId = users.get(0).getId();
         keycloak.realm("TP2").users().get(userId).executeActionsEmail(java.util.Collections.singletonList("VERIFY_EMAIL"));
     }
+
+    @Override
+    public void alterarSenhaUsuario(String userId, String novaSenha) {
+        try {
+            // Monta a representação da nova credencial (não-temporária)
+            CredentialRepresentation credencial = new CredentialRepresentation();
+            credencial.setType(CredentialRepresentation.PASSWORD);
+            credencial.setValue(novaSenha);
+            credencial.setTemporary(false); // false = usuário NÃO é obrigado a trocar no próximo login
+
+            // Utiliza o UserResource do Admin Client para resetar diretamente
+            keycloak.realm("TP2").users().get(userId).resetPassword(credencial);
+
+        } catch (jakarta.ws.rs.ProcessingException e) {
+            throw new jakarta.ws.rs.WebApplicationException(
+                jakarta.ws.rs.core.Response.status(503)
+                    .entity(java.util.Map.of("message", "Serviço Keycloak indisponível. Tente novamente mais tarde."))
+                    .build()
+            );
+        } catch (Exception e) {
+            throw new jakarta.ws.rs.WebApplicationException(
+                jakarta.ws.rs.core.Response.status(500)
+                    .entity(java.util.Map.of("message", "Erro ao alterar a senha no Keycloak: " + e.getMessage()))
+                    .build()
+            );
+        }
+    }
 }

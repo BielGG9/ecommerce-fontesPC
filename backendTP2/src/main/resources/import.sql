@@ -42,7 +42,7 @@ INSERT INTO modelo(id, numeracao, marca_id) VALUES(10, 800, 10);
 INSERT INTO fonte(id, nome, potencia, preco, estoque, certificacao, modelo_id) VALUES(1, 'RM750x', 750, 800.00, 50, 'GOLD', 1);
 INSERT INTO fonte(id, nome, potencia, preco, estoque, certificacao, modelo_id) VALUES(2, 'Prime TX-1000', 1000, 1500.00, 20, 'TITANIUM', 2);
 INSERT INTO fonte(id, nome, potencia, preco, estoque, certificacao, modelo_id) VALUES(3, 'SuperNOVA 850', 850, 950.00, 30, 'GOLD', 3);
-INSERT INTO fonte(id, nome, potencia, preco, estoque, certificacao, modelo_id) VALUES(4, 'Smart 600W', 600, 350.00, 150, 'WHITE', 4);
+INSERT INTO fonte(id, nome, potencia, preco, estoque, certificacao, modelo_id) VALUES(4, 'Smart 600W', 600, 350.00, 150, 'BRONZE', 4);
 INSERT INTO fonte(id, nome, potencia, preco, estoque, certificacao, modelo_id) VALUES(5, 'MWE Bronze 500', 500, 280.00, 100, 'BRONZE', 5);
 INSERT INTO fonte(id, nome, potencia, preco, estoque, certificacao, modelo_id) VALUES(6, 'Core Reactor 650', 650, 600.00, 45, 'GOLD', 6);
 INSERT INTO fonte(id, nome, potencia, preco, estoque, certificacao, modelo_id) VALUES(7, 'P450B', 450, 220.00, 200, 'BRONZE', 7);
@@ -182,3 +182,33 @@ INSERT INTO fonte_fornecedor(fonte_id, fornecedor_id) VALUES (7, 8);
 INSERT INTO fonte_fornecedor(fonte_id, fornecedor_id) VALUES (8, 9);
 INSERT INTO fonte_fornecedor(fonte_id, fornecedor_id) VALUES (9, 10);
 INSERT INTO fonte_fornecedor(fonte_id, fornecedor_id) VALUES (10, 11);
+
+-- CREATE TABLE DESEJO (Wishlist N:N mapping)
+CREATE TABLE IF NOT EXISTS desejo (
+    id bigserial NOT NULL,
+    id_cliente bigint NOT NULL,
+    id_fonte bigint NOT NULL,
+    CONSTRAINT desejo_pkey PRIMARY KEY (id),
+    CONSTRAINT fk_desejo_cliente FOREIGN KEY (id_cliente) REFERENCES cliente(id) ON DELETE CASCADE,
+    CONSTRAINT fk_desejo_fonte FOREIGN KEY (id_fonte) REFERENCES fonte(id) ON DELETE CASCADE,
+    CONSTRAINT uq_desejo_cliente_fonte UNIQUE (id_cliente, id_fonte)
+);
+
+-- Adjust sequence for desejo just in case
+SELECT setval(pg_get_serial_sequence('desejo', 'id'), 1, false);
+
+-- CREATE TABLE CUPOM (Discount Coupon)
+CREATE TABLE IF NOT EXISTS cupom (
+    id bigserial NOT NULL,
+    codigo varchar(255) NOT NULL UNIQUE,
+    porcentagem double precision NOT NULL,
+    ativo boolean NOT NULL,
+    CONSTRAINT cupom_pkey PRIMARY KEY (id)
+);
+
+-- Seed Coupons
+INSERT INTO cupom (codigo, porcentagem, ativo) VALUES ('DESCONTO10', 10.0, true);
+INSERT INTO cupom (codigo, porcentagem, ativo) VALUES ('WELCOME15', 15.0, true);
+
+-- Adjust sequence for cupom just in case
+SELECT setval(pg_get_serial_sequence('cupom', 'id'), 2, true);

@@ -12,6 +12,10 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 
+import org.eclipse.microprofile.jwt.JsonWebToken;
+import gabriel.fontes.br.quarkus.Model.Cliente;
+import gabriel.fontes.br.quarkus.Repository.ClienteRepository;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +27,12 @@ public class EnderecoServiceImpl implements EnderecoService {
 
     @Inject
     PessoaRepository pessoaRepository;
+
+    @Inject
+    JsonWebToken jwt;
+
+    @Inject
+    ClienteRepository clienteRepository;
 
     // Implementação de um método de busca personalizada
     public List<EnderecoResponse> buscarEnderecosPorRua(String parametroDeBusca) {
@@ -105,5 +115,20 @@ public class EnderecoServiceImpl implements EnderecoService {
         Endereco endereco = repository.findByIdOptional(id)
                 .orElseThrow(() -> new NotFoundException("Endereco com id " + id + " não encontrado."));
         return EnderecoResponse.fromEntity(endereco);
+    }
+
+    @Override
+    public List<EnderecoResponse> findMeusEnderecos() {
+        String idUsuarioKeycloak = jwt.getSubject();
+        if (idUsuarioKeycloak == null) {
+            throw new jakarta.ws.rs.NotAuthorizedException("Usuário não autenticado.");
+        }
+        Cliente cliente = clienteRepository.findByIdKeycloak(idUsuarioKeycloak);
+        if (cliente == null) {
+            throw new NotFoundException("Cliente não encontrado.");
+        }
+        return repository.find("pessoa.id", cliente.getId()).stream()
+                .map(EnderecoResponse::fromEntity)
+                .collect(Collectors.toList());
     }
 }

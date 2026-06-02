@@ -27,4 +27,8 @@ export class ClienteService {
   validarSenhaESolicitarAlteracao(senha: string): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/solicitar-alteracao-segura`, { senha });
   }
+
+  alterarSenha(senhaAtual: string, novaSenha: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/alterar-senha`, { senhaAtual, novaSenha });
+  }
 }

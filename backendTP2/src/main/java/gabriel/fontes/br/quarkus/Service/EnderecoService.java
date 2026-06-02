@@ -13,5 +13,5 @@ public interface EnderecoService {
     EnderecoResponse delete(Long id);
     List<EnderecoResponse> findAll();
     EnderecoResponse findById(Long id);
-    
+    List<EnderecoResponse> findMeusEnderecos();
 }

@@ -16,3 +16,27 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
+
+.endereco-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.endereco-card.selecionado {
+  border-color: var(--primary-color, #1976d2);
+  background-color: rgba(25, 118, 210, 0.05);
+}
+
+.endereco-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+

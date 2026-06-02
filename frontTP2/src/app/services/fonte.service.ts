@@ -13,27 +13,26 @@ export class FonteService {
 
   constructor(private http: HttpClient) { }
 
-  findAll(page: number = 0, pageSize: number = 10, nome: string = ''): Observable<Fonte[]> {
-
-    // Cria os parâmetros da requisição
+  findAll(page: number, pageSize: number, nome?: string, idMarca?: number, categoria?: string): Observable<any> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
-
-    // Adiciona o parâmetro de busca se ele não estiver vazio
-    if (nome) {
-      params = params.set('nome', nome);
-    }
-    return this.http.get<Fonte[]>(this.apiUrl, { params });
+    if (nome) params = params.set('nome', nome);
+    if (idMarca) params = params.set('marca', idMarca.toString());
+    if (categoria) params = params.set('categoria', categoria);
+    return this.http.get<any>(this.apiUrl, { params });
   }
 
-  // Conta o número total de fontes
-  count(nome: string = ''): Observable<number> {
+  count(nome: string = '', idMarca?: number, categoria?: string): Observable<number> {
     let params = new HttpParams();
-    if (nome) {
-      params = params.set('nome', nome);
-    }
+    if (nome) params = params.set('nome', nome);
+    if (idMarca) params = params.set('marca', idMarca.toString());
+    if (categoria) params = params.set('categoria', categoria);
     return this.http.get<number>(`${this.apiUrl}/count`, { params });
+  }
+
+  getCertificacoes(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/certificacoes`);
   }
 
   findById(id: number): Observable<Fonte> {

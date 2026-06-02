@@ -248,4 +248,74 @@ public class ClienteServiceImpl implements ClienteService {
 
         keycloakAdminService.enviarEmailVerificacao(emailUsuario);
     }
+
+    @Override
+    public void alterarSenha(String senhaAtual, String novaSenha) {
+        // Extrai identificadores do token JWT do usuário logado
+        String userId = jwt.getSubject();
+        String usernameUsuario = jwt.getClaim("preferred_username");
+
+        if (userId == null || usernameUsuario == null) {
+            throw new jakarta.ws.rs.NotAuthorizedException("Usuário não autenticado.");
+        }
+
+        // 1. Valida a senha atual — reutilizamos a lógica já existente de validação via login temporário
+        boolean senhaAtualCorreta = keycloakAdminService.validarSenhaUsuario(usernameUsuario, senhaAtual);
+        if (!senhaAtualCorreta) {
+            throw new jakarta.ws.rs.WebApplicationException(
+                jakarta.ws.rs.core.Response.status(401)
+                    .entity(java.util.Map.of("message", "Senha atual incorreta. Verifique e tente novamente."))
+                    .build()
+            );
+        }
+
+        // 2. Aplica a nova senha diretamente no Keycloak via Admin Client
+        keycloakAdminService.alterarSenhaUsuario(userId, novaSenha);
+    }
+
+    @Override
+    @Transactional
+    public gabriel.fontes.br.quarkus.Model.Cliente sincronizarUsuarioLogado() {
+        String uuid = jwt.getSubject();
+        if (uuid == null) {
+            throw new jakarta.ws.rs.NotAuthorizedException("Usuário não autenticado.");
+        }
+
+        Cliente cliente = repository.findByIdKeycloak(uuid);
+        if (cliente != null) {
+            return cliente;
+        }
+
+        // Tenta também pelo e-mail caso o e-mail já esteja cadastrado para evitar duplicados
+        String email = jwt.getClaim("email");
+        if (email != null) {
+            cliente = repository.findByEmail(email);
+            if (cliente != null) {
+                cliente.setIdKeycloak(uuid);
+                repository.persist(cliente);
+                return cliente;
+            }
+        }
+
+        // Caso contrário, cria um novo Cliente (JIT Provisioning)
+        Cliente novoCliente = new Cliente();
+        novoCliente.setIdKeycloak(uuid);
+
+        String nome = jwt.getClaim("name");
+        if (nome == null) {
+            nome = jwt.getClaim("preferred_username");
+        }
+        if (nome == null) {
+            nome = "Usuário " + (email != null ? email : uuid);
+        }
+
+        novoCliente.setNome(nome);
+        novoCliente.setEmail(email != null ? email : uuid + "@temp.com");
+        novoCliente.setCpf("00000000000");
+        novoCliente.setRg("0000000");
+        novoCliente.setDataCadastro(LocalDateTime.now());
+
+        repository.persist(novoCliente);
+        return novoCliente;
+    }
 }

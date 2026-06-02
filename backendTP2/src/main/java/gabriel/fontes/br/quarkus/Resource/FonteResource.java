@@ -10,7 +10,9 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 @Path("/fontes")
@@ -21,7 +23,7 @@ public class FonteResource {
     @Inject
     FonteService service;
 
-    private static final Logger logger = Logger.getLogger(ClienteResource.class.getName());
+    private static final Logger logger = Logger.getLogger(FonteResource.class.getName());
 
     @POST
     @Transactional
@@ -34,21 +36,47 @@ public class FonteResource {
 
     @GET
     @PermitAll
-    public Response FindAll(@QueryParam("page") @DefaultValue("0") int page, 
-                            @QueryParam("pageSize") @DefaultValue("10") int pageSize, 
-                            @QueryParam("nome") String nome) {
-        List<FonteResponse> lista = service.findAll(page, pageSize, nome);
-        logger.info("Buscando todas as fontes (Página: " + page + ", Tamanho: " + pageSize + ", Busca: " + nome + ")");
-        return Response.ok(lista).build();
+    public Response findAll(
+        @QueryParam("page") @DefaultValue("1") int page,
+        @QueryParam("pageSize") @DefaultValue("12") int pageSize,
+        @QueryParam("nome") String nome,
+        @QueryParam("marca") Long idMarca,
+        @QueryParam("categoria") String categoria) {
+
+        List<FonteResponse> fontes = service.findAll(
+            page, pageSize, nome, idMarca, categoria);
+        long total = service.count(nome, idMarca, categoria);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("items", fontes);
+        response.put("total", total);
+        response.put("page", page);
+        response.put("pageSize", pageSize);
+
+        return Response.ok(response)
+                .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                .header("Pragma", "no-cache")
+                .header("Expires", "0")
+                .build();
     }
 
     @GET
     @Path("/count")
     @PermitAll
-    public Response count(@QueryParam("nome") String nome) {
-        long total = service.count(nome);
-        logger.info("Contando fontes (Busca: " + nome + ") - Total: " + total);
+    public Response count(@QueryParam("nome") String nome,
+                          @QueryParam("marca") Long idMarca,
+                          @QueryParam("categoria") String categoria) {
+        long total = service.count(nome, idMarca, categoria);
+        logger.info("Contando fontes (Busca: " + nome + ", Marca: " + idMarca + ", Categoria: " + categoria + ") - Total: " + total);
         return Response.ok(total).build();
+    }
+
+    @GET
+    @Path("/certificacoes")
+    @PermitAll
+    public Response getCertificacoes() {
+        logger.info("Buscando todas as certificações");
+        return Response.ok(service.getCertificacoes()).build();
     }
 
     @GET
@@ -57,7 +85,11 @@ public class FonteResource {
     public Response findById(@PathParam("id") Long id) {
         FonteResponse fonte = service.findById(id);
         logger.info("Buscando fonte pelo ID: " + id);
-        return Response.ok(fonte).build();
+        return Response.ok(fonte)
+                .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                .header("Pragma", "no-cache")
+                .header("Expires", "0")
+                .build();
     }
 
     @DELETE
