@@ -215,10 +215,13 @@ export class DadosComponent implements OnInit {
 
           console.log('Dados do utilizador recebidos:', dados);
 
+          const tokenData = this.authService.obterDadosToken();
+          const preferredUsername = tokenData ? tokenData.preferred_username : '';
+
           this.formGroup.patchValue({
             nome: dados.nome,
             email: dados.email,
-            username: dados.username || dados.nome || '',
+            username: preferredUsername || dados.username || dados.nome || '',
             cpf: dados.cpf,
             rg: dados.rg
           });
@@ -287,8 +290,10 @@ export class DadosComponent implements OnInit {
         this.ngZone.run(() => {
           if (err.status === 400) {
             this.erroSenha = 'Senha atual incorreta.';
+            this.dialogService.showWarning('A senha atual informada está incorreta. Verifique e tente novamente.', 'Senha Incorreta');
           } else {
             this.erroSenha = 'Erro ao alterar senha. Tente novamente.';
+            this.dialogService.showWarning('Ocorreu um erro ao tentar alterar a senha. Por favor, tente novamente.', 'Erro');
           }
         });
         return EMPTY;

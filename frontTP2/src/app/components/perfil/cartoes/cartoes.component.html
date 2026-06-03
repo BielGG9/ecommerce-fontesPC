@@ -1,7 +1,7 @@
 <div class="active-section-container">
   <div class="active-section-header">
     <h3>
-      <i class="bi bi-credit-card-fill" style="color: #ff6b00; margin-right: 10px;"></i>
+      <i class="bi bi-credit-card-fill" style="color: #0d6efd; margin-right: 10px;"></i>
       Minha Carteira
     </h3>
     <button class="btn btn-sm btn-outline-secondary" [routerLink]="['/perfil']">
@@ -52,7 +52,10 @@
         <div class="row">
           <div class="col-md-6 mb-3">
             <label class="form-label fw-bold">Número do Cartão</label>
-            <input type="text" class="form-control" formControlName="numero" placeholder="0000 0000 0000 0000">
+            <input type="text" class="form-control" formControlName="numero" placeholder="0000 0000 0000 0000" maxlength="16" (keypress)="apenasNumeros($event)">
+            <small class="text-danger" *ngIf="formGroup.get('numero')?.invalid && formGroup.get('numero')?.touched">
+              Número deve ter exatamente 16 dígitos.
+            </small>
           </div>
           <div class="col-md-6 mb-3">
             <label class="form-label fw-bold">Nome Impresso no Cartão</label>
@@ -70,7 +73,10 @@
           </div>
           <div class="col-md-6 mb-3">
             <label class="form-label fw-bold">CPF/CNPJ do Titular</label>
-            <input type="text" class="form-control" formControlName="cpfCnpj" placeholder="000.000.000-00">
+            <input type="text" class="form-control" formControlName="cpfCnpj" placeholder="000.000.000-00" maxlength="14" (keypress)="apenasNumeros($event)">
+            <small class="text-danger" *ngIf="formGroup.get('cpfCnpj')?.invalid && formGroup.get('cpfCnpj')?.touched">
+              Informe um CPF (11 dígitos) ou CNPJ (14 dígitos) válido.
+            </small>
           </div>
         </div>
 

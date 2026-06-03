@@ -1,7 +1,7 @@
 <div class="active-section-container">
   <div class="active-section-header">
     <h3>
-      <i class="bi bi-telephone-fill" style="color: #ff6b00; margin-right: 10px;"></i>
+      <i class="bi bi-telephone-fill" style="color: #0d6efd; margin-right: 10px;"></i>
       Meus Telefones
     </h3>
     <button class="btn btn-sm btn-outline-secondary" [routerLink]="['/perfil']">
@@ -49,11 +49,17 @@
         <div class="row">
           <div class="col-md-3 mb-3">
             <label class="form-label fw-bold">DDD</label>
-            <input type="text" class="form-control" formControlName="ddd" placeholder="Ex: 11" maxlength="2">
+            <input type="text" class="form-control" formControlName="ddd" placeholder="Ex: 11" maxlength="2" (keypress)="apenasNumeros($event)">
+            <small class="text-danger" *ngIf="formGroup.get('ddd')?.invalid && formGroup.get('ddd')?.touched">
+              DDD deve ter exatamente 2 dígitos.
+            </small>
           </div>
           <div class="col-md-9 mb-3">
             <label class="form-label fw-bold">Número</label>
-            <input type="text" class="form-control" formControlName="numero" placeholder="Ex: 987654321">
+            <input type="text" class="form-control" formControlName="numero" placeholder="Ex: 987654321" maxlength="9" (keypress)="apenasNumeros($event)">
+            <small class="text-danger" *ngIf="formGroup.get('numero')?.invalid && formGroup.get('numero')?.touched">
+              Número deve ter 8 ou 9 dígitos.
+            </small>
           </div>
         </div>
 

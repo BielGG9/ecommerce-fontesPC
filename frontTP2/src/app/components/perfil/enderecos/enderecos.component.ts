@@ -34,7 +34,7 @@ export class EnderecosComponent implements OnInit {
 
   initForm() {
     this.formGroup = this.fb.group({
-      cep: ['', Validators.required],
+      cep: ['', [Validators.required, Validators.pattern('^[0-9]{8}$')]],
       rua: ['', Validators.required],
       numero: ['', Validators.required],
       bairro: ['', Validators.required],
@@ -129,5 +129,14 @@ export class EnderecosComponent implements OnInit {
         error: (err) => alert('Erro ao excluir: ' + (err.error || err.message))
       });
     }
+  }
+
+  apenasNumeros(event: KeyboardEvent): boolean {
+    const charCode = event.which || event.keyCode;
+    if (charCode < 48 || charCode > 57) {
+      event.preventDefault();
+      return false;
+    }
+    return true;
   }
 }

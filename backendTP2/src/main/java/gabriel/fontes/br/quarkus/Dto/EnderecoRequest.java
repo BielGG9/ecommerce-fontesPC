@@ -3,6 +3,7 @@ package gabriel.fontes.br.quarkus.Dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 public record EnderecoRequest( 
 
@@ -24,6 +25,7 @@ public record EnderecoRequest(
     String estado,
 
     @NotBlank(message = "O CEP não pode ser vazio")
+    @Pattern(regexp = "^[0-9]{8}$", message = "O CEP deve conter exatamente 8 dígitos numéricos")
     String cep,
 
     @NotNull(message = "O ID da pessoa não pode ser nulo")

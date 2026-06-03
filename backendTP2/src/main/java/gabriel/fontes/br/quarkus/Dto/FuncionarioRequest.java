@@ -2,6 +2,7 @@ package gabriel.fontes.br.quarkus.Dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 public record FuncionarioRequest(
 
@@ -12,9 +13,11 @@ public record FuncionarioRequest(
     String email,
 
     @NotBlank(message = "O CPF do funcionário é obrigatório")
+    @Pattern(regexp = "^[0-9]{11}$", message = "O CPF deve conter exatamente 11 dígitos numéricos")
     String cpf,
 
     @NotBlank(message = "O RG do funcionário é obrigatório")
+    @Pattern(regexp = "^[0-9]{7,15}$", message = "O RG deve conter de 7 a 15 dígitos numéricos")
     String rg,
     
     @NotBlank(message = "O cargo do funcionário é obrigatório")

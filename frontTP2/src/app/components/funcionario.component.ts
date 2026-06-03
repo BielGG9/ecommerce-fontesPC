@@ -51,8 +51,8 @@ export class FuncionarioComponent implements OnInit {
     id: [null as number | null],
     nome: ['', [Validators.required, Validators.maxLength(100)]],
     email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
-    cpf: ['', [Validators.required, Validators.maxLength(11)]],
-    rg: ['', [Validators.required, Validators.maxLength(20)]],
+    cpf: ['', [Validators.required, Validators.pattern('^[0-9]{11}$')]],
+    rg: ['', [Validators.required, Validators.pattern('^[0-9]{7,15}$')]],
     cargo: ['', [Validators.required, Validators.maxLength(100)]],
     dataAdmissao: ['', Validators.required],
     idDepartamento: [null as number | null, Validators.required]
@@ -191,6 +191,10 @@ export class FuncionarioComponent implements OnInit {
     if (controle.hasError('required')) return `${nomeCampo} obrigatório.`;
     if (controle.hasError('email')) return `Formato de e-mail inválido.`;
     if (controle.hasError('maxlength')) return `Pode ter no máximo ${controle.getError('maxlength').requiredLength} caracteres.`;
+    if (controle.hasError('pattern')) {
+      if (campo === 'cpf') return 'CPF deve ter exatamente 11 dígitos numéricos.';
+      if (campo === 'rg') return 'RG deve ter de 7 a 15 dígitos numéricos.';
+    }
 
     return '';
   }

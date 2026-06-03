@@ -50,6 +50,18 @@ public class ClienteServiceImpl implements ClienteService {
         String idUsuarioKeycloak = jwt.getSubject();
         String emailUsuario = jwt.getClaim("email");
 
+        if (idUsuarioKeycloak == null) {
+            throw new jakarta.ws.rs.NotAuthorizedException("Usuário não autenticado.");
+        }
+
+        // Busca a representação do usuário direto do Keycloak (tempo real)
+        org.keycloak.representations.idm.UserRepresentation userRep = keycloakAdminService.obterUsuario(idUsuarioKeycloak);
+
+        // Verifica se o usuário existe e está ativo/habilitado no Keycloak
+        if (userRep == null || !userRep.isEnabled()) {
+            throw new io.quarkus.security.ForbiddenException("Usuário desativado ou não encontrado no Keycloak.");
+        }
+
         // Busca cliente atrelado ao ID do Keycloak
         Cliente cliente = repository.findByIdKeycloak(idUsuarioKeycloak);
 
@@ -60,25 +72,34 @@ public class ClienteServiceImpl implements ClienteService {
             if (cliente == null) {
                 // Sincronização automática: O usuário existe no Keycloak mas sumiu do Postgres (ex: drop-and-create)
                 Cliente novoCliente = new Cliente();
-                novoCliente.setNome(jwt.getName() != null ? jwt.getName() : "Usuário " + emailUsuario);
+                
+                String nome = null;
+                String firstName = userRep.getFirstName();
+                String lastName = userRep.getLastName();
+                if (firstName != null && !firstName.trim().isEmpty()) {
+                    nome = firstName.trim();
+                    if (lastName != null && !lastName.trim().isEmpty()) {
+                        nome += " " + lastName.trim();
+                    }
+                } else {
+                    nome = userRep.getUsername();
+                }
+                
+                novoCliente.setNome(nome != null ? nome : "Usuário " + emailUsuario);
                 novoCliente.setEmail(emailUsuario);
 
-                // Tenta extrair CPF e RG das claims personalizadas do JWT (com fallback robusto)
-                String cpfClaim = jwt.getClaim("cpf");
-                String rgClaim = jwt.getClaim("rg");
-
-                if (cpfClaim == null && jwt.containsClaim("attributes")) {
-                    Object attribs = jwt.getClaim("attributes");
-                    if (attribs instanceof jakarta.json.JsonObject) {
-                        jakarta.json.JsonObject attributesJson = (jakarta.json.JsonObject) attribs;
-                        jakarta.json.JsonArray cpfArray = attributesJson.getJsonArray("cpf");
-                        if (cpfArray != null && !cpfArray.isEmpty()) {
-                            cpfClaim = cpfArray.getString(0);
-                        }
-                        jakarta.json.JsonArray rgArray = attributesJson.getJsonArray("rg");
-                        if (rgArray != null && !rgArray.isEmpty()) {
-                            rgClaim = rgArray.getString(0);
-                        }
+                // Tenta extrair CPF e RG das claims do Keycloak
+                String cpfClaim = null;
+                String rgClaim = null;
+                java.util.Map<String, java.util.List<String>> attributes = userRep.getAttributes();
+                if (attributes != null) {
+                    java.util.List<String> cpfList = attributes.get("cpf");
+                    if (cpfList != null && !cpfList.isEmpty()) {
+                        cpfClaim = cpfList.get(0);
+                    }
+                    java.util.List<String> rgList = attributes.get("rg");
+                    if (rgList != null && !rgList.isEmpty()) {
+                        rgClaim = rgList.get(0);
                     }
                 }
 
@@ -100,7 +121,12 @@ public class ClienteServiceImpl implements ClienteService {
             throw new NotFoundException("Cliente não encontrado para o usuário autenticado.");
         }
 
-        return ClienteResponse.fromEntity(cliente);
+        // Sincroniza dados atualizados do Keycloak
+        sincronizarDadosToken(cliente, userRep);
+
+        // Retorna com o username atualizado do Keycloak (fallback token se null)
+        String username = (userRep != null) ? userRep.getUsername() : jwt.getClaim("preferred_username");
+        return ClienteResponse.fromEntity(cliente, username);
     }
 
     /**
@@ -177,6 +203,11 @@ public class ClienteServiceImpl implements ClienteService {
     public ClienteResponse update(Long id, ClienteRequest dto) {
         Cliente cliente = repository.findByIdOptional(id)
                 .orElseThrow(() -> new NotFoundException("Cliente com id " + id + " não encontrado."));
+
+        // Propaga as alterações de Nome, E-mail, CPF e RG para o Keycloak
+        if (cliente.getIdKeycloak() != null) {
+            keycloakAdminService.atualizarUsuario(cliente.getIdKeycloak(), dto.nome(), dto.email(), dto.cpf(), dto.rg());
+        }
 
         cliente.setNome(dto.nome());
         cliente.setEmail(dto.email());
@@ -281,17 +312,27 @@ public class ClienteServiceImpl implements ClienteService {
             throw new jakarta.ws.rs.NotAuthorizedException("Usuário não autenticado.");
         }
 
+        // Busca a representação do usuário direto do Keycloak (tempo real)
+        org.keycloak.representations.idm.UserRepresentation userRep = keycloakAdminService.obterUsuario(uuid);
+
+        // Verifica se o usuário ainda está ativo/habilitado no Keycloak
+        if (userRep == null || !userRep.isEnabled()) {
+            throw new io.quarkus.security.ForbiddenException("Usuário desativado ou não encontrado no Keycloak.");
+        }
+
         Cliente cliente = repository.findByIdKeycloak(uuid);
         if (cliente != null) {
+            sincronizarDadosToken(cliente, userRep);
             return cliente;
         }
 
         // Tenta também pelo e-mail caso o e-mail já esteja cadastrado para evitar duplicados
-        String email = jwt.getClaim("email");
+        String email = userRep.getEmail();
         if (email != null) {
             cliente = repository.findByEmail(email);
             if (cliente != null) {
                 cliente.setIdKeycloak(uuid);
+                sincronizarDadosToken(cliente, userRep);
                 repository.persist(cliente);
                 return cliente;
             }
@@ -301,9 +342,16 @@ public class ClienteServiceImpl implements ClienteService {
         Cliente novoCliente = new Cliente();
         novoCliente.setIdKeycloak(uuid);
 
-        String nome = jwt.getClaim("name");
-        if (nome == null) {
-            nome = jwt.getClaim("preferred_username");
+        String nome = null;
+        String firstName = userRep.getFirstName();
+        String lastName = userRep.getLastName();
+        if (firstName != null && !firstName.trim().isEmpty()) {
+            nome = firstName.trim();
+            if (lastName != null && !lastName.trim().isEmpty()) {
+                nome += " " + lastName.trim();
+            }
+        } else {
+            nome = userRep.getUsername();
         }
         if (nome == null) {
             nome = "Usuário " + (email != null ? email : uuid);
@@ -311,11 +359,120 @@ public class ClienteServiceImpl implements ClienteService {
 
         novoCliente.setNome(nome);
         novoCliente.setEmail(email != null ? email : uuid + "@temp.com");
-        novoCliente.setCpf("00000000000");
-        novoCliente.setRg("0000000");
+
+        // CPF e RG das attributes
+        String cpfClaim = null;
+        String rgClaim = null;
+        java.util.Map<String, java.util.List<String>> attributes = userRep.getAttributes();
+        if (attributes != null) {
+            java.util.List<String> cpfList = attributes.get("cpf");
+            if (cpfList != null && !cpfList.isEmpty()) {
+                cpfClaim = cpfList.get(0);
+            }
+            java.util.List<String> rgList = attributes.get("rg");
+            if (rgList != null && !rgList.isEmpty()) {
+                rgClaim = rgList.get(0);
+            }
+        }
+
+        novoCliente.setCpf(cpfClaim != null ? cpfClaim : "00000000000");
+        novoCliente.setRg(rgClaim != null ? rgClaim : "0000000");
         novoCliente.setDataCadastro(LocalDateTime.now());
 
         repository.persist(novoCliente);
         return novoCliente;
+    }
+
+    private void sincronizarDadosToken(Cliente cliente, org.keycloak.representations.idm.UserRepresentation userRep) {
+        if (cliente == null) return;
+        
+        boolean modificado = false;
+        String nomeToken = null;
+        String emailUsuario = null;
+        String cpfClaim = null;
+        String rgClaim = null;
+
+        if (userRep != null) {
+            // Sincronizar pelo Keycloak Admin API em tempo real
+            String firstName = userRep.getFirstName();
+            String lastName = userRep.getLastName();
+            if (firstName != null && !firstName.trim().isEmpty()) {
+                nomeToken = firstName.trim();
+                if (lastName != null && !lastName.trim().isEmpty()) {
+                    nomeToken += " " + lastName.trim();
+                }
+            } else {
+                nomeToken = userRep.getUsername();
+            }
+
+            emailUsuario = userRep.getEmail();
+
+            java.util.Map<String, java.util.List<String>> attributes = userRep.getAttributes();
+            if (attributes != null) {
+                java.util.List<String> cpfList = attributes.get("cpf");
+                if (cpfList != null && !cpfList.isEmpty()) {
+                    cpfClaim = cpfList.get(0);
+                }
+                java.util.List<String> rgList = attributes.get("rg");
+                if (rgList != null && !rgList.isEmpty()) {
+                    rgClaim = rgList.get(0);
+                }
+            }
+        } else {
+            // Fallback: Sincronizar pelas claims do token JWT
+            nomeToken = jwt.getClaim("name");
+            if (nomeToken == null) {
+                nomeToken = jwt.getClaim("given_name");
+                if (nomeToken != null && jwt.getClaim("family_name") != null) {
+                    nomeToken += " " + jwt.getClaim("family_name");
+                }
+            }
+            if (nomeToken == null) {
+                nomeToken = jwt.getClaim("preferred_username");
+            }
+            
+            emailUsuario = jwt.getClaim("email");
+
+            cpfClaim = jwt.getClaim("cpf");
+            rgClaim = jwt.getClaim("rg");
+            if (cpfClaim == null && jwt.containsClaim("attributes")) {
+                Object attribs = jwt.getClaim("attributes");
+                if (attribs instanceof jakarta.json.JsonObject) {
+                    jakarta.json.JsonObject attributesJson = (jakarta.json.JsonObject) attribs;
+                    jakarta.json.JsonArray cpfArray = attributesJson.getJsonArray("cpf");
+                    if (cpfArray != null && !cpfArray.isEmpty()) {
+                        cpfClaim = cpfArray.getString(0);
+                    }
+                    jakarta.json.JsonArray rgArray = attributesJson.getJsonArray("rg");
+                    if (rgArray != null && !rgArray.isEmpty()) {
+                        rgClaim = rgArray.getString(0);
+                    }
+                }
+            }
+        }
+
+        // Aplicar as atualizações
+        if (nomeToken != null && !nomeToken.equals(cliente.getNome())) {
+            cliente.setNome(nomeToken);
+            modificado = true;
+        }
+        
+        if (emailUsuario != null && !emailUsuario.equals(cliente.getEmail())) {
+            cliente.setEmail(emailUsuario);
+            modificado = true;
+        }
+        
+        if (cpfClaim != null && !cpfClaim.equals(cliente.getCpf()) && !cpfClaim.equals("00000000000")) {
+            cliente.setCpf(cpfClaim);
+            modificado = true;
+        }
+        if (rgClaim != null && !rgClaim.equals(cliente.getRg()) && !rgClaim.equals("0000000")) {
+            cliente.setRg(rgClaim);
+            modificado = true;
+        }
+
+        if (modificado) {
+            repository.persist(cliente);
+        }
     }
 }

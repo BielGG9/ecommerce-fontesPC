@@ -7,7 +7,8 @@ public record ClienteResponse(
     String nome,
     String email,
     String cpf,
-    String rg
+    String rg,
+    String username
 ) {
 
     public static ClienteResponse fromEntity(Cliente cliente) {
@@ -16,7 +17,19 @@ public record ClienteResponse(
             cliente.getNome(),
             cliente.getEmail(),
             cliente.getCpf(),
-            cliente.getRg()
+            cliente.getRg(),
+            null
+        );
+    }
+
+    public static ClienteResponse fromEntity(Cliente cliente, String username) {
+        return new ClienteResponse(
+            cliente.getId(),
+            cliente.getNome(),
+            cliente.getEmail(),
+            cliente.getCpf(),
+            cliente.getRg(),
+            username
         );
     }
 }

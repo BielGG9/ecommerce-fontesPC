@@ -16,7 +16,25 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <!-- Tailwind CSS & Plugins -->
+  <script>
+    (function() {
+      const originalWarn = console.warn;
+      console.warn = function(...args) {
+        if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) {
+          return;
+        }
+        originalWarn.apply(console, args);
+      };
+      window._restoreWarn = originalWarn;
+    })();
+  </script>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    if (window._restoreWarn) {
+      console.warn = window._restoreWarn;
+      delete window._restoreWarn;
+    }
+  </script>
   <!-- Tailwind Config Injection -->
   <script id="tailwind-config">
         tailwind.config = {

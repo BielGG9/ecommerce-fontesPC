@@ -62,7 +62,7 @@
               <div class="row g-3">
                 <div class="col-md-4">
                   <label class="form-label text-muted">CEP</label>
-                  <input type="text" class="form-control" formControlName="cep" placeholder="00000-000">
+                  <input type="text" class="form-control" formControlName="cep" placeholder="00000-000" maxlength="8" (keypress)="apenasNumeros($event)">
                 </div>
                 <div class="col-md-8">
                   <label class="form-label text-muted">Rua / Logradouro</label>
@@ -130,15 +130,15 @@
                   </div>
                   <div class="col-12">
                     <label class="form-label text-muted small">Número do Cartão</label>
-                    <input type="text" class="form-control" formControlName="numeroCartao" placeholder="0000 0000 0000 0000">
+                    <input type="text" class="form-control" formControlName="numeroCartao" placeholder="0000 0000 0000 0000" maxlength="16" (keypress)="apenasNumeros($event)">
                   </div>
                   <div class="col-md-6">
                     <label class="form-label text-muted small">Validade (MM/AA)</label>
-                    <input type="text" class="form-control" formControlName="validadeCartao" placeholder="12/30">
+                    <input type="text" class="form-control" formControlName="validadeCartao" placeholder="12/30" maxlength="5" (input)="formatarValidade($event)">
                   </div>
                   <div class="col-md-6">
                     <label class="form-label text-muted small">CVV</label>
-                    <input type="text" class="form-control" formControlName="cvv" placeholder="123">
+                    <input type="text" class="form-control" formControlName="cvv" placeholder="123" maxlength="4" (keypress)="apenasNumeros($event)">
                   </div>
                 </div>
               </div>

@@ -1,6 +1,7 @@
 package gabriel.fontes.br.quarkus.Dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 public record EnderecoEntregaRequest (
 
@@ -24,6 +25,7 @@ public record EnderecoEntregaRequest (
     String estado,
 
     @NotBlank(message = "O CEP não pode ser vazio")
+    @Pattern(regexp = "^[0-9]{8}$", message = "O CEP deve conter exatamente 8 dígitos numéricos")
     String cep
 )
 

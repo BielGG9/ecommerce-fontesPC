@@ -27,8 +27,8 @@ export class CadastroClienteComponent {
     nome: ['', [Validators.required, Validators.maxLength(100)]],
     username: ['', [Validators.required, Validators.maxLength(50)]],
     email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
-    cpf: ['', [Validators.required, Validators.maxLength(11), Validators.minLength(11)]],
-    rg: ['', [Validators.required, Validators.maxLength(20)]],
+    cpf: ['', [Validators.required, Validators.pattern('^[0-9]{11}$')]],
+    rg: ['', [Validators.required, Validators.pattern('^[0-9]{7,15}$')]],
     senha: ['', [Validators.required, Validators.minLength(6)]]
   });
 
@@ -40,6 +40,10 @@ export class CadastroClienteComponent {
     if (controle.hasError('email')) return `Formato de e-mail inválido.`;
     if (controle.hasError('minlength')) return `O tamanho mínimo é ${controle.getError('minlength').requiredLength} caracteres.`;
     if (controle.hasError('maxlength')) return `O tamanho máximo é ${controle.getError('maxlength').requiredLength} caracteres.`;
+    if (controle.hasError('pattern')) {
+      if (campo === 'cpf') return 'O CPF deve conter exatamente 11 dígitos numéricos.';
+      if (campo === 'rg') return 'O RG deve conter de 7 a 15 dígitos numéricos.';
+    }
 
     return '';
   }

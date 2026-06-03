@@ -34,10 +34,10 @@ export class CartoesComponent implements OnInit {
 
   initForm() {
     this.formGroup = this.fb.group({
-      numero: ['', Validators.required],
+      numero: ['', [Validators.required, Validators.pattern('^[0-9]{16}$')]],
       nomeImpresso: ['', Validators.required],
       bandeira: ['', Validators.required],
-      cpfCnpj: ['', Validators.required]
+      cpfCnpj: ['', [Validators.required, Validators.pattern('^[0-9]{11}$|^[0-9]{14}$')]]
     });
   }
 
@@ -113,5 +113,14 @@ export class CartoesComponent implements OnInit {
         error: (err) => alert('Erro: ' + (err.error || err.message))
       });
     }
+  }
+
+  apenasNumeros(event: KeyboardEvent): boolean {
+    const charCode = event.which || event.keyCode;
+    if (charCode < 48 || charCode > 57) {
+      event.preventDefault();
+      return false;
+    }
+    return true;
   }
 }

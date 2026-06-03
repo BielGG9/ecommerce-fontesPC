@@ -164,4 +164,60 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
             );
         }
     }
+
+    @Override
+    public org.keycloak.representations.idm.UserRepresentation obterUsuario(String userId) {
+        try {
+            return keycloak.realm("TP2").users().get(userId).toRepresentation();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Override
+    public boolean isUsuarioAtivo(String userId) {
+        org.keycloak.representations.idm.UserRepresentation user = obterUsuario(userId);
+        return user != null && user.isEnabled();
+    }
+
+    @Override
+    public void atualizarUsuario(String userId, String nome, String email, String cpf, String rg) {
+        try {
+            org.keycloak.admin.client.resource.UserResource userResource = keycloak.realm("TP2").users().get(userId);
+            org.keycloak.representations.idm.UserRepresentation userRep = userResource.toRepresentation();
+
+            // Separar Nome Completo em First Name e Last Name
+            String firstName = nome;
+            String lastName = "";
+            if (nome != null && nome.trim().contains(" ")) {
+                int primeiroEspaco = nome.trim().indexOf(" ");
+                firstName = nome.trim().substring(0, primeiroEspaco);
+                lastName = nome.trim().substring(primeiroEspaco + 1);
+            }
+
+            userRep.setFirstName(firstName);
+            userRep.setLastName(lastName);
+            userRep.setEmail(email);
+
+            // Atualiza atributos customizados
+            java.util.Map<String, java.util.List<String>> attributes = userRep.getAttributes();
+            if (attributes == null) {
+                attributes = new java.util.HashMap<>();
+            } else {
+                attributes = new java.util.HashMap<>(attributes); // garante que é mutável
+            }
+            attributes.put("cpf", java.util.Collections.singletonList(cpf));
+            attributes.put("rg", java.util.Collections.singletonList(rg));
+            userRep.setAttributes(attributes);
+
+            userResource.update(userRep);
+        } catch (Exception e) {
+            System.err.println("Erro ao atualizar dados do usuário no Keycloak: " + e.getMessage());
+            throw new jakarta.ws.rs.WebApplicationException(
+                jakarta.ws.rs.core.Response.status(500)
+                    .entity(java.util.Map.of("message", "Erro ao atualizar os dados do usuário no Keycloak: " + e.getMessage()))
+                    .build()
+            );
+        }
+    }
 }

@@ -70,27 +70,14 @@ public class PedidoServiceImpl implements PedidoService {
     @Transactional
     public PedidoResponse create(PedidoRequest dto) {
 
-        // 1. Obter dados do usuário autenticado via Keycloak
-        String idUsuarioKeycloak = jwt.getSubject();
-
-        // Buscar o cliente autenticado no banco de dados
-        Cliente clienteAutenticado = clienteRepository.findByIdKeycloak(idUsuarioKeycloak);
-
-        if (clienteAutenticado == null) {
-            String email = jwt.getClaim("email");
-            if (email != null) {
-                clienteAutenticado = clienteRepository.findByEmail(email);
-                if (clienteAutenticado != null && clienteAutenticado.getIdKeycloak() == null) {
-                    clienteAutenticado.setIdKeycloak(idUsuarioKeycloak);
-                    clienteRepository.persist(clienteAutenticado);
-                }
-            }
-        }
-
-        // Verificar se o cliente autenticado foi encontrado
+        // 1. Obter e sincronizar o cliente autenticado no Keycloak (verifica status e dados em tempo real)
+        Cliente clienteAutenticado = clienteService.sincronizarUsuarioLogado();
+        
         if (clienteAutenticado == null) {
             throw new BadRequestException("Cadastro de cliente não encontrado para o usuário autenticado.");
         }
+
+        String idUsuarioKeycloak = clienteAutenticado.getIdKeycloak();
 
         // Validar o endereço de entrega
         Endereco enderecoBanco = enderecoRepository.findByIdOptional(dto.idEnderecoEntrega())

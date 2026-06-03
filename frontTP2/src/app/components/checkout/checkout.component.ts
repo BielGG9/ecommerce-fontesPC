@@ -101,17 +101,28 @@ export class CheckoutComponent implements OnInit {
 
     this.checkoutForm.get('pagamento')?.valueChanges.subscribe(value => {
       const isCartao = value === 'cartao';
-      const cartaoControls = ['nomeImpresso', 'numeroCartao', 'validadeCartao', 'cvv'];
       
-      cartaoControls.forEach(ctrl => {
-        const control = this.checkoutForm.get(ctrl);
-        if (isCartao) {
-          control?.setValidators(Validators.required);
-        } else {
-          control?.clearValidators();
-        }
-        control?.updateValueAndValidity();
-      });
+      const controlNome = this.checkoutForm.get('nomeImpresso');
+      const controlNumero = this.checkoutForm.get('numeroCartao');
+      const controlValidade = this.checkoutForm.get('validadeCartao');
+      const controlCvv = this.checkoutForm.get('cvv');
+
+      if (isCartao) {
+        controlNome?.setValidators(Validators.required);
+        controlNumero?.setValidators([Validators.required, Validators.pattern('^[0-9]{16}$')]);
+        controlValidade?.setValidators(Validators.required);
+        controlCvv?.setValidators([Validators.required, Validators.pattern('^[0-9]{3,4}$')]);
+      } else {
+        controlNome?.clearValidators();
+        controlNumero?.clearValidators();
+        controlValidade?.clearValidators();
+        controlCvv?.clearValidators();
+      }
+
+      controlNome?.updateValueAndValidity();
+      controlNumero?.updateValueAndValidity();
+      controlValidade?.updateValueAndValidity();
+      controlCvv?.updateValueAndValidity();
     });
   }
 
@@ -176,7 +187,11 @@ export class CheckoutComponent implements OnInit {
     fields.forEach(field => {
       const control = this.checkoutForm.get(field);
       if (this.adicionandoNovoEndereco) {
-        control?.setValidators(Validators.required);
+        if (field === 'cep') {
+          control?.setValidators([Validators.required, Validators.pattern('^[0-9]{8}$')]);
+        } else {
+          control?.setValidators(Validators.required);
+        }
       } else {
         control?.clearValidators();
       }
@@ -245,5 +260,29 @@ export class CheckoutComponent implements OnInit {
         this.processando.set(false);
       }
     });
+  }
+
+  apenasNumeros(event: KeyboardEvent): boolean {
+    const charCode = event.which || event.keyCode;
+    if (charCode < 48 || charCode > 57) {
+      event.preventDefault();
+      return false;
+    }
+    return true;
+  }
+
+  formatarValidade(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    // Remove everything that is not a digit
+    let value = input.value.replace(/\D/g, '');
+
+    // Insert '/' after the 2nd digit
+    if (value.length >= 3) {
+      value = value.substring(0, 2) + '/' + value.substring(2, 4);
+    }
+
+    // Update the DOM input and the form control
+    input.value = value;
+    this.checkoutForm.get('validadeCartao')?.setValue(value, { emitEvent: false });
   }
 }

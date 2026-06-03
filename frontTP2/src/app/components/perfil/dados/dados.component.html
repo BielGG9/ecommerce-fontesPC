@@ -4,7 +4,7 @@
     <!-- Breadcrumb e Voltar -->
     <div class="breadcrumb d-flex justify-content-between align-items-center">
       <span class="text-muted fw-semibold">Central Minha Conta / Meus Dados</span>
-      <a [routerLink]="['/minha-conta']" class="text-decoration-none fw-bold" style="color: #ff6b00;">
+      <a [routerLink]="['/minha-conta']" class="text-decoration-none fw-bold" style="color: #0d6efd;">
         <i class="bi bi-arrow-left"></i> Voltar aos Atalhos
       </a>
     </div>
@@ -12,7 +12,7 @@
     <!-- Título Principal -->
     <div class="page-header mt-4 mb-4">
       <h2 class="fw-bold" style="color: #333; display: flex; align-items: center; gap: 10px;">
-        <i class="bi bi-person-fill" style="color: #ff6b00;"></i> MEUS DADOS
+        <i class="bi bi-person-fill" style="color: #0d6efd;"></i> MEUS DADOS
       </h2>
     </div>
 
@@ -92,7 +92,7 @@
             <!-- LINK REAL para alterar senha — abre o modal no modo 'senha' -->
             <a href="javascript:void(0)"
                class="fw-bold text-decoration-none"
-               style="color: #ff6b00; font-size: 14px; text-transform: uppercase;"
+               style="color: #0d6efd; font-size: 14px; text-transform: uppercase;"
                (click)="abrirModalAlterarSenha()">
               <i class="bi bi-key-fill me-1"></i> Alterar Senha
             </a>
@@ -125,7 +125,7 @@
 
       <!-- Header (adapta o título ao modo) -->
       <div class="modal-header text-white border-0"
-           style="background-color: #ff6b00; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;">
+           style="background-color: #0d6efd; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;">
         <h5 class="modal-title fw-bold" style="margin: 0;">
           <ng-container *ngIf="modalModo === 'campo'">
             <i class="bi bi-shield-lock-fill me-2"></i> Validação de Segurança
@@ -170,7 +170,7 @@
             <!-- Senha Atual -->
             <div class="mb-3">
               <label class="form-label fw-semibold" style="color: #444; font-size: 14px; display: block; margin-bottom: 6px;">
-                <i class="bi bi-lock-fill me-1" style="color: #ff6b00;"></i> Senha Atual
+                <i class="bi bi-lock-fill me-1" style="color: #0d6efd;"></i> Senha Atual
               </label>
               <input type="password"
                      id="modal-senha-atual"
@@ -188,7 +188,7 @@
             <!-- Nova Senha -->
             <div class="mb-3">
               <label class="form-label fw-semibold" style="color: #444; font-size: 14px; display: block; margin-bottom: 6px;">
-                <i class="bi bi-unlock-fill me-1" style="color: #ff6b00;"></i> Nova Senha
+                <i class="bi bi-unlock-fill me-1" style="color: #0d6efd;"></i> Nova Senha
               </label>
               <input type="password"
                      id="modal-nova-senha"
@@ -206,7 +206,7 @@
             <!-- Confirmar Nova Senha -->
             <div class="mb-3">
               <label class="form-label fw-semibold" style="color: #444; font-size: 14px; display: block; margin-bottom: 6px;">
-                <i class="bi bi-check-circle-fill me-1" style="color: #ff6b00;"></i> Confirmar Nova Senha
+                <i class="bi bi-check-circle-fill me-1" style="color: #0d6efd;"></i> Confirmar Nova Senha
               </label>
               <input type="password"
                      id="modal-confirmar-nova-senha"

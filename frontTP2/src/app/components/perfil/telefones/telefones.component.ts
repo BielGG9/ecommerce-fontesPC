@@ -34,8 +34,8 @@ export class TelefonesComponent implements OnInit {
 
   initForm() {
     this.formGroup = this.fb.group({
-      ddd: ['', [Validators.required, Validators.maxLength(2)]],
-      numero: ['', Validators.required]
+      ddd: ['', [Validators.required, Validators.pattern('^[0-9]{2}$')]],
+      numero: ['', [Validators.required, Validators.pattern('^[0-9]{8,9}$')]]
     });
   }
 
@@ -110,5 +110,14 @@ export class TelefonesComponent implements OnInit {
         error: (err) => alert('Erro: ' + (err.error || err.message))
       });
     }
+  }
+
+  apenasNumeros(event: KeyboardEvent): boolean {
+    const charCode = event.which || event.keyCode;
+    if (charCode < 48 || charCode > 57) {
+      event.preventDefault();
+      return false;
+    }
+    return true;
   }
 }

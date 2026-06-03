@@ -14,4 +14,7 @@ public interface KeycloakAdminService {
      * @param novaSenha Nova senha em plain-text (o Keycloak cuida do hashing)
      */
     void alterarSenhaUsuario(String userId, String novaSenha);
+    boolean isUsuarioAtivo(String userId);
+    org.keycloak.representations.idm.UserRepresentation obterUsuario(String userId);
+    void atualizarUsuario(String userId, String nome, String email, String cpf, String rg);
 }
