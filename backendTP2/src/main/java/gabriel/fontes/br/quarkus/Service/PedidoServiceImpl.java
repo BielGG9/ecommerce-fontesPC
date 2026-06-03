@@ -25,6 +25,9 @@ import gabriel.fontes.br.quarkus.Repository.EnderecoRepository;
 import gabriel.fontes.br.quarkus.Repository.FonteRepository;
 import gabriel.fontes.br.quarkus.Repository.PagamentoRepository;
 import gabriel.fontes.br.quarkus.Repository.PedidoRepository;
+import gabriel.fontes.br.quarkus.Repository.CupomRepository;
+import gabriel.fontes.br.quarkus.Model.Cupom;
+import java.util.Optional;
 import io.quarkus.security.ForbiddenException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -38,6 +41,9 @@ public class PedidoServiceImpl implements PedidoService {
 
     @Inject
     PedidoRepository pedidoRepository;
+
+    @Inject
+    CupomRepository cupomRepository;
 
     @Inject
     FonteRepository fonteRepository;
@@ -145,7 +151,17 @@ public class PedidoServiceImpl implements PedidoService {
         }
 
         // 7. Finalizar Pedido
-        pedido.setTotal(total);
+        double totalComDesconto = total;
+        Cupom cupomEntidade = null;
+        if (dto.cupom() != null && !dto.cupom().trim().isEmpty()) {
+            Optional<Cupom> cupomOpt = cupomRepository.findByCodigo(dto.cupom().trim());
+            if (cupomOpt.isPresent() && Boolean.TRUE.equals(cupomOpt.get().getAtivo())) {
+                cupomEntidade = cupomOpt.get();
+                totalComDesconto = total * (1 - cupomEntidade.getPorcentagem() / 100);
+            }
+        }
+        pedido.setTotal(totalComDesconto);
+        pedido.setCupom(cupomEntidade);
         pedido.setItens(itensParaSalvar);
 
         Pagamento pagamentoEntity = null;
@@ -241,7 +257,7 @@ public class PedidoServiceImpl implements PedidoService {
         }
 
     // Dados Comuns a todos os pagamentos
-    pagamentoEntity.setValor(total);pagamentoEntity.setDataPagamento(LocalDateTime.now());
+    pagamentoEntity.setValor(totalComDesconto);pagamentoEntity.setDataPagamento(LocalDateTime.now());
 
     // Persistir e Vincular
     pagamentoRepository.persist(pagamentoEntity);pedido.setPagamento(pagamentoEntity);

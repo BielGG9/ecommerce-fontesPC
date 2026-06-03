@@ -35,7 +35,7 @@ export class EnderecosComponent implements OnInit {
   initForm() {
     this.formGroup = this.fb.group({
       cep: ['', Validators.required],
-      logradouro: ['', Validators.required],
+      rua: ['', Validators.required],
       numero: ['', Validators.required],
       bairro: ['', Validators.required],
       cidade: ['', Validators.required],
@@ -48,10 +48,13 @@ export class EnderecosComponent implements OnInit {
     this.clienteService.getMeuPerfil().subscribe({
       next: (dados) => {
         this.cliente = dados;
-        // Se a API retornar os endereços aninhados no cliente:
-        this.enderecos = dados.enderecos || [];
-        
-        // Caso a API não retorne aninhado, teríamos que buscar e filtrar. Mas vamos assumir que o Quarkus mapeou @OneToMany
+        // Busca os endereços do usuário autenticado no endpoint dedicado
+        this.enderecoService.getMeusEnderecos().subscribe({
+          next: (ends) => {
+            this.enderecos = ends || [];
+          },
+          error: (err) => console.error('Erro ao buscar endereços:', err)
+        });
       },
       error: (err) => console.error(err)
     });
@@ -68,7 +71,7 @@ export class EnderecosComponent implements OnInit {
     this.editingId = end.id;
     this.formGroup.patchValue({
       cep: end.cep,
-      logradouro: end.logradouro,
+      rua: end.rua,
       numero: end.numero,
       bairro: end.bairro,
       cidade: end.cidade,

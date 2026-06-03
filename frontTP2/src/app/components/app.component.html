@@ -1,56 +1,97 @@
 <!-- Global Navbar -->
 @if (!isAdminRoute) {
-  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4 border-bottom">
-    <div class="container-fluid d-flex justify-content-between align-items-center px-4">
-      
-      <!-- Branding -->
-      <a class="navbar-brand fw-bold text-primary d-flex align-items-center" [routerLink]="['/']">
-        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 35px; height: 35px;">
-          <i class="bi bi-lightning-fill"></i>
-        </div>
+<header class="bg-surface-container-lowest border-b border-outline-variant shadow-sm w-full sticky top-0 z-40">
+  <div class="max-w-[1280px] mx-auto px-md">
+    <!-- Top Row: Logo and Actions -->
+    <div class="h-16 flex items-center justify-between w-full">
+      <a [routerLink]="['/']" class="font-display-lg text-title-md tracking-tighter text-primary uppercase flex items-center gap-2 no-underline cursor-pointer">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bolt</span>
         Fontes PC
       </a>
-
-      <!-- User Information & Cart Container -->
-      <div class="d-flex align-items-center gap-3">
-        <!-- Carrinho -->
-        <button [routerLink]="['/carrinho']" class="btn btn-outline-primary position-relative rounded-circle p-2 border-0 shadow-sm" title="Ir para o Carrinho">
-          <i class="bi bi-cart3 fs-5"></i>
+      
+      <div class="flex items-center gap-xs">
+        <div class="hidden md:flex items-center gap-2 mr-2">
+          @if (usuarioLogado) {
+            <span class="font-body-sm text-body-sm text-on-surface-variant">Olá, <strong class="text-primary">{{ nomeUsuario }}!</strong></span>
+            
+            <button [routerLink]="['/minha-conta']" class="flex items-center gap-1 border border-primary text-primary rounded-full px-3 py-1 font-label-caps text-label-caps hover:bg-primary hover:text-on-primary transition-colors duration-200">
+              <span class="material-symbols-outlined text-[16px]">person</span> Perfil
+            </button>
+            
+            <button (click)="sair()" class="flex items-center gap-1 border border-error text-error rounded-full px-3 py-1 font-label-caps text-label-caps hover:bg-error hover:text-on-error transition-colors duration-200 ml-2">
+              Sair
+            </button>
+          } @else {
+            <button [routerLink]="['/login']" class="flex items-center gap-1 bg-primary text-on-primary rounded-full px-4 py-1.5 font-label-caps text-label-caps hover:bg-primary-container transition-colors duration-200">
+              Login
+            </button>
+          }
+        </div>
+        
+        <button [routerLink]="['/carrinho']" class="p-2 text-on-surface-variant hover:text-primary transition-colors duration-200 active:scale-95 transition-transform relative cursor-pointer">
+          <span class="material-symbols-outlined">shopping_cart</span>
           @if (carrinhoService.quantidadeTotal() > 0) {
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65em;">
+            <span class="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 bg-error text-on-error rounded-full text-[10px] font-bold shadow-sm">
               {{ carrinhoService.quantidadeTotal() }}
             </span>
           }
         </button>
-
-        @if (usuarioLogado) {
-          <div class="d-flex align-items-center bg-light rounded-pill px-3 py-1 border shadow-sm hover-shadow transition-all">
-            <!-- Texto visível em telas maiores -->
-            <span class="me-3 fw-medium text-secondary d-none d-sm-inline">
-              Olá, <span class="fw-bold text-primary">{{ nomeUsuario }}</span>!
-            </span>
-            <!-- Ícone visível em celular -->
-            <span class="me-2 fw-medium text-secondary d-inline d-sm-none" title="Olá, {{ nomeUsuario }}!">
-              <i class="bi bi-person-circle fs-5 text-primary"></i>
-            </span>
-            
-            <button [routerLink]="['/minha-conta']" class="btn btn-sm btn-outline-primary rounded-pill fw-bold px-3 me-2">
-              <i class="bi bi-person-badge"></i> Perfil
-            </button>
-            
-            <button (click)="sair()" class="btn btn-sm btn-outline-danger rounded-pill fw-bold px-3">
-              Sair
-            </button>
-          </div>
-        } @else {
-          <button [routerLink]="['/login']" title="Faça seu login ou crie uma conta" class="btn btn-primary rounded-pill fw-bold px-4 shadow-sm">
-            Login
-          </button>
-        }
       </div>
-      
     </div>
-  </nav>
+
+    <!-- Bottom Row: Integrated Search and Filters (Desktop Only) -->
+    <div class="hidden md:flex items-center gap-md py-3 border-t border-outline-variant/30">
+      <div class="flex-1 relative group">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors">search</span>
+        <input [(ngModel)]="filtroNome" (keyup.enter)="buscar()" class="w-full bg-surface-container-low border border-outline-variant rounded-lg py-2 pl-10 pr-4 font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Buscar produto..." type="text"/>
+      </div>
+      <div class="relative min-w-[180px]">
+        <select [(ngModel)]="filtroMarca" class="w-full bg-surface-container-low border border-outline-variant rounded-lg py-2 pl-4 pr-10 font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all cursor-pointer">
+          <option [value]="null">Todas as Marcas</option>
+          @for (marca of marcas; track marca.id) {
+            <option [value]="marca.id">{{ marca.nome }}</option>
+          }
+        </select>
+      </div>
+      <div class="relative min-w-[180px]">
+        <select [(ngModel)]="filtroCategoria" class="w-full bg-surface-container-low border border-outline-variant rounded-lg py-2 pl-4 pr-10 font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all cursor-pointer">
+          <option value="">Todas Certificações</option>
+          @for (cert of certificacoes; track $index) {
+            <option [value]="cert">{{ cert }}</option>
+          }
+        </select>
+      </div>
+      <div class="flex gap-2">
+        <button (click)="buscar()" class="bg-primary text-on-primary font-label-caps text-label-caps px-6 py-2 rounded-lg hover:bg-primary-container transition-colors">
+          Filtrar
+        </button>
+        <button (click)="limparFiltros()" class="bg-surface-variant text-on-surface-variant font-label-caps text-label-caps px-4 py-2 rounded-lg hover:bg-surface-dim transition-colors border border-outline-variant/50">
+          Limpar
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- BottomNavBar Shared Component (Mobile Only) -->
+<nav class="md:hidden bg-surface-container-lowest border-t border-outline-variant shadow-[0_-2px_10px_rgba(0,0,0,0.05)] fixed bottom-0 left-0 w-full z-50">
+  <div class="flex justify-around items-center py-2">
+    <a [routerLink]="['/']" routerLinkActive="text-primary bg-primary-fixed-dim/20" [routerLinkActiveOptions]="{exact: true}" class="flex flex-col items-center justify-center text-on-surface-variant rounded-full px-4 py-1 active:scale-90 duration-100 no-underline">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+      <span class="font-label-caps text-[10px] leading-tight mt-1">Início</span>
+    </a>
+    <a [routerLink]="['/carrinho']" routerLinkActive="text-primary bg-primary-fixed-dim/20" class="flex flex-col items-center justify-center text-on-surface-variant rounded-full px-4 py-1 active:scale-90 duration-100 transition-all no-underline">
+      <span class="material-symbols-outlined">shopping_cart</span>
+      <span class="font-label-caps text-[10px] leading-tight mt-1">Carrinho</span>
+    </a>
+    <a [routerLink]="['/minha-conta']" routerLinkActive="text-primary bg-primary-fixed-dim/20" class="flex flex-col items-center justify-center text-on-surface-variant rounded-full px-4 py-1 active:scale-90 duration-100 transition-all no-underline">
+      <span class="material-symbols-outlined">person</span>
+      <span class="font-label-caps text-[10px] leading-tight mt-1">Perfil</span>
+    </a>
+  </div>
+</nav>
+<!-- spacer for mobile nav -->
+<div class="h-16 md:hidden w-full"></div>
 }
 
 <!-- Main App Content -->

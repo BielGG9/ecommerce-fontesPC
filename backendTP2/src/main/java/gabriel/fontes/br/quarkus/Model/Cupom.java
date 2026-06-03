@@ -1,13 +1,13 @@
 package gabriel.fontes.br.quarkus.Model;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import gabriel.fontes.br.quarkus.Model.Abstratc.DefaultEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "cupom")
-public class Cupom extends PanacheEntity {
+public class Cupom extends DefaultEntity {
 
     @Column(unique = true)
     private String codigo;

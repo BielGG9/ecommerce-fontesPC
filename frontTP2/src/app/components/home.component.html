@@ -1,83 +1,75 @@
-<div class="vitrine-container">
-  <div class="hero-banner">
-    <h1>Bem-vindo à Fontes PC! ⚡</h1>
-    <p>A energia que o seu setup merece, com as melhores marcas do mercado.</p>
-  </div>
+<main class="flex-1 w-full max-w-[1280px] mx-auto px-sm md:px-md py-lg flex flex-col gap-lg mt-4">
 
-  <div class="filtros-container">
-    <!-- Busca por nome -->
-    <mat-form-field appearance="outline">
-      <mat-label>Buscar produto</mat-label>
-      <input matInput [(ngModel)]="filtroNome" placeholder="Nome do produto..." />
-    </mat-form-field>
+  <!-- Hero Carousel Section -->
+  <section class="w-full rounded-xl overflow-hidden shadow-md relative flex items-center justify-center min-h-[300px] md:min-h-[400px] bg-surface-variant group" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDn4iGLVsAoL2OVeO1fOwefbUzyidhvZYiI6RKrejIga76HvnJufuS5IJw06roPcHABu9P-P-4tEp1IBG-j6nKoCA904d2Q_Ug0rKVsUNKgsAMzkxLE_itGCjDNbPS_tDiv-xXF-ByuN2MY-fP9XRjl3iMe98OlK74JqinqPfzUCYUn30pdB4G_RmrnsijAOJuB7N46NZQJarQx9XEv0UPQ6KAOlxYWfg8-Fq0ZVna8lvMzkYp4G5TDaKsenFS5sOzCwB9vUbKV-1w'); background-size: cover; background-position: center;">
+    <!-- Dark Overlay for Legibility -->
+    <div class="absolute inset-0 bg-black/60 z-0"></div>
+    <!-- Slide Content -->
+    <div class="relative z-10 text-center px-8 md:px-16 flex flex-col items-center gap-4 w-full">
+      <h1 class="font-display-lg text-headline-lg-mobile md:text-headline-lg text-on-primary font-bold">
+        Potência Extrema para o seu Setup 
+        <span class="inline-block text-secondary-container drop-shadow-[0_0_8px_rgba(0,193,253,0.8)]">⚡</span>
+      </h1>
+      <p class="font-body-rg text-body-rg text-surface-container-low max-w-2xl mx-auto drop-shadow-md">
+        A energia que o seu setup merece, com as melhores marcas do mercado. Explore nossa nova vitrine.
+      </p>
+    </div>
+  </section>
 
-    <!-- Filtro por marca -->
-    <mat-form-field appearance="outline">
-      <mat-label>Marca</mat-label>
-      <mat-select [(ngModel)]="filtroMarca">
-        <mat-option [value]="null">Todas</mat-option>
-        <mat-option *ngFor="let marca of marcas" [value]="marca.id">
-          {{ marca.nome }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
 
-    <!-- Filtro por certificação -->
-    <mat-form-field appearance="outline">
-      <mat-label>Certificação</mat-label>
-      <mat-select [(ngModel)]="filtroCategoria">
-        <mat-option value="">Todas</mat-option>
-        <mat-option *ngFor="let cert of certificacoes" [value]="cert">
-          {{ cert }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <!-- Botões -->
-    <button mat-raised-button color="primary" (click)="buscar()">
-      Buscar
-    </button>
-    <button mat-stroked-button (click)="limparFiltros()">
-      Limpar
-    </button>
-  </div>
-
-  <div class="grid-produtos">
+  <!-- Product Grid -->
+  <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-md">
     @for (fonte of fontes(); track fonte.id) {
-      <mat-card class="produto-card" (click)="router.navigate(['/produto', fonte.id])" style="cursor: pointer;">
-        <mat-card-header>
-          <mat-card-title>{{ fonte.nome }}</mat-card-title>
-          <mat-card-subtitle>{{ fonte.marca || 'Marca não informada' }}</mat-card-subtitle>
-        </mat-card-header>
+      <article (click)="router.navigate(['/produto', fonte.id])" class="bg-surface-container-lowest border border-outline-variant/50 rounded-xl p-md flex flex-col gap-4 shadow-[0_4px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 relative group overflow-hidden cursor-pointer">
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
         
-        <img mat-card-image
-             *ngIf="getFirstImageUrl(fonte)"
-             [src]="getFirstImageUrl(fonte)!"
-             alt="Imagem da Fonte"
-             style="height: 200px; object-fit: contain; margin-top: 10px;">
+        <div class="flex flex-col gap-1">
+          <span class="font-body-sm text-body-sm text-on-surface-variant">{{ fonte.marca || 'Marca Genérica' }}</span>
+          <h2 class="font-title-md text-title-md text-on-surface font-bold line-clamp-1" title="{{ fonte.nome }}">{{ fonte.nome }}</h2>
+        </div>
+        
+        @if (getFirstImageUrl(fonte)) {
+          <div class="w-full h-40 flex items-center justify-center bg-surface-variant/20 rounded-lg p-2">
+            <img [src]="getFirstImageUrl(fonte)" alt="{{ fonte.nome }}" class="max-h-full max-w-full object-contain mix-blend-multiply">
+          </div>
+        } @else {
+          <div class="w-full h-40 flex items-center justify-center bg-surface-variant/20 rounded-lg p-2 text-on-surface-variant">
+            <span class="material-symbols-outlined text-4xl opacity-50">image_not_supported</span>
+          </div>
+        }
 
-        <mat-card-content>
-          <p class="preco">{{ fonte.preco | currency:'BRL' }}</p>
-          
-          <mat-chip-set class="tags-produto">
-            <mat-chip highlighted color="accent">{{ fonte.potencia }}W</mat-chip>
-            <mat-chip color="primary">{{ fonte.certificacao?.fontcert }}</mat-chip>
-          </mat-chip-set>
-          
-          <p class="estoque">Em estoque: {{ fonte.estoque }} unidades</p>
-        </mat-card-content>
+        <div class="mt-2 mb-2">
+          <span class="font-price-display text-price-display text-[#10B981]">{{ fonte.preco | currency:'BRL' }}</span>
+        </div>
         
-        <mat-card-actions class="acoes">
-          <button mat-raised-button color="primary" (click)="$event.stopPropagation(); comprar(fonte)" [disabled]="(fonte.estoque ?? 0) === 0">
-            <mat-icon>shopping_cart</mat-icon> {{ (fonte.estoque ?? 0) > 0 ? 'Comprar' : 'Esgotado' }}
-          </button>
-        </mat-card-actions>
-      </mat-card>
+        <div class="flex flex-wrap gap-2">
+          <span class="bg-primary-fixed text-on-primary-fixed px-2 py-1 rounded-sm font-label-caps text-label-caps">{{ fonte.potencia }}W</span>
+          @if (fonte.certificacao?.fontcert) {
+            <span class="bg-surface-container-high text-on-surface px-2 py-1 rounded-sm font-label-caps text-label-caps border border-outline-variant/30 flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">workspace_premium</span> {{ fonte.certificacao?.fontcert }}
+            </span>
+          }
+        </div>
+        
+        <div class="font-body-sm text-body-sm text-on-surface-variant text-xs mt-2 flex-1">
+          @if ((fonte.estoque ?? 0) > 0) {
+            Em estoque: {{ fonte.estoque }} unidades
+          } @else {
+            <span class="text-error font-bold">Produto Esgotado</span>
+          }
+        </div>
+        
+        <button (click)="$event.stopPropagation(); comprar(fonte)" [disabled]="(fonte.estoque ?? 0) === 0" class="w-full mt-auto bg-transparent border-2 border-primary text-primary font-label-caps text-label-caps py-2.5 rounded-lg hover:bg-primary hover:text-on-primary disabled:border-outline-variant disabled:text-outline-variant disabled:hover:bg-transparent transition-colors flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined">shopping_cart</span>
+          {{ (fonte.estoque ?? 0) > 0 ? 'Comprar' : 'Esgotado' }}
+        </button>
+      </article>
     } @empty {
-      <div class="aviso-vazio">
-        <mat-icon>inventory_2</mat-icon>
-        <p>A nossa vitrine está a ser abastecida. Volte em breve!</p>
+      <div class="col-span-full flex flex-col items-center justify-center py-12 text-on-surface-variant gap-4 bg-surface-container-lowest rounded-xl border border-outline-variant border-dashed">
+        <span class="material-symbols-outlined text-5xl">inventory_2</span>
+        <p class="font-body-rg">Nenhum produto encontrado com os filtros atuais.</p>
+        <button (click)="limparFiltros()" class="text-primary hover:underline font-label-caps">Limpar Filtros</button>
       </div>
     }
-  </div>
-</div>
+  </section>
+</main>

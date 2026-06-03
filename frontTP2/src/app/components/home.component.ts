@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FonteService } from '../services/fonte.service';
 import { MarcaService } from '../services/marca.service';
 import { Fonte } from '../models/fonte.model';
@@ -38,16 +38,14 @@ import { MatInputModule } from '@angular/material/input';
 })
 export class HomeComponent implements OnInit {
   private fonteService = inject(FonteService);
-  private marcaService = inject(MarcaService);
   private carrinhoService = inject(CarrinhoService);
   private dialogService = inject(DialogService);
   public router = inject(Router);
+  private route = inject(ActivatedRoute); // Injected ActivatedRoute
   
   // Guardamos as fontes que vão aparecer na vitrine
   fontes = signal<Fonte[]>([]);
 
-  marcas: any[] = [];
-  certificacoes: string[] = [];
   filtroNome: string = '';
   filtroMarca: number | null = null;
   filtroCategoria: string = '';
@@ -57,9 +55,15 @@ export class HomeComponent implements OnInit {
   total: number = 0;
 
   ngOnInit(): void {
-    this.marcaService.findAll().subscribe(m => this.marcas = m);
-    this.fonteService.getCertificacoes().subscribe(c => this.certificacoes = c);
-    this.loadFontes();
+    // Listen to query parameters from the URL
+    this.route.queryParams.subscribe(params => {
+      this.filtroNome = params['nome'] || '';
+      this.filtroMarca = params['marca'] ? Number(params['marca']) : null;
+      this.filtroCategoria = params['categoria'] || '';
+      
+      this.page = 0; // Reset page when filters change
+      this.loadFontes();
+    });
   }
 
   loadFontes(): void {
@@ -75,19 +79,6 @@ export class HomeComponent implements OnInit {
       },
       error: (err) => console.error('Erro ao carregar fontes filtradas', err)
     });
-  }
-
-  buscar(): void {
-    this.page = 0;
-    this.loadFontes();
-  }
-
-  limparFiltros(): void {
-    this.filtroNome = '';
-    this.filtroMarca = null;
-    this.filtroCategoria = '';
-    this.page = 0;
-    this.loadFontes();
   }
 
   // Novo método de comprar!
@@ -112,6 +103,14 @@ export class HomeComponent implements OnInit {
       this.dialogService.showWarning(`Desculpe, ${fonte.nome} está esgotada!`, 'Esgotado');
     }
   }
+
+  limparFiltros(): void {
+    this.router.navigate(['/'], { 
+      queryParams: { nome: null, marca: null, categoria: null },
+      queryParamsHandling: 'merge'
+    });
+  }
+
 
   getImagemUrl(url: string): string {
     return `http://localhost:8081${url}`;

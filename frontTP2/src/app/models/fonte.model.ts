@@ -10,6 +10,7 @@ import { Certificacao } from "./certificacao.model";
  * certificacao ({id, fontcert}), idFornecedores, imagens.
  */
 export interface Fonte {
+    fonteId(): number;
     id?: number;
     nome: string;
     potencia: number;

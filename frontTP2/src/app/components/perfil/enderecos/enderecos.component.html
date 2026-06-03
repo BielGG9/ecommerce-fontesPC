@@ -28,7 +28,7 @@
           <div class="col-md-6 mb-3">
             <div class="card h-100 shadow-sm border-0 address-card">
               <div class="card-body">
-                <h5 class="card-title fw-bold text-dark mb-1">{{ end.logradouro }}, {{ end.numero }}</h5>
+                <h5 class="card-title fw-bold text-dark mb-1">{{ end.rua }}, {{ end.numero }}</h5>
                 <h6 class="card-subtitle mb-2 text-muted">CEP: {{ end.cep }}</h6>
                 <p class="card-text mb-1">
                   {{ end.bairro }}, {{ end.cidade }} - {{ end.estado }}<br>
@@ -55,8 +55,8 @@
             <input type="text" class="form-control" formControlName="cep" placeholder="00000-000">
           </div>
           <div class="col-md-7 mb-3">
-            <label class="form-label fw-bold">Logradouro</label>
-            <input type="text" class="form-control" formControlName="logradouro" placeholder="Rua, Avenida, etc...">
+            <label class="form-label fw-bold">Rua / Logradouro</label>
+            <input type="text" class="form-control" formControlName="rua" placeholder="Rua, Avenida, etc...">
           </div>
           <div class="col-md-2 mb-3">
             <label class="form-label fw-bold">Número</label>

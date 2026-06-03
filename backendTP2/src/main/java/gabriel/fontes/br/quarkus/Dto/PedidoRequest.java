@@ -25,6 +25,8 @@ public record PedidoRequest(
 
     Long idCartao,
 
-    CartaoRequest novoCartao
+    CartaoRequest novoCartao,
+
+    String cupom
 ) {    
 }

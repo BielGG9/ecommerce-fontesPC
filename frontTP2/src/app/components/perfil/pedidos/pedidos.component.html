@@ -83,6 +83,20 @@
                   </table>
                 </div>
 
+                <div class="address-details" *ngIf="pedido.enderecoEntrega" style="margin-top: 15px; padding: 15px; border-radius: 8px; background-color: #fcfcfc; border: 1px solid #eee;">
+                  <h5 style="font-weight: 700; color: #ff6b00; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">
+                    <mat-icon style="font-size: 18px; width: 18px; height: 18px; color: #ff6b00;">location_on</mat-icon>
+                    Endereço de Entrega
+                  </h5>
+                  <p style="margin: 0; color: #555; font-size: 13.5px; line-height: 1.5;">
+                    <strong>{{ pedido.enderecoEntrega.rua }}, {{ pedido.enderecoEntrega.numero }}</strong>
+                    <span *ngIf="pedido.enderecoEntrega.complemento"> - {{ pedido.enderecoEntrega.complemento }}</span><br>
+                    Bairro: {{ pedido.enderecoEntrega.bairro }}<br>
+                    Cidade: {{ pedido.enderecoEntrega.cidade }} - {{ pedido.enderecoEntrega.estado }}<br>
+                    CEP: {{ pedido.enderecoEntrega.cep }}
+                  </p>
+                </div>
+
                 <div class="details-footer">
                   <div class="shipping-info">
                     <mat-icon>local_shipping</mat-icon>

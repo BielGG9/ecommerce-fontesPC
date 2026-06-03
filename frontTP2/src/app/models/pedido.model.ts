@@ -7,4 +7,13 @@ export interface Pedido {
     valorTotal: number;
     cliente?: Cliente;
     itens: ItemPedido[]; // Composição: Um pedido é composto obrigatoriamente por itens! Se o pedido some, os itens somem.
+    enderecoEntrega?: {
+        rua: string;
+        numero: string;
+        complemento?: string;
+        bairro: string;
+        cidade: string;
+        estado: string;
+        cep: string;
+    };
 }

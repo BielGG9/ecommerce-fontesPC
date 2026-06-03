@@ -24,7 +24,8 @@ export class PedidoService {
         quantidade: item.quantidade,
         precoUnitario: item.preco || 0,
         fonte: item.fonte
-      }))
+      })),
+      enderecoEntrega: p.enderecoEntrega
     };
   }
 

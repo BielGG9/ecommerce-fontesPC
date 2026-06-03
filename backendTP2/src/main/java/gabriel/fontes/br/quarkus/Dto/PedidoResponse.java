@@ -13,7 +13,8 @@ public record PedidoResponse(
     EnderecoEntregaResponse enderecoEntrega,
     List<ItemPedidoResponse> itensPedido,
     Object pagamento,
-    String status
+    String status,
+    String cupom
 ) {
 
     public static PedidoResponse fromEntity(Pedido pedido) {
@@ -36,7 +37,8 @@ public record PedidoResponse(
             enderecoRes,
             pedido.getItens().stream().map(ItemPedidoResponse::fromEntity).toList(),
             pagamentoRes,
-            pedido.getStatus().getStts()
+            pedido.getStatus().getStts(),
+            pedido.getCupom() != null ? pedido.getCupom().getCodigo() : null
         );
     }
 }
