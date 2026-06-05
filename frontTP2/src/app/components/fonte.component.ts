@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FonteService } from '../services/fonte.service';
@@ -13,24 +13,14 @@ import { Modelo } from '../models/modelo.models';
 import { FornecedorService } from '../services/fornecedor.service';
 import { Fornecedor } from '../models/fornecedor.model';
 import { CertificacaoDialog } from './certificacao-dialog/certificacao-dialog';
-
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select'; 
-import { MatButtonModule } from '@angular/material/button';
-import { MatTableModule } from '@angular/material/table';
-import { MatIconModule } from '@angular/material/icon'; 
-import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { PaginatorIntlPtBr } from '../paginator-ptbr';
 import { Router } from '@angular/router';
+
 @Component({
   selector: 'app-fonte',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatTableModule, MatIconModule, MatPaginatorModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './fonte.component.html',
-  styleUrl: './fonte.component.css',
-  providers: [{ provide: MatPaginatorIntl, useClass: PaginatorIntlPtBr }]
+  styleUrl: './fonte.component.css'
 })
 export class FonteComponent implements OnInit {
   private modeloService = inject(ModeloService);
@@ -50,7 +40,7 @@ export class FonteComponent implements OnInit {
 
   // --- Configuração da Paginação ---
   totalFontes = signal(0); // Quantidade total de itens no servidor
-  pageSize = 2; // Quantos itens por página (pode mudar conforme o backend)
+  pageSize = 2; // Quantos itens por página
   page = 0; // Começamos na página 0 (a primeira)
   nomeBusca = ''; // O texto que o usuário digita
 
@@ -64,8 +54,8 @@ export class FonteComponent implements OnInit {
     nome: ['', [Validators.required, Validators.maxLength(100)]],
     potencia: ['', [Validators.required, Validators.maxLength(5)]],
     preco: ['', [Validators.required, Validators.maxLength(10)]],
-    idMarca: [''], 
-    idModelo: [''],
+    idMarca: ['', Validators.required], 
+    idModelo: ['', Validators.required],
     idFornecedores: [[] as number[]],
     certificacaoNome: [{value: '', disabled: true}, Validators.required],
     certificacao: ['', Validators.required]
@@ -86,12 +76,10 @@ export class FonteComponent implements OnInit {
   }
 
   carregarFontes() {
-    // 1. Chamamos o serviço passando os parâmetros de paginação
     this.fonteService.findAll(this.page, this.pageSize, this.nomeBusca).subscribe({
       next: (dados) => {
-        this.fontes.set(dados);
+        this.fontes.set(dados.items);
         
-        // 2. Chamamos o serviço de contagem para saber o total
         this.fonteService.count(this.nomeBusca).subscribe({
           next: (total) => {
             this.totalFontes.set(total);
@@ -103,70 +91,56 @@ export class FonteComponent implements OnInit {
     });
   }
 
-  // --- Método para lidar com a mudança de página ---
-  paginar(event: PageEvent): void{
-    // event.pageIndex é o número da página (0, 1, 2...)
-    this.page = event.pageIndex;
-    // event.pageSize é o tamanho da página (2, 5, 10...)
-    this.pageSize = event.pageSize;
-    // Recarrega os dados com a nova página
-    this.carregarFontes();
-  }
-
-  // --- Método para buscar ---
   buscar(texto: string) {
     this.nomeBusca = texto;
     this.page = 0; // Sempre volta para a primeira página ao buscar
     this.carregarFontes();
   }
+
   carregarMarcasParaOSelect() {
     console.log("Carregando marcas...");
-
-      this.marcaService.findAll().subscribe({
-        next: (dados) => {
-        console.log("Marcas carregadas com sucesso!", dados),
+    this.marcaService.findAll().subscribe({
+      next: (dados) => {
+        console.log("Marcas carregadas com sucesso!", dados);
         this.marcas.set(dados);
       },
-        error: (err) => {
-          console.error('Erro ao carregar marcas', err)
-    }
-      });
-    }
+      error: (err) => {
+        console.error('Erro ao carregar marcas', err);
+      }
+    });
+  }
 
   carregarModelosParaOSelect() {
     console.log("Carregando modelos...");
-
-      this.modeloService.findAll().subscribe({
-        next: (dados) => {
-        console.log("Modelos carregados com sucesso!", dados),
+    this.modeloService.findAll().subscribe({
+      next: (dados) => {
+        console.log("Modelos carregados com sucesso!", dados);
         this.modelos.set(dados);
       },
-        error: (err) => {
-          console.error('Erro ao carregar modelos', err)
-    }
-      });
-    }
+      error: (err) => {
+        console.error('Erro ao carregar modelos', err);
+      }
+    });
+  }
 
   carregarFornecedoresParaOSelect() {
-      this.fornecedorService.findAll().subscribe({
-        next: (dados) => {
+    this.fornecedorService.findAll().subscribe({
+      next: (dados) => {
         this.fornecedores.set(dados);
       },
-        error: (err) => {
-          console.error('Erro ao carregar fornecedores', err)
-    }
-      });
-    }
+      error: (err) => {
+        console.error('Erro ao carregar fornecedores', err);
+      }
+    });
+  }
 
- salvar() {
+  salvar() {
     if (this.fonteForm.invalid) return;
     
-    // 1. Verificamos se há um ID preenchido no formulário 
     const idAtual = this.fonteForm.value.id;
     
-    // 2. Montamos o pacote.
     const fontePronta = {
-        id: idAtual, // <-- Se for novo vai nulo, se for edição vai com o número!
+        id: idAtual,
         nome: this.fonteForm.value.nome,
         potencia: Number(this.fonteForm.value.potencia),
         preco: Number(this.fonteForm.value.preco),
@@ -176,13 +150,11 @@ export class FonteComponent implements OnInit {
         certificacao: this.fonteForm.value.certificacao
     } as Fonte;
 
-    // 3. A Bifurcação: Atualizar ou Criar?
     if (idAtual) {
-      // TEM ID: Vamos chamar o método de atualizar
       this.fonteService.update(fontePronta).subscribe({
         next: () => {
           this.dialogService.showSuccess('Fonte atualizada com sucesso!');
-          this.resetForm(); // Usamos o cancelar para limpar tudo direitinho
+          this.resetForm();
           this.isFormVisible = false;
           this.carregarFontes();
         },
@@ -192,7 +164,6 @@ export class FonteComponent implements OnInit {
         }
       });
     } else {
-      // NÃO TEM ID: É uma fonte nova 
       this.fonteService.save(fontePronta).subscribe({
         next: () => {
           this.dialogService.showSuccess('Fonte guardada com sucesso!');
@@ -207,11 +178,10 @@ export class FonteComponent implements OnInit {
       });
     }
   }
+
   editar(fonte: any) {
-    // Pegamos o nome da certificação quer venha como objeto ou como texto
     const nomeCert = fonte.certificacao?.fontcert || fonte.certificacao;
 
-    // Colamos os dados no formulário! 
     this.fonteForm.patchValue({
       ...fonte,    
       idModelo: fonte.idModelo, 
@@ -220,7 +190,6 @@ export class FonteComponent implements OnInit {
       certificacao: nomeCert ? nomeCert.replace('80 Plus ', '').toUpperCase() : ''
     });
     
-    // Mostra o formulário
     this.isFormVisible = true;
   }
 
@@ -234,7 +203,7 @@ export class FonteComponent implements OnInit {
   }
 
   excluir(id: number | undefined) {
-    if (!id) return; // Segurança extra caso o ID venha vazio
+    if (!id) return;
     
     if (confirm('Tem a certeza que deseja eliminar esta fonte?')) {
       this.fonteService.delete(id).subscribe({
@@ -266,21 +235,18 @@ export class FonteComponent implements OnInit {
   resetForm() {
     this.fonteForm.reset();
   }
+
   abrirDialogCertificacao() {
-    // 1. Mandamos o Angular abrir o nosso componente flutuante
     const dialogRef = this.dialog.open(CertificacaoDialog, {
-      width: '400px' // Um tamanho bacana para não ficar gigante
+      width: '400px'
     });
 
-    // 2. Ficamos "à escuta" do momento em que o Dialog for fechado
     dialogRef.afterClosed().subscribe(resultado => {
-      // Se o utilizador escolheu uma opção (não clicou em Cancelar)
       if (resultado) {
         const valorParaOjava = resultado.fontcert.replace('80 Plus ', '').toUpperCase();
-        // Atualizamos o nosso formulário com a escolha dele!
         this.fonteForm.patchValue({
-          certificacaoNome: resultado.fontcert, // Ex: "80 Plus Bronze"
-          certificacao: valorParaOjava        // Ex: 1
+          certificacaoNome: resultado.fontcert,
+          certificacao: valorParaOjava
         });
       }
     });
@@ -290,8 +256,87 @@ export class FonteComponent implements OnInit {
     this.router.navigate(['/home']);
   }
 
+  // --- Métodos de Paginação Customizada ---
+  getPageStart(): number {
+    if (this.totalFontes() === 0) return 0;
+    return this.page * this.pageSize + 1;
+  }
+
+  getPageEnd(): number {
+    return Math.min((this.page + 1) * this.pageSize, this.totalFontes());
+  }
+
+  onPageSizeChange(newSize: string) {
+    this.pageSize = Number(newSize);
+    this.page = 0;
+    this.carregarFontes();
+  }
+
+  anteriorPagina() {
+    if (this.page > 0) {
+      this.page--;
+      this.carregarFontes();
+    }
+  }
+
+  proximaPagina() {
+    if ((this.page + 1) * this.pageSize < this.totalFontes()) {
+      this.page++;
+      this.carregarFontes();
+    }
+  }
+
+  // --- Seleção de Fornecedores ---
+  isFornecedorSelected(id: number | undefined): boolean {
+    if (id === undefined) return false;
+    const selected = this.fonteForm.value.idFornecedores || [];
+    return selected.includes(id);
+  }
+
+  toggleFornecedor(id: number | undefined) {
+    if (id === undefined) return;
+    const selected = [...(this.fonteForm.value.idFornecedores || [])];
+    const index = selected.indexOf(id);
+    if (index > -1) {
+      selected.splice(index, 1);
+    } else {
+      selected.push(id);
+    }
+    this.fonteForm.patchValue({ idFornecedores: selected });
+    this.fonteForm.get('idFornecedores')?.markAsTouched();
+  }
+
+  // --- Seleção de Modelo ---
+  selecionarModelo(id: number | undefined) {
+    if (id === undefined) return;
+    this.fonteForm.patchValue({ idModelo: id as any });
+    this.fonteForm.get('idModelo')?.markAsTouched();
+  }
+
+  // --- Controle de Dropdown de Fornecedores ---
+  fornecedoresDropdownAberto = false;
+
+  toggleFornecedoresDropdown(event: Event) {
+    event.stopPropagation();
+    this.fornecedoresDropdownAberto = !this.fornecedoresDropdownAberto;
+  }
+
+  @HostListener('document:click')
+  onDocumentClick() {
+    this.fornecedoresDropdownAberto = false;
+  }
+
+  obterFornecedoresSelecionadosTexto(): string {
+    const selectedIds = this.fonteForm.value.idFornecedores || [];
+    const nomes = this.fornecedores()
+      .filter(f => selectedIds.includes(f.id as number))
+      .map(f => f.razaoSocial);
+    return nomes.join(', ');
+  }
+
   // --- Gerenciamento de Imagens ---
-  onFileSelected(event: any, fonteId: number) {
+  onFileSelected(event: any, fonteId: number | undefined) {
+    if (fonteId === undefined) return;
     const file: File = event.target.files[0];
     if (file) {
       this.fonteService.uploadImagem(fonteId, file).subscribe({
@@ -305,7 +350,6 @@ export class FonteComponent implements OnInit {
         }
       });
     }
-    // Limpa o input file para permitir selecionar o mesmo arquivo novamente se necessário
     event.target.value = '';
   }
 

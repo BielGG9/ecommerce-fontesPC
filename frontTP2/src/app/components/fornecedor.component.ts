@@ -5,23 +5,14 @@ import { FornecedorService } from '../services/fornecedor.service';
 import { Fornecedor } from '../models/fornecedor.model';
 import { DialogService } from '../services/dialog.service';
 
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
 import { Router } from '@angular/router';
-import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { PaginatorIntlPtBr } from '../paginator-ptbr';
 
 @Component({
   selector: 'app-fornecedor',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, MatPaginatorModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './fornecedor.component.html',
-  styleUrl: './fornecedor.component.css',
-  providers: [{ provide: MatPaginatorIntl, useClass: PaginatorIntlPtBr }]
+  styleUrl: './fornecedor.component.css'
 })
 export class FornecedorComponent implements OnInit {
   private fornecedorService = inject(FornecedorService);
@@ -74,10 +65,34 @@ export class FornecedorComponent implements OnInit {
     });
   }
 
-  paginar(event: PageEvent): void {
-    this.page = event.pageIndex;
-    this.pageSize = event.pageSize;
+  // --- Métodos de Paginação Customizada ---
+  getPageStart(): number {
+    if (this.totalFornecedores() === 0) return 0;
+    return this.page * this.pageSize + 1;
+  }
+
+  getPageEnd(): number {
+    return Math.min((this.page + 1) * this.pageSize, this.totalFornecedores());
+  }
+
+  onPageSizeChange(newSize: string) {
+    this.pageSize = Number(newSize);
+    this.page = 0;
     this.carregarFornecedores();
+  }
+
+  anteriorPagina() {
+    if (this.page > 0) {
+      this.page--;
+      this.carregarFornecedores();
+    }
+  }
+
+  proximaPagina() {
+    if ((this.page + 1) * this.pageSize < this.totalFornecedores()) {
+      this.page++;
+      this.carregarFornecedores();
+    }
   }
 
   buscar(texto: string) {

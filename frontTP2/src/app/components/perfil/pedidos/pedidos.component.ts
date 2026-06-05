@@ -58,4 +58,13 @@ export class PedidosComponent implements OnInit {
       minute: '2-digit'
     });
   }
+
+  formatCpf(cpf: string | undefined): string {
+    if (!cpf) return '';
+    const digits = cpf.replace(/\D/g, '');
+    if (digits.length === 11) {
+      return `${digits.substring(0, 3)}.***.***-**`;
+    }
+    return digits.substring(0, 3) + '...';
+  }
 }

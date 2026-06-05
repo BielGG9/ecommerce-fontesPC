@@ -24,6 +24,21 @@ export class PerfilComponent implements OnInit {
   cliente: Cliente | null = null;
   ultimoPedido: Pedido | null = null;
   carregandoPedido = true;
+  avatarUrl = 'https://i.pinimg.com/736x/21/e4/f0/21e4f0c4bb7c4e57cdccbc412ca671c6.jpg';
+
+  menuAvatarAberto = false;
+
+  onAvatarSelected(event: any) {
+    console.log(event.target.files[0]);
+  }
+
+  toggleMenuAvatar() {
+    this.menuAvatarAberto = !this.menuAvatarAberto;
+  }
+
+  editarFotoAtual() {
+    console.log('Placeholder para edição da foto');
+  }
 
   ngOnInit() {
     this.carregarPerfil();

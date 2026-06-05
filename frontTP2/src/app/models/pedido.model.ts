@@ -6,6 +6,9 @@ export interface Pedido {
     dataHora: Date;
     valorTotal: number;
     cliente?: Cliente;
+    nomeCliente?: string;
+    cpfCliente?: string;
+    formaPagamento?: string;
     itens: ItemPedido[]; // Composição: Um pedido é composto obrigatoriamente por itens! Se o pedido some, os itens somem.
     enderecoEntrega?: {
         rua: string;

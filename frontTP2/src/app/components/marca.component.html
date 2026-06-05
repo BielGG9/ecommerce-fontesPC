@@ -2,141 +2,192 @@
   
   @if (isFormVisible) {
     <!-- VIEW DO FORMULÁRIO -->
-    <mat-card class="material-card">
-      <div class="card-header-azul">
-        <h2 style="margin: 0; font-size: 20px;">{{ marcaForm.value.id ? 'Editar Marca' : 'Nova Marca' }}</h2>
+    <div class="bg-white rounded border border-outline-variant overflow-hidden shadow-md max-w-[600px] mx-auto w-full mb-8">
+      <div class="bg-primary text-white py-4 px-6 text-center font-bold text-lg rounded-t-custom">
+        {{ marcaForm.value.id ? 'Editar Marca' : 'Nova Marca' }}
       </div>
-      <div style="margin-bottom: 20px; display: flex; align-items: center;">
-        <button mat-button color="primary" (click)="voltarParaLista()">
-          <mat-icon>arrow_back</mat-icon>
-          Voltar para a Lista
-        </button>
-      </div>
-
-      <form [formGroup]="marcaForm" (ngSubmit)="salvar()">
-        
-        <mat-card-content style="padding-top: 20px;">
-          
-          <mat-form-field appearance="outline" style="width: 100%;">
-            <mat-label>Nome da Marca</mat-label>
-            <input matInput formControlName="nome" maxlength="100" placeholder="Ex: Corsair, EVGA, XPG...">
-            @if (marcaForm.get('nome')?.invalid && marcaForm.get('nome')?.touched) {
-              <mat-error>{{ obterMensagemErro('nome', 'Nome da Marca') }}</mat-error>
-            }
-          </mat-form-field>
-
-        </mat-card-content>
-
-        <mat-card-actions align="end" style="padding: 16px;">
-          
-          <button mat-button type="button" (click)="voltarParaLista()">
-            Cancelar
-          </button>
-
-          <button mat-raised-button color="primary" type="submit" [disabled]="marcaForm.invalid">
-            Salvar
-          </button>
-
-        </mat-card-actions>
-      </form>
-    </mat-card>
-
-  } @else {
-    <!-- VIEW DA LISTA -->
-    <mat-card class="material-card mb-4">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 style="margin: 0; font-size: 24px; font-weight: bold; color: #2b3674;">Gestão de Marcas</h2>
-        <div style="display: flex; gap: 10px;">
-          <button mat-button color="primary" (click)="navegarParaHome()">
-            <mat-icon>store</mat-icon>
-            Loja
-          </button>
-          <button mat-raised-button color="primary" (click)="novaMarca()">
-            <mat-icon>add</mat-icon>
-            Adicionar Marca
+      
+      <div class="p-6">
+        <!-- Voltar para a lista -->
+        <div class="mb-6">
+          <button type="button" (click)="voltarParaLista()" class="flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+            </svg>
+            Voltar para a Lista
           </button>
         </div>
-      </div>
 
-      <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: baseline;">
-        <mat-form-field appearance="outline" style="flex: 1;">
-          <mat-label>Pesquisar Marca por Nome</mat-label>
-          <input matInput #inputPesquisa (keyup.enter)="buscar(inputPesquisa.value)" placeholder="Ex: Corsair">
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
+        <form [formGroup]="marcaForm" (ngSubmit)="salvar()" class="flex flex-col gap-6">
+          <!-- Nome da Marca -->
+          <div class="flex flex-col gap-1.5">
+            <input formControlName="nome" type="text" maxlength="100" placeholder="Nome da Marca*" class="w-full bg-[#f8fafc] border border-gray-300 rounded-custom px-4 py-3 text-sm focus:ring-primary focus:border-primary outline-none transition-colors">
+            @if (marcaForm.get('nome')?.invalid && marcaForm.get('nome')?.touched) {
+              <span class="text-xs text-red-600 px-1">{{ obterMensagemErro('nome', 'Nome da Marca') }}</span>
+            }
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex items-center justify-end gap-4 border-t border-gray-100 pt-6">
+            <button type="button" (click)="voltarParaLista()" class="px-5 py-2.5 text-sm font-bold text-gray-500 hover:text-gray-700 cursor-pointer">
+              Cancelar
+            </button>
+            <button type="submit" [disabled]="marcaForm.invalid" class="btn-primary px-8 py-2.5 rounded-custom text-sm font-bold cursor-pointer">
+              Salvar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  } @else {
+    <!-- VIEW DA LISTA -->
+    <div class="bg-[#f7f9fb] min-h-screen py-8">
+      <div class="max-w-[1280px] mx-auto px-6 flex flex-col gap-6">
         
-        <button mat-raised-button color="primary" (click)="buscar(inputPesquisa.value)" style="height: 50px;">
-          Buscar
-        </button>
-      </div>
+        <!-- Header Row -->
+        <div class="mb-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h2 class="text-3xl font-bold text-gray-800" data-purpose="page-title">Gestão de Marcas</h2>
+            <p class="text-gray-500 mt-1">Gerencie as marcas de fontes de PC cadastradas no sistema.</p>
+          </div>
+          <div class="flex items-center gap-4 w-full sm:w-auto">
+            <button type="button" class="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-primary transition-colors duration-200 cursor-pointer" (click)="navegarParaHome()">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+              </svg>
+              Loja
+            </button>
+            <button type="button" class="btn-primary px-5 py-2.5 rounded-custom text-sm font-bold flex items-center gap-2 cursor-pointer" (click)="novaMarca()">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+              </svg>
+              Adicionar Marca
+            </button>
+          </div>
+        </div>
 
-      <table mat-table [dataSource]="marcas()" class="mat-elevation-z8" style="width: 100%; border-radius: 8px; margin-bottom: 30px;">
-
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef style="width: 80px; font-weight: bold;"> ID </th>
-          <td mat-cell *matCellDef="let marca"> {{marca.id}} </td>
-        </ng-container>
-
-        <ng-container matColumnDef="nome">
-          <th mat-header-cell *matHeaderCellDef style="font-weight: bold;"> Nome da Marca </th>
-          <td mat-cell *matCellDef="let marca"> {{marca.nome}} </td>
-        </ng-container>
-
-        <ng-container matColumnDef="imagens">
-          <th mat-header-cell *matHeaderCellDef style="font-weight: bold; text-align: center;"> Imagens </th>
-          <td mat-cell *matCellDef="let marca" style="text-align: center; vertical-align: middle;">
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 5px 0;">
-              
-              <!-- Se tiver imagens, mostra -->
-              <div *ngIf="marca.imagens && marca.imagens.length > 0" style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;">
-                <div *ngFor="let img of marca.imagens" style="position: relative; display: inline-block;">
-                  <img [src]="getImagemUrl(img.url)" alt="Marca" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ccc;">
-                  <button mat-icon-button color="warn" style="position: absolute; top: -10px; right: -10px; transform: scale(0.6);" (click)="excluirImagem(img.url)">
-                    <mat-icon>cancel</mat-icon>
-                  </button>
-                </div>
+        <!-- Search Bar Row -->
+        <section class="mb-2" data-purpose="search-filters">
+          <div class="bg-white p-2 rounded-custom border border-outline-variant flex items-center gap-2 search-container">
+            <div class="relative flex-grow">
+              <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                </svg>
               </div>
+              <input #inputPesquisa [value]="nomeBusca" (keyup.enter)="buscar(inputPesquisa.value)" class="w-full pl-12 pr-4 py-3 bg-transparent border-none focus:ring-0 text-gray-700 placeholder-gray-400 focus:outline-none" placeholder="Pesquisar Marca por Nome" type="text"/>
+            </div>
+            <button type="button" class="btn-outline px-8 py-2.5 rounded-custom font-bold text-sm cursor-pointer" (click)="buscar(inputPesquisa.value)">
+              Buscar
+            </button>
+          </div>
+        </section>
 
-              <!-- Input de file sempre disponível (escondido) -->
-              <input type="file" #fileInput style="display: none" accept="image/*" (change)="onFileSelected($event, marca.id)">
-              <button mat-stroked-button color="primary" style="font-size: 11px; line-height: 24px; padding: 0 10px;" (click)="fileInput.click()">
-                <mat-icon style="font-size: 16px; width: 16px; height: 16px; line-height: 16px;">add_photo_alternate</mat-icon> Upload
+        <!-- Table View -->
+        <section class="bg-white rounded-custom border border-outline-variant overflow-hidden table-container">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead class="bg-gray-50 border-b border-outline-variant">
+                <tr>
+                  <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">ID</th>
+                  <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Nome da Marca</th>
+                  <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-center">Imagens</th>
+                  <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 bg-white">
+                @for (m of marcas(); track m.id) {
+                  <tr class="hover:bg-gray-50/50 transition-colors">
+                    <td class="px-6 py-4 text-sm text-gray-500 font-medium">{{m.id}}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900 font-medium">{{m.nome}}</td>
+                    <td class="px-6 py-4 text-sm">
+                      <div class="flex flex-col items-center gap-2">
+                        @if (m.imagens && m.imagens.length > 0) {
+                          <div class="flex gap-2 flex-wrap justify-center">
+                            @for (img of m.imagens; track img.url) {
+                              <div class="relative group">
+                                <img [src]="getImagemUrl(img.url)" alt="Marca" class="w-10 h-10 object-cover rounded border border-gray-200 shadow-sm transition-transform hover:scale-105">
+                                <button type="button" class="absolute -top-1.5 -right-1.5 bg-red-600 text-white rounded-full p-0.5 flex items-center justify-center transition-colors shadow hover:bg-red-700 cursor-pointer" (click)="excluirImagem(img.url)" title="Excluir imagem">
+                                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                                  </svg>
+                                </button>
+                              </div>
+                            }
+                          </div>
+                        }
+                        <input type="file" #fileInput class="hidden" accept="image/*" (change)="onFileSelected($event, m.id!)">
+                        <button type="button" class="btn-outline px-3 py-1 rounded-custom text-xs font-bold flex items-center gap-1 cursor-pointer" (click)="fileInput.click()">
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                          </svg>
+                          Upload
+                        </button>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-right">
+                      <div class="flex items-center justify-end gap-2">
+                        <button type="button" class="p-2 text-primary hover:bg-blue-50 rounded transition-colors flex items-center justify-center cursor-pointer" (click)="editar(m)" title="Editar">
+                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                          </svg>
+                        </button>
+                        <button type="button" class="p-2 text-red-600 hover:bg-red-50 rounded transition-colors flex items-center justify-center cursor-pointer" (click)="excluir(m.id!)" title="Excluir">
+                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+                @if (marcas().length === 0) {
+                  <tr>
+                    <td class="px-6 py-20 text-center" colspan="4">
+                      <div class="flex flex-col items-center justify-center opacity-40">
+                        <svg class="h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+                        </svg>
+                        <p class="text-lg font-medium">Nenhuma marca encontrada</p>
+                        <p class="text-sm">Tente ajustar seus termos de busca ou adicionar um novo item.</p>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- BEGIN: Pagination -->
+          <div class="px-6 py-4 border-t border-outline-variant flex items-center justify-end gap-8 bg-gray-50/50">
+            <div class="flex items-center gap-3 text-sm text-gray-600">
+              <span>Itens por página:</span>
+              <select [value]="pageSize" (change)="onPageSizeChange($any($event.target).value)" class="bg-white border border-gray-300 rounded-custom py-1 pl-2 pr-8 text-sm focus:ring-primary focus:border-primary outline-none">
+                <option [value]="2">2</option>
+                <option [value]="5">5</option>
+                <option [value]="10">10</option>
+                <option [value]="20">20</option>
+              </select>
+            </div>
+            <div class="text-sm text-gray-600 font-medium">
+              {{ getPageStart() }} de {{ totalMarcas() }}
+            </div>
+            <div class="flex items-center gap-2">
+              <button (click)="anteriorPagina()" [disabled]="page === 0" class="p-1 rounded hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer">
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                </svg>
+              </button>
+              <button (click)="proximaPagina()" [disabled]="(page + 1) * pageSize >= totalMarcas()" class="p-1 rounded hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer">
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                </svg>
               </button>
             </div>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="acoes">
-          <th mat-header-cell *matHeaderCellDef style="width: 120px; text-align: center; font-weight: bold;"> Ações </th>
-          <td mat-cell *matCellDef="let marca" style="text-align: center;">
-            
-            <button mat-icon-button color="primary" (click)="editar(marca)" title="Editar">
-              <mat-icon>edit</mat-icon>
-            </button>
-
-            <button mat-icon-button color="warn" (click)="excluir(marca.id!)" title="Excluir">
-              <mat-icon>delete</mat-icon>
-            </button>
-
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="colunas"></tr>
-        <tr mat-row *matRowDef="let row; columns: colunas;"></tr>
-
-      </table>
-
-      <mat-paginator 
-        [pageSizeOptions]="[2, 4, 8, 16]" 
-        [pageSize]="pageSize" 
-        [length]="totalMarcas()" 
-        (page)="paginar($event)">
-      </mat-paginator>
-
-      <div *ngIf="marcas().length === 0" style="text-align: center; padding: 20px; color: #666;">
-        Nenhuma marca registrada no momento.
+          </div>
+          <!-- END: Pagination -->
+        </section>
       </div>
-    </mat-card>
+    </div>
   }
-
-</div> 
+</div>

@@ -23,6 +23,7 @@ Este documento resume todas as funcionalidades que o projeto E-Commerce FontesPC
 *   **Proteção de Rotas:** Utilização de AuthGuards nativos no Angular (`canActivateUser` e `canActivateAuthRole`) para blindar o acesso indevido às rotas de Perfil (precisa estar logado) e Admin (precisa ter role Admin/Funcionario).
 
 ## 4. Backoffice (Área Administrativa)
+
 *   **Gestão de Cadastros:** Telas de CRUDs protegidas e operacionais para gerenciar o ecossistema da loja: Marcas, Fontes (Produtos), Modelos, Departamentos, Fornecedores e Funcionários.
 *   **Upload e Exibição de Imagens:** Testado e aprovado o upload de fotos para Marcas e Fontes (Produtos). As imagens são salvas, seus nomes de arquivo persistidos, e depois servidas e exibidas com sucesso na vitrine (`HomeComponent`).
 

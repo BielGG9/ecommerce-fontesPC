@@ -4,24 +4,14 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MarcaService } from '../services/marca.service';
 import { Marca } from '../models/marca.model';
 import { DialogService } from '../services/dialog.service';
-
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
 import { Router } from '@angular/router';
-import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { PaginatorIntlPtBr } from '../paginator-ptbr';
 
 @Component({
   selector: 'app-marca',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatTableModule, MatPaginatorModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './marca.component.html',
-  styleUrl: './marca.component.css',
-  providers: [{ provide: MatPaginatorIntl, useClass: PaginatorIntlPtBr }]
+  styleUrl: './marca.component.css'
 })
 export class MarcaComponent implements OnInit {
   private marcaService = inject(MarcaService);
@@ -70,10 +60,34 @@ export class MarcaComponent implements OnInit {
     });
   }
 
-  paginar(event: PageEvent): void {
-    this.page = event.pageIndex;
-    this.pageSize = event.pageSize;
+  // --- Métodos de Paginação Customizada ---
+  getPageStart(): number {
+    if (this.totalMarcas() === 0) return 0;
+    return this.page * this.pageSize + 1;
+  }
+
+  getPageEnd(): number {
+    return Math.min((this.page + 1) * this.pageSize, this.totalMarcas());
+  }
+
+  onPageSizeChange(newSize: string) {
+    this.pageSize = Number(newSize);
+    this.page = 0;
     this.carregarMarcas();
+  }
+
+  anteriorPagina() {
+    if (this.page > 0) {
+      this.page--;
+      this.carregarMarcas();
+    }
+  }
+
+  proximaPagina() {
+    if ((this.page + 1) * this.pageSize < this.totalMarcas()) {
+      this.page++;
+      this.carregarMarcas();
+    }
   }
 
   buscar(texto: string) {

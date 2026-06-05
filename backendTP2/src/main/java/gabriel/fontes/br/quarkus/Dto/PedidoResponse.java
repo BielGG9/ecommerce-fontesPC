@@ -8,6 +8,7 @@ import gabriel.fontes.br.quarkus.Model.Pedido;
 public record PedidoResponse(
     Long id,
     String nomeCliente,
+    String cpfCliente,
     Double total,
     LocalDateTime data,
     EnderecoEntregaResponse enderecoEntrega,
@@ -32,6 +33,7 @@ public record PedidoResponse(
         return new PedidoResponse(
             pedido.getId(),
             pedido.getNomeClienteSnapshot(),
+            pedido.getCpfClienteSnapshot(),
             pedido.getTotal(),
             pedido.getData(),
             enderecoRes,

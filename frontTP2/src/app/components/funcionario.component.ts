@@ -7,24 +7,14 @@ import { DialogService } from '../services/dialog.service';
 import { DepartamentoService } from '../services/departamento.service';
 import { Departamento } from '../models/departamento.model';
 
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
-import { MatSelectModule } from '@angular/material/select';
 import { Router } from '@angular/router';
-import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { PaginatorIntlPtBr } from '../paginator-ptbr';
 
 @Component({
   selector: 'app-funcionario',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatIconModule, MatTableModule, MatPaginatorModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './funcionario.component.html',
-  styleUrl: './funcionario.component.css',
-  providers: [{ provide: MatPaginatorIntl, useClass: PaginatorIntlPtBr }]
+  styleUrl: './funcionario.component.css'
 })
 export class FuncionarioComponent implements OnInit {
   private funcionarioService = inject(FuncionarioService);
@@ -82,10 +72,34 @@ export class FuncionarioComponent implements OnInit {
     });
   }
 
-  paginar(event: PageEvent): void {
-    this.page = event.pageIndex;
-    this.pageSize = event.pageSize;
+  // --- Métodos de Paginação Customizada ---
+  getPageStart(): number {
+    if (this.totalFuncionarios() === 0) return 0;
+    return this.page * this.pageSize + 1;
+  }
+
+  getPageEnd(): number {
+    return Math.min((this.page + 1) * this.pageSize, this.totalFuncionarios());
+  }
+
+  onPageSizeChange(newSize: string) {
+    this.pageSize = Number(newSize);
+    this.page = 0;
     this.carregarFuncionarios();
+  }
+
+  anteriorPagina() {
+    if (this.page > 0) {
+      this.page--;
+      this.carregarFuncionarios();
+    }
+  }
+
+  proximaPagina() {
+    if ((this.page + 1) * this.pageSize < this.totalFuncionarios()) {
+      this.page++;
+      this.carregarFuncionarios();
+    }
   }
 
   buscar(texto: string) {

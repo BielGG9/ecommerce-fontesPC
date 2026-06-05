@@ -32,6 +32,7 @@ public class Pedido extends DefaultEntity{
     @Column(name = "id_usuario_keycloack")
     private String idUsuario;
     private String nomeClienteSnapshot;
+    private String cpfClienteSnapshot;
 
     // Relação Um-para-Muitos com ItemPedido com cascade persist
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.PERSIST)
@@ -124,6 +125,12 @@ public class Pedido extends DefaultEntity{
     }
     public void setNomeClienteSnapshot(String nomeClienteSnapshot) {
         this.nomeClienteSnapshot = nomeClienteSnapshot;
+    }
+    public String getCpfClienteSnapshot() {
+        return cpfClienteSnapshot;
+    }
+    public void setCpfClienteSnapshot(String cpfClienteSnapshot) {
+        this.cpfClienteSnapshot = cpfClienteSnapshot;
     }
     public EnderecoEntrega getEnderecoEntrega() {
         return enderecoEntrega;

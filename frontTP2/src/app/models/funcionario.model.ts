@@ -4,8 +4,11 @@ import { Departamento } from './departamento.model';
 // Herança: Funcionario "é uma" Pessoa
 export interface Funcionario extends Pessoa {
     cpf: string;
-    login: string;
-    salario: number;
-    idDepartamento?: number;
-    departamento?: Departamento; // Agregação (1:N)
+    rg: string;
+    cargo: string;
+    dataAdmissao: string;
+    idDepartamento: number;
+    departamento?: Departamento | string;
+    login?: string;
+    salario?: number;
 }

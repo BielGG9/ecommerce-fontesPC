@@ -31,4 +31,11 @@ export class ClienteService {
   alterarSenha(senhaAtual: string, novaSenha: string): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/alterar-senha`, { senhaAtual, novaSenha });
   }
+
+  uploadAvatar(idCliente: number, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('idCliente', idCliente.toString());
+    formData.append('file', file);
+    return this.http.patch(`${this.apiUrl}/image/upload`, formData);
+  }
 }

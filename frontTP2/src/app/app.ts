@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterLink, Router, RouterLinkActive, ActivatedRoute } from '@angular/router';
+import { RouterOutlet, RouterLink, Router, RouterLinkActive, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MatBadgeModule } from '@angular/material/badge';
 import { CarrinhoService } from './services/carrinho.service';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,7 +15,8 @@ import { FonteService } from './services/fonte.service';
   selector: 'app-root',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterOutlet, RouterLink, RouterLinkActive, MatBadgeModule, MatIconModule],
-  templateUrl: './components/app.component.html'
+  templateUrl: './components/app.component.html',
+  styleUrl: './components/app.component.css'
 })
 export class App implements OnInit, OnDestroy {
   private router = inject(Router);
@@ -25,15 +27,36 @@ export class App implements OnInit, OnDestroy {
   private authSub!: Subscription;
   public carrinhoService = inject(CarrinhoService);
 
+  // Signals reativos — sem NG0100
+  readonly marcas = toSignal(this.marcaService.findAll(), { initialValue: [] as any[] });
+  readonly certificacoes = toSignal(this.fonteService.getCertificacoes(), { initialValue: [] as string[] });
+
   usuarioLogado = false;
   nomeUsuario: string | null = '';
 
-  marcas: any[] = [];
-  certificacoes: string[] = [];
-  
-  filtroNome: string = '';
-  filtroMarca: number | null = null;
-  filtroCategoria: string = '';
+  isAdminRoute = false;
+  isVitrine = false;
+
+  termoBusca: string = '';
+  marcaSelecionada: number | null = null;
+  certificacaoSelecionada: string = '';
+
+  lastScrollPosition = 0;
+  isScrollingDown = false;
+
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    const currentScroll = window.scrollY || document.documentElement.scrollTop || 0;
+
+    if (currentScroll <= 0) {
+      this.isScrollingDown = false;
+      this.lastScrollPosition = 0;
+      return;
+    }
+
+    this.isScrollingDown = currentScroll > this.lastScrollPosition;
+    this.lastScrollPosition = currentScroll;
+  }
 
   ngOnInit() {
     this.authSub = this.authService.usuarioLogado$.subscribe(nome => {
@@ -41,14 +64,21 @@ export class App implements OnInit, OnDestroy {
       this.nomeUsuario = nome;
     });
 
-    this.marcaService.findAll().subscribe(m => this.marcas = m);
-    this.fonteService.getCertificacoes().subscribe(c => this.certificacoes = c);
-    
-    // Sync filter fields with URL
+    // Sync filter fields with URL (deferred to next tick to avoid NG0100)
     this.route.queryParams.subscribe(params => {
-      this.filtroNome = params['nome'] || '';
-      this.filtroMarca = params['marca'] ? Number(params['marca']) : null;
-      this.filtroCategoria = params['categoria'] || '';
+      setTimeout(() => {
+        this.termoBusca = params['nome'] || '';
+        this.marcaSelecionada = params['marca'] ? Number(params['marca']) : null;
+        this.certificacaoSelecionada = params['categoria'] || '';
+      });
+    });
+
+    // Initialize route state synchronously, then track navigation
+    this.updateRouteState(this.router.url);
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.updateRouteState(event.urlAfterRedirects || event.url);
+      }
     });
   }
 
@@ -58,26 +88,28 @@ export class App implements OnInit, OnDestroy {
     }
   }
 
-  get isAdminRoute(): boolean {
-    return this.router.url.startsWith('/admin');
+  private updateRouteState(url: string) {
+    if (!url) return;
+    this.isAdminRoute = url.startsWith('/admin');
+    this.isVitrine = url === '/' || url.startsWith('/?') || url === '/home' || url.startsWith('/home?');
   }
 
-  buscar() {
-    this.router.navigate(['/'], { 
-      queryParams: { 
-        nome: this.filtroNome || null, 
-        marca: this.filtroMarca || null, 
-        categoria: this.filtroCategoria || null 
+  filtrar() {
+    this.router.navigate(['/'], {
+      queryParams: {
+        nome: this.termoBusca || null,
+        marca: this.marcaSelecionada || null,
+        categoria: this.certificacaoSelecionada || null
       },
       queryParamsHandling: 'merge'
     });
   }
 
-  limparFiltros() {
-    this.filtroNome = '';
-    this.filtroMarca = null;
-    this.filtroCategoria = '';
-    this.router.navigate(['/'], { 
+  limpar() {
+    this.termoBusca = '';
+    this.marcaSelecionada = null;
+    this.certificacaoSelecionada = '';
+    this.router.navigate(['/'], {
       queryParams: { nome: null, marca: null, categoria: null },
       queryParamsHandling: 'merge'
     });

@@ -88,6 +88,10 @@
                     <mat-icon style="font-size: 18px; width: 18px; height: 18px; color: #0d6efd;">location_on</mat-icon>
                     Endereço de Entrega
                   </h5>
+                  <div class="snapshot-info">
+                    <strong>Destinatário:</strong> {{ pedido.nomeCliente }} <br>
+                    <strong>Documento:</strong> CPF {{ formatCpf(pedido.cpfCliente) }} <br>
+                  </div>
                   <p style="margin: 0; color: #555; font-size: 13.5px; line-height: 1.5;">
                     <strong>{{ pedido.enderecoEntrega.rua }}, {{ pedido.enderecoEntrega.numero }}</strong>
                     <span *ngIf="pedido.enderecoEntrega.complemento"> - {{ pedido.enderecoEntrega.complemento }}</span><br>
@@ -103,8 +107,8 @@
                     <span>Entregue por <strong>Fontes PC</strong></span>
                   </div>
                   <div class="payment-info">
-                    <mat-icon>credit_card</mat-icon>
-                    <span>Pagamento via Sistema</span>
+                    <mat-icon>payment</mat-icon>
+                    <span>Pagamento via <strong>{{ pedido.formaPagamento }}</strong></span>
                   </div>
                 </div>
               </div>

@@ -14,11 +14,26 @@ export class PedidoService {
   constructor(private http: HttpClient) { }
 
   private mapToPedido(p: any): Pedido {
+    let formaPagamento = 'Sistema';
+    const innerPagamento = p.pagamento?.pagamento;
+    if (innerPagamento) {
+      if (innerPagamento.chavePix !== undefined) {
+        formaPagamento = 'Pix';
+      } else if (innerPagamento.numeroCartao !== undefined) {
+        formaPagamento = 'Cartão';
+      } else if (innerPagamento.codigoBarras !== undefined) {
+        formaPagamento = 'Boleto';
+      }
+    }
+
     return {
       id: p.id,
       dataHora: p.data ? new Date(p.data) : new Date(),
       valorTotal: p.total || 0,
       cliente: p.nomeCliente ? { nome: p.nomeCliente } as any : undefined,
+      nomeCliente: p.nomeCliente,
+      cpfCliente: p.cpfCliente,
+      formaPagamento: formaPagamento,
       itens: (p.itensPedido || []).map((item: any) => ({
         id: item.id,
         quantidade: item.quantidade,

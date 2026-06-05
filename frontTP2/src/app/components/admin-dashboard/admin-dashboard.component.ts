@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { DashboardService } from '../../services/dashboard.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -14,9 +15,11 @@ import { Subscription } from 'rxjs';
 export class AdminDashboardComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private authService = inject(AuthService);
+  private dashboardService = inject(DashboardService);
   private authSub!: Subscription;
 
   nomeUsuario: string | null = '';
+  estatisticas: any = null;
 
   // Controle do estado da Sidebar
   isCollapsed = false;
@@ -27,6 +30,34 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.authSub = this.authService.usuarioLogado$.subscribe(nome => {
       this.nomeUsuario = nome;
     });
+
+    // Chamada HTTP comentada temporariamente para fins de apresentação/mock
+    /*
+    this.dashboardService.getEstatisticas().subscribe({
+      next: (dados) => {
+        this.estatisticas = dados;
+      },
+      error: (err) => {
+        console.error('Erro ao carregar estatísticas do dashboard:', err);
+      }
+    });
+    */
+
+    // Geração de dados simulados (Mock) com valores aleatórios e realistas
+    const randomFontes = Math.floor(Math.random() * (150 - 50 + 1)) + 50;
+    const randomMarcas = Math.floor(Math.random() * (30 - 10 + 1)) + 10;
+    const randomVendas = Math.floor(Math.random() * (12000 - 3000 + 1)) + 3000;
+    const randomClientes = Math.floor(Math.random() * (60 - 15 + 1)) + 15;
+
+    this.estatisticas = {
+      totalFontes: randomFontes,
+      totalMarcas: randomMarcas,
+      vendasMensais: randomVendas,
+      novosClientes: randomClientes,
+      // Suporte à versão mais recente com chaves de métricas diárias
+      vendasDiarias: randomVendas,
+      quantidadeVendasDiarias: randomClientes
+    };
   }
 
   ngOnDestroy() {

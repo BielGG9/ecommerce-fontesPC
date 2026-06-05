@@ -10,16 +10,6 @@ import { Marca } from '../models/marca.model';
 import { DialogService } from '../services/dialog.service';
 
 
-// Peças do Angular Material
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTableModule } from '@angular/material/table';
-import { MatIconModule } from '@angular/material/icon';
-import { MatPaginatorIntl, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { PaginatorIntlPtBr } from '../paginator-ptbr';
 import { Router } from '@angular/router';
 
 @Component({
@@ -27,19 +17,10 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [
     CommonModule, 
-    ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatTableModule,
-    MatIconModule,
-    MatPaginatorModule
+    ReactiveFormsModule
   ],
   templateUrl: './modelo.component.html',
-  styleUrl: './modelo.component.css',
-  providers: [{ provide: MatPaginatorIntl, useClass: PaginatorIntlPtBr }]
+  styleUrl: './modelo.component.css'
 })
 export class ModeloComponent implements OnInit {
   private modeloService = inject(ModeloService);
@@ -92,10 +73,34 @@ export class ModeloComponent implements OnInit {
     });
   }
 
-  paginar(event: PageEvent): void {
-    this.page = event.pageIndex;
-    this.pageSize = event.pageSize;
+  // --- Métodos de Paginação Customizada ---
+  getPageStart(): number {
+    if (this.totalModelos() === 0) return 0;
+    return this.page * this.pageSize + 1;
+  }
+
+  getPageEnd(): number {
+    return Math.min((this.page + 1) * this.pageSize, this.totalModelos());
+  }
+
+  onPageSizeChange(newSize: string) {
+    this.pageSize = Number(newSize);
+    this.page = 0;
     this.carregarModelos();
+  }
+
+  anteriorPagina() {
+    if (this.page > 0) {
+      this.page--;
+      this.carregarModelos();
+    }
+  }
+
+  proximaPagina() {
+    if ((this.page + 1) * this.pageSize < this.totalModelos()) {
+      this.page++;
+      this.carregarModelos();
+    }
   }
 
   buscar(texto: string) {

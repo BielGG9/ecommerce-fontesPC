@@ -79,16 +79,68 @@
       
       <!-- Stats Cards Row -->
       <div class="row g-4 mb-5">
-        <div class="col-xl-3 col-md-6" *ngFor="let stat of stats">
+        <!-- Card 1: Total Fontes -->
+        <div class="col-xl-3 col-md-6">
           <div class="card stat-card shadow-sm border-0 h-100 rounded-4">
             <div class="card-body p-4">
               <div class="d-flex align-items-center justify-content-between">
                 <div>
-                  <p class="text-muted text-uppercase small fw-bold mb-1 letter-spacing-1">{{ stat.title }}</p>
-                  <h3 class="fw-bold mb-0 text-dark">{{ stat.value }}</h3>
+                  <p class="text-muted text-uppercase small fw-bold mb-1 letter-spacing-1">Total Fontes</p>
+                  <h3 class="fw-bold mb-0 text-dark">{{ estatisticas?.totalFontes || 0 }}</h3>
                 </div>
-                <div class="icon-shape rounded-circle p-3 d-flex align-items-center justify-content-center" [ngClass]="stat.bgColor">
-                  <i [class]="stat.icon + ' fs-3 ' + stat.colorClass"></i>
+                <div class="icon-shape rounded-circle bg-primary-subtle p-3 d-flex align-items-center justify-content-center">
+                  <i class="bi bi-lightning-charge fs-3 text-primary"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Marcas -->
+        <div class="col-xl-3 col-md-6">
+          <div class="card stat-card shadow-sm border-0 h-100 rounded-4">
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <p class="text-muted text-uppercase small fw-bold mb-1 letter-spacing-1">Marcas</p>
+                  <h3 class="fw-bold mb-0 text-dark">{{ estatisticas?.totalMarcas || 0 }}</h3>
+                </div>
+                <div class="icon-shape rounded-circle bg-success-subtle p-3 d-flex align-items-center justify-content-center">
+                  <i class="bi bi-tags fs-3 text-success"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Vendas Diárias -->
+        <div class="col-xl-3 col-md-6">
+          <div class="card stat-card shadow-sm border-0 h-100 rounded-4">
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <p class="text-muted text-uppercase small fw-bold mb-1 letter-spacing-1">Vendas Diárias</p>
+                  <h3 class="fw-bold mb-0 text-dark">{{ (estatisticas?.vendasDiarias || 0) | currency:'BRL':'symbol':'1.2-2' }}</h3>
+                </div>
+                <div class="icon-shape rounded-circle bg-warning-subtle p-3 d-flex align-items-center justify-content-center">
+                  <i class="bi bi-graph-up-arrow fs-3 text-warning"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: Vendas Diárias (Quantidade) -->
+        <div class="col-xl-3 col-md-6">
+          <div class="card stat-card shadow-sm border-0 h-100 rounded-4">
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <p class="text-muted text-uppercase small fw-bold mb-1 letter-spacing-1">Vendas Diárias (Quantidade)</p>
+                  <h3 class="fw-bold mb-0 text-dark">{{ estatisticas?.quantidadeVendasDiarias || 0 }}</h3>
+                </div>
+                <div class="icon-shape rounded-circle bg-info-subtle p-3 d-flex align-items-center justify-content-center">
+                  <i class="bi bi-people fs-3 text-info"></i>
                 </div>
               </div>
             </div>

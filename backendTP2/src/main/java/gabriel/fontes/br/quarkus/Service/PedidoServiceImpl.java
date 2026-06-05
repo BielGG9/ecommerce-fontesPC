@@ -94,6 +94,7 @@ public class PedidoServiceImpl implements PedidoService {
         pedido.setIdUsuario(idUsuarioKeycloak);
         pedido.setCliente(clienteAutenticado); // Importante: Setar o objeto Cliente também
         pedido.setNomeClienteSnapshot(clienteAutenticado.getNome());
+        pedido.setCpfClienteSnapshot(clienteAutenticado.getCpf());
         pedido.setData(LocalDateTime.now());
 
         // 4. Mapear Endereço (Snapshot)

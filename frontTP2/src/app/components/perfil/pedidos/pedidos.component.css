@@ -278,3 +278,12 @@
 
 .shipping-info mat-icon { color: #0d6efd; }
 .payment-info mat-icon { color: #8a05be; }
+
+.snapshot-info {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed #eef0f4;
+  color: #555;
+  font-size: 13.5px;
+  line-height: 1.6;
+}

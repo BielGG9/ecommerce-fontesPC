@@ -5,13 +5,12 @@
 }
 
 .hero-banner {
-  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  background: linear-gradient(135deg, #020617 0%, #00174b 50%, #003694 100%);
   color: white;
   text-align: center;
-  padding: 40px 20px;
-  border-radius: 10px;
-  margin-bottom: 30px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  padding: 4rem 2rem;
+  width: 100%;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
 .hero-banner h1 {
