@@ -19,6 +19,10 @@ export class CarrinhoComponent {
     this.carrinhoService.itens.update(itens => itens.filter(i => i.fonte?.id !== item.fonte?.id));
   }
 
+  removerTodos() {
+    this.carrinhoService.itens.set([]);
+  }
+
   aumentarQuantidade(item: ItemPedido) {
     if (item.fonte && item.quantidade < (item.fonte.estoque ?? 0)) {
        this.carrinhoService.itens.update(itens => {
@@ -41,5 +45,16 @@ export class CarrinhoComponent {
 
   irParaCheckout() {
     this.router.navigate(['/checkout']);
+  }
+
+  getImagemUrl(url: string): string {
+    return `http://localhost:8081${url}`;
+  }
+
+  getFirstImageUrl(fonte: any): string | null {
+    if (!fonte?.imagens || fonte.imagens.length === 0) return null;
+    const first = fonte.imagens[0];
+    if (!first?.url) return null;
+    return this.getImagemUrl(first.url);
   }
 }

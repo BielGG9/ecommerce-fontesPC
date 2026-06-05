@@ -1,94 +1,143 @@
-<div class="container py-5 mt-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-primary mb-0"><i class="bi bi-cart3 me-2"></i>Seu Carrinho</h2>
-    <button [routerLink]="['/']" class="btn btn-outline-secondary rounded-pill shadow-sm">
-      <i class="bi bi-arrow-left me-2"></i>Continuar Comprando
-    </button>
-  </div>
+<div class="max-w-[1280px] mx-auto w-full px-md py-xl">
+    <div class="flex flex-col lg:flex-row gap-xl">
+        <!-- Left Column: Cart Items -->
+        <div class="flex-1">
+            <div class="flex items-center justify-between mb-lg border-b border-outline-variant pb-md">
+                <h1 class="text-display-sm font-bold text-primary flex items-center gap-sm">
+                    <span class="material-symbols-outlined text-[32px]">shopping_cart</span>
+                    Seu Carrinho
+                </h1>
+            </div>
 
-  @if (carrinhoService.itens().length === 0) {
-    <div class="text-center py-5 bg-white rounded-4 shadow-sm border">
-      <i class="bi bi-cart-x fs-1 text-muted mb-3 d-block"></i>
-      <h4 class="text-muted">Seu carrinho está vazio</h4>
-      <p class="text-secondary mb-4">Adicione algumas fontes para dar energia ao seu PC!</p>
-      <button [routerLink]="['/']" class="btn btn-primary rounded-pill px-4 py-2 fw-bold">
-        Ver Vitrine
-      </button>
-    </div>
-  } @else {
-    <div class="row g-4">
-      <!-- Lista de Itens -->
-      <div class="col-lg-8">
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-          <div class="card-body p-0">
-            <ul class="list-group list-group-flush">
-              @for (item of carrinhoService.itens(); track item.fonte?.id) {
-                <li class="list-group-item p-4 d-flex align-items-center justify-content-between">
-                  <div class="d-flex align-items-center">
-                    <div class="bg-light rounded p-3 me-3 text-center" style="width: 80px; height: 80px;">
-                      <i class="bi bi-lightning-charge fs-1 text-primary"></i>
+            @if (carrinhoService.itens().length === 0) {
+            <div class="text-center py-20 bg-surface-container-lowest rounded-2xl border border-outline-variant shadow-sm flex flex-col items-center justify-center">
+                <span class="material-symbols-outlined text-[64px] text-outline mb-md block">remove_shopping_cart</span>
+                <h2 class="text-title-large font-bold text-on-surface mb-sm">Seu carrinho está vazio</h2>
+                <p class="text-body-md text-on-surface-variant mb-lg">Adicione algumas fontes para dar energia ao seu PC!</p>
+                <button [routerLink]="['/']" class="bg-primary text-on-primary font-label-large uppercase tracking-wider px-xl py-3 rounded-full hover:bg-primary/90 transition-colors shadow-sm flex items-center gap-sm">
+                    Ver Vitrine
+                </button>
+            </div>
+            } @else {
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+                <!-- Header -->
+                <div class="flex items-center justify-between p-md border-b border-outline-variant bg-surface-container-lowest">
+                    <div class="flex items-center gap-sm text-primary font-bold uppercase tracking-wider text-label-large">
+                        <span class="material-symbols-outlined">shopping_basket</span>
+                        Produto e Serviço
                     </div>
-                    <div>
-                      <h5 class="mb-1 fw-bold">{{ item.fonte?.nome }}</h5>
-                      <p class="text-muted small mb-0">{{ item.fonte?.marca }} | {{ item.fonte?.potencia }}W</p>
-                      <span class="badge bg-primary mt-2">{{ item.fonte?.certificacao?.fontcert }}</span>
-                    </div>
-                  </div>
-                  
-                  <div class="d-flex flex-column align-items-end">
-                    <div class="d-flex align-items-center mb-2">
-                      <button class="btn btn-sm btn-outline-secondary rounded-circle" (click)="diminuirQuantidade(item)" [disabled]="item.quantidade <= 1">
-                        <i class="bi bi-dash"></i>
-                      </button>
-                      <span class="mx-3 fw-bold">{{ item.quantidade }}</span>
-                      <button class="btn btn-sm btn-outline-secondary rounded-circle" (click)="aumentarQuantidade(item)" [disabled]="item.quantidade >= (item.fonte?.estoque || 0)">
-                        <i class="bi bi-plus"></i>
-                      </button>
-                    </div>
-                    <div class="fw-bold fs-5 text-dark mb-1">
-                      {{ (item.precoUnitario * item.quantidade) | currency:'BRL' }}
-                    </div>
-                    <button class="btn btn-sm btn-link text-danger text-decoration-none p-0" (click)="removerItem(item)">
-                      <i class="bi bi-trash me-1"></i> Remover
+                    <button class="flex items-center gap-1 text-[#DC2626] hover:bg-[#DC2626]/10 px-3 py-1.5 rounded-lg transition-colors text-label-small font-bold uppercase" (click)="removerTodos()">
+                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                        Remover Todos os Produtos
                     </button>
-                  </div>
-                </li>
-              }
-            </ul>
-          </div>
-        </div>
-      </div>
+                </div>
 
-      <!-- Resumo do Pedido -->
-      <div class="col-lg-4">
-        <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 100px;">
-          <div class="card-body p-4">
-            <h4 class="fw-bold border-bottom pb-3 mb-3">Resumo do Pedido</h4>
-            
-            <div class="d-flex justify-content-between mb-2">
-              <span class="text-secondary">Itens ({{ carrinhoService.quantidadeTotal() }})</span>
-              <span class="fw-medium">{{ carrinhoService.valorTotal() | currency:'BRL' }}</span>
-            </div>
-            
-            <div class="d-flex justify-content-between mb-4">
-              <span class="text-secondary">Frete</span>
-              <span class="text-success fw-bold">Grátis</span>
-            </div>
-            
-            <div class="d-flex justify-content-between border-top pt-3 mb-4">
-              <span class="fw-bold fs-5">Total</span>
-              <span class="fw-bold fs-4 text-primary">{{ carrinhoService.valorTotal() | currency:'BRL' }}</span>
-            </div>
+                <!-- Items List -->
+                <div class="flex flex-col">
+                    @for (item of carrinhoService.itens(); track item.fonte?.id) {
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-md border-b border-outline-variant last:border-0 gap-md hover:bg-surface-container-low/50 transition-colors">
+                        <div class="flex items-center gap-md w-full sm:w-auto">
+                            <!-- Product Image -->
+                            <div class="w-24 h-24 bg-surface-container-low rounded-lg flex items-center justify-center shrink-0 border border-outline-variant overflow-hidden">
+                                @if (getFirstImageUrl(item.fonte)) {
+                                  <img [src]="getFirstImageUrl(item.fonte)" alt="{{ item.fonte?.nome }}" class="max-h-full max-w-full object-contain mix-blend-multiply p-2">
+                                } @else {
+                                  <span class="material-symbols-outlined text-[40px] text-primary" style="font-variation-settings: 'FILL' 1;">bolt</span>
+                                }
+                            </div>
+                            
+                            <!-- Product Details -->
+                            <div class="flex-1">
+                                <h3 class="text-title-medium text-on-surface font-bold mb-xs">{{ item.fonte?.nome }}</h3>
+                                <p class="text-body-small text-on-surface-variant mb-sm">{{ item.fonte?.marca }} <span class="text-outline-variant px-1">|</span> {{ item.fonte?.potencia }}W</p>
+                                <div class="flex items-center gap-xs">
+                                    <span class="px-2 py-1 bg-[#3B82F6] text-white text-[10px] font-bold rounded uppercase tracking-wider shadow-sm">{{ item.fonte?.certificacao?.fontcert }}</span>
+                                </div>
+                            </div>
+                        </div>
 
-            <button class="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow-sm" (click)="irParaCheckout()">
-              <i class="bi bi-check-circle me-2"></i> Finalizar Compra
-            </button>
-            <div class="text-center mt-3 text-muted small">
-              <i class="bi bi-shield-lock me-1"></i> Compra Segura
+                        <!-- Price and Actions -->
+                        <div class="flex flex-row items-center justify-between sm:justify-end w-full sm:w-auto gap-xl mt-sm sm:mt-0">
+                            <!-- Quantity Control (Segmented) -->
+                            <div class="flex items-center bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden h-10 shadow-sm">
+                                @if (item.quantidade <= 1) {
+                                  <button class="w-10 h-full flex items-center justify-center text-[#DC2626] hover:bg-[#DC2626]/10 transition-colors border-r border-outline-variant" (click)="removerItem(item)">
+                                      <span class="material-symbols-outlined text-[18px]">delete</span>
+                                  </button>
+                                } @else {
+                                  <button class="w-10 h-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors border-r border-outline-variant" (click)="diminuirQuantidade(item)">
+                                      <span class="material-symbols-outlined text-[18px]">remove</span>
+                                  </button>
+                                }
+                                <span class="w-12 h-full flex items-center justify-center text-label-large font-bold text-on-surface border-r border-outline-variant bg-surface-container-low/30">{{ item.quantidade }}</span>
+                                <button class="w-10 h-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors" (click)="aumentarQuantidade(item)" [disabled]="item.quantidade >= (item.fonte?.estoque || 0)">
+                                    <span class="material-symbols-outlined text-[18px]">add</span>
+                                </button>
+                            </div>
+
+                            <!-- Price -->
+                            <div class="text-right min-w-[140px]">
+                                <span class="text-headline-small text-primary font-bold">{{ (item.precoUnitario * item.quantidade) | currency:'BRL' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    }
+                </div>
             </div>
-          </div>
+            }
         </div>
-      </div>
+
+        @if (carrinhoService.itens().length > 0) {
+        <!-- Right Column: Order Summary -->
+        <div class="w-full lg:w-[380px] shrink-0">
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-lg sticky top-[100px] shadow-sm">
+                <h2 class="text-title-large font-bold text-on-surface mb-lg pb-sm border-b border-outline-variant">Resumo do Pedido</h2>
+                
+                <div class="flex flex-col gap-sm mb-lg">
+                    <div class="flex justify-between items-center text-body-md text-on-surface">
+                        <span class="text-on-surface-variant">Subtotal ({{ carrinhoService.quantidadeTotal() }} itens)</span>
+                        <span class="font-bold">{{ carrinhoService.valorTotal() | currency:'BRL' }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-body-md text-on-surface">
+                        <span class="text-on-surface-variant">Frete</span>
+                        <span class="text-success font-bold">Grátis</span>
+                    </div>
+                </div>
+
+                <div class="border-t border-outline-variant pt-md mb-lg">
+                    <div class="flex justify-between items-end mb-xs">
+                        <span class="text-title-medium text-on-surface font-bold">Total</span>
+                        <div class="text-right">
+                            <span class="text-display-sm text-primary font-bold leading-none">{{ carrinhoService.valorTotal() | currency:'BRL' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-sm">
+                    <button class="w-full bg-primary text-on-primary font-label-large uppercase tracking-wider py-4 rounded-xl hover:bg-primary/90 transition-colors shadow-md flex items-center justify-center gap-sm" (click)="irParaCheckout()">
+                        <span class="material-symbols-outlined">lock</span>
+                        Finalizar Compra
+                    </button>
+                    <button [routerLink]="['/']" class="w-full bg-surface-container-lowest text-primary font-label-large uppercase tracking-wider py-3 rounded-xl hover:bg-primary/5 transition-colors border-2 border-primary/20 flex items-center justify-center gap-sm">
+                        <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                        Continuar Comprando
+                    </button>
+                </div>
+
+                <div class="mt-md pt-md border-t border-outline-variant">
+                    <p class="text-center font-label-caps text-[11px] text-on-surface-variant uppercase tracking-wider mb-sm opacity-70">Formas de pagamento aceitas</p>
+                    <div class="flex items-center justify-center gap-4 text-on-surface-variant">
+                        <div class="w-10 h-10 flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity" title="Pix">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M5.283 18.36a3.505 3.505 0 0 0 2.493-1.032l3.6-3.6a.684.684 0 0 1 .946 0l3.613 3.613a3.504 3.504 0 0 0 2.493 1.032h.71l-4.56 4.56a3.647 3.647 0 0 1-5.156 0L4.85 18.36ZM18.428 5.627a3.505 3.505 0 0 0-2.493 1.032l-3.613 3.614a.67.67 0 0 1-.946 0l-3.6-3.6A3.505 3.505 0 0 0 5.283 5.64h-.434l4.573-4.572a3.646 3.646 0 0 1 5.156 0l4.559 4.559ZM1.068 9.422 3.79 6.699h1.492a2.483 2.483 0 0 1 1.744.722l3.6 3.6a1.73 1.73 0 0 0 2.443 0l3.614-3.613a2.482 2.482 0 0 1 1.744-.723h1.767l2.737 2.737a3.646 3.646 0 0 1 0 5.156l-2.736 2.736h-1.768a2.482 2.482 0 0 1-1.744-.722l-3.613-3.613a1.77 1.77 0 0 0-2.444 0l-3.6 3.6a2.483 2.483 0 0 1-1.744.722H3.791l-2.723-2.723a3.646 3.646 0 0 1 0-5.156" fill="#32BCAD"/>
+                            </svg>
+                        </div>
+                        <div class="w-8 h-8 flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity" title="Cartão de Crédito"><span class="material-symbols-outlined text-[28px]">credit_card</span></div>
+                        <div class="w-8 h-8 flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity" title="Boleto"><span class="material-symbols-outlined text-[28px]">payments</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        }
     </div>
-  }
 </div>

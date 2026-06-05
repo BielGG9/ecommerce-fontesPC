@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -29,6 +29,7 @@ export class CheckoutComponent implements OnInit {
   fb = inject(FormBuilder);
   router = inject(Router);
   dialogService = inject(DialogService);
+  cdr = inject(ChangeDetectorRef);
 
   checkoutForm!: FormGroup;
   processando = signal(false);
@@ -64,11 +65,13 @@ export class CheckoutComponent implements OnInit {
               this.selectedEnderecoId = enderecos[0].id || null;
             }
             this.updateEnderecoValidators();
+            this.cdr.detectChanges();
           },
           error: (err) => {
             console.error('Erro ao buscar endereços:', err);
             this.adicionandoNovoEndereco = true;
             this.updateEnderecoValidators();
+            this.cdr.detectChanges();
           }
         });
       },
