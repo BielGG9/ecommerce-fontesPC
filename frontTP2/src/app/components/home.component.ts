@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FonteService } from '../services/fonte.service';
 import { MarcaService } from '../services/marca.service';
 import { Fonte } from '../models/fonte.model';
@@ -24,6 +24,7 @@ import { MatInputModule } from '@angular/material/input';
   imports: [
     CommonModule, 
     FormsModule,
+    RouterModule,
     MatCardModule, 
     MatButtonModule, 
     MatIconModule, 

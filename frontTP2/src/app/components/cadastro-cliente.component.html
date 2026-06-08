@@ -1,84 +1,49 @@
-<div class="cadastro-container">
-  <mat-card class="cadastro-card mat-elevation-z8">
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg border border-gray-100">
     
-    <div class="card-header">
-      <h2>Criar Conta</h2>
-      <p>Junte-se a nós para comprar rápida e facilmente!</p>
+    <div>
+      <h2 class="text-center text-3xl font-extrabold text-gray-900">
+        Criar Conta
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        Rápido, fácil e sem burocracia
+      </p>
     </div>
 
-    <form [formGroup]="cadastroForm" (ngSubmit)="salvar()">
-      <mat-card-content class="form-content">
+    <form class="mt-8 space-y-6" (ngSubmit)="criarContaRapida()">
+      <div class="rounded-md shadow-sm space-y-4">
         
-        @if (erroCadastro) {
-          <div class="error-message" style="color: #f44336; background-color: #ffebee; padding: 10px; border-radius: 4px; margin-bottom: 20px; text-align: center; font-weight: 500;">
-            {{ erroCadastro }}
-          </div>
-        }
-        
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Nome Completo</mat-label>
-          <input matInput formControlName="nome" placeholder="Digite o seu nome" maxlength="100">
-          @if (cadastroForm.get('nome')?.invalid && cadastroForm.get('nome')?.touched) {
-            <mat-error>{{ obterMensagemErro('nome', 'Nome') }}</mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Nome de Usuário</mat-label>
-          <input matInput formControlName="username" placeholder="Ex: bielgg" maxlength="50">
-          @if (cadastroForm.get('username')?.invalid && cadastroForm.get('username')?.touched) {
-            <mat-error>{{ obterMensagemErro('username', 'Nome de Usuário') }}</mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>E-mail</mat-label>
-          <input matInput formControlName="email" type="email" placeholder="Digite o seu e-mail" maxlength="100">
-          @if (cadastroForm.get('email')?.invalid && cadastroForm.get('email')?.touched) {
-            <mat-error>{{ obterMensagemErro('email', 'E-mail') }}</mat-error>
-          }
-        </mat-form-field>
-
-        <div class="form-row">
-          <mat-form-field appearance="outline" class="half-width">
-            <mat-label>CPF</mat-label>
-            <input matInput formControlName="cpf" maxlength="11" placeholder="Somente números">
-            @if (cadastroForm.get('cpf')?.invalid && cadastroForm.get('cpf')?.touched) {
-              <mat-error>{{ obterMensagemErro('cpf', 'CPF') }}</mat-error>
-            }
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="half-width">
-            <mat-label>RG</mat-label>
-            <input matInput formControlName="rg" maxlength="20" placeholder="Seu RG">
-            @if (cadastroForm.get('rg')?.invalid && cadastroForm.get('rg')?.touched) {
-              <mat-error>{{ obterMensagemErro('rg', 'RG') }}</mat-error>
-            }
-          </mat-form-field>
+        <div>
+          <label for="nome" class="block text-sm font-medium text-gray-700">Nome Completo</label>
+          <input id="nome" name="nome" type="text" required [(ngModel)]="nome"
+            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm mt-1" 
+            placeholder="Seu nome">
         </div>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Senha</mat-label>
-          <input matInput formControlName="senha" type="password" placeholder="Crie uma senha forte" minlength="6">
-          @if (cadastroForm.get('senha')?.invalid && cadastroForm.get('senha')?.touched) {
-            <mat-error>{{ obterMensagemErro('senha', 'Senha') }}</mat-error>
-          }
-        </mat-form-field>
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700">E-mail</label>
+          <input id="email" name="email" type="email" required [(ngModel)]="email"
+            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm mt-1" 
+            placeholder="voce@exemplo.com">
+        </div>
 
-      </mat-card-content>
+        <div>
+          <label for="senha" class="block text-sm font-medium text-gray-700">Senha</label>
+          <input id="senha" name="senha" type="password" required [(ngModel)]="senha"
+            class="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm mt-1" 
+            placeholder="••••••••">
+        </div>
 
-      <mat-card-actions class="cadastro-actions" style="display: flex; flex-direction: column; gap: 10px;">
-        <button mat-raised-button color="primary" type="submit" [disabled]="cadastroForm.invalid" style="width: 100%;">
-          Criar Conta
+      </div>
+
+      <div>
+        <button type="submit" [disabled]="isLoading"
+          class="group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-70">
+          <span *ngIf="!isLoading">Criar Conta Rápida</span>
+          <span *ngIf="isLoading">Criando...</span>
         </button>
-        <button mat-button type="button" routerLink="/login" style="width: 100%;">
-          <mat-icon>arrow_back</mat-icon> Voltar para o Login
-        </button>
-        <button mat-button type="button" routerLink="/" style="width: 100%;">
-          <mat-icon>home</mat-icon> Voltar para a Home
-        </button>
-      </mat-card-actions>
-      
+      </div>
     </form>
-  </mat-card>
+    
+  </div>
 </div>

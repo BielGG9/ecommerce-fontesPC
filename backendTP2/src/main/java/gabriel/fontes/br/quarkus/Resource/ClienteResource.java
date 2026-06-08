@@ -26,7 +26,31 @@ public class ClienteResource {
     @Inject
     ClienteService service;
 
+    @Inject
+    gabriel.fontes.br.quarkus.Repository.ClienteRepository clienteRepository;
+
     private static final Logger logger = Logger.getLogger(ClienteResource.class.getName());
+
+    @POST
+    @Path("/cadastro-expresso")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Transactional
+    @PermitAll
+    public Response cadastroExpresso(gabriel.fontes.br.quarkus.Dto.CadastroExpressoDTO dto) {
+        gabriel.fontes.br.quarkus.Model.Cliente cliente = new gabriel.fontes.br.quarkus.Model.Cliente();
+        cliente.setNome(dto.nome());
+        cliente.setEmail(dto.email());
+        cliente.setSenha(dto.senha()); // Regra Absoluta: Salvando a senha em texto plano
+        
+        clienteRepository.persist(cliente);
+        
+        return Response.status(Response.Status.CREATED).entity(java.util.Map.of(
+            "id", cliente.getId(),
+            "nome", cliente.getNome(),
+            "email", cliente.getEmail()
+        )).build();
+    }
 
     @GET
     @PermitAll

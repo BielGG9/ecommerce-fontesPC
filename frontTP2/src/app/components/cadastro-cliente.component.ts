@@ -1,77 +1,50 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ClienteService } from '../services/cliente.service';
-import { Cliente } from '../models/cliente.model';
-import { Router, RouterModule } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-cadastro-cliente',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './cadastro-cliente.component.html',
   styleUrl: './cadastro-cliente.component.css'
 })
 export class CadastroClienteComponent {
+  nome = '';
+  email = '';
+  senha = '';
+  isLoading = false;
 
-  private fb = inject(FormBuilder);
-  private clienteService = inject(ClienteService);
-  private router = inject(Router);
+  constructor(private http: HttpClient, private router: Router) {}
 
-  cadastroForm = this.fb.group({
-    nome: ['', [Validators.required, Validators.maxLength(100)]],
-    username: ['', [Validators.required, Validators.maxLength(50)]],
-    email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
-    cpf: ['', [Validators.required, Validators.pattern('^[0-9]{11}$')]],
-    rg: ['', [Validators.required, Validators.pattern('^[0-9]{7,15}$')]],
-    senha: ['', [Validators.required, Validators.minLength(6)]]
-  });
+  criarContaRapida() {
+    this.isLoading = true;
+    const payload = { 
+      nome: this.nome, 
+      email: this.email, 
+      senha: this.senha 
+    };
 
-  obterMensagemErro(campo: string, nomeCampo: string): string {
-    const controle = this.cadastroForm.get(campo);
-    if (!controle || !controle.errors) return '';
-
-    if (controle.hasError('required')) return `${nomeCampo} é obrigatório.`;
-    if (controle.hasError('email')) return `Formato de e-mail inválido.`;
-    if (controle.hasError('minlength')) return `O tamanho mínimo é ${controle.getError('minlength').requiredLength} caracteres.`;
-    if (controle.hasError('maxlength')) return `O tamanho máximo é ${controle.getError('maxlength').requiredLength} caracteres.`;
-    if (controle.hasError('pattern')) {
-      if (campo === 'cpf') return 'O CPF deve conter exatamente 11 dígitos numéricos.';
-      if (campo === 'rg') return 'O RG deve conter de 7 a 15 dígitos numéricos.';
-    }
-
-    return '';
-  }
-
-  erroCadastro: string | null = null;
-
-  salvar() {
-    if (this.cadastroForm.invalid) {
-      this.cadastroForm.markAllAsTouched();
-      return;
-    }
-
-    this.erroCadastro = null;
-    const cliente: Cliente = this.cadastroForm.value as Cliente;
-
-    this.clienteService.registrar(cliente).subscribe({
-      next: () => {
-        alert('Conta criada com sucesso!');
-        this.router.navigate(['/home']);
-      },
-      error: (err) => {
-        console.error('Erro ao registar cliente', err);
-        this.erroCadastro = err.error?.message || 'Erro ao realizar cadastro. Verifique se o email ou CPF já estão em uso.';
-      }
-    });
-  }
-
-  voltar() {
-    this.router.navigate(['/home']); 
+    // Aponta para o endpoint do Quarkus
+    this.http.post('http://localhost:8080/clientes/cadastro-expresso', payload)
+      .subscribe({
+        next: (res: any) => {
+          // Salva os dados do usuário na sessão (simulando login automático)
+          localStorage.setItem('currentUser', JSON.stringify(res));
+          
+          // Redireciona direto para a vitrine inicial
+          this.router.navigate(['/']);
+        },
+        error: (err) => {
+          console.error('Erro no cadastro expresso:', err);
+          alert('Erro ao criar conta. Verifique os dados.');
+          this.isLoading = false;
+        },
+        complete: () => {
+          this.isLoading = false;
+        }
+      });
   }
 }
