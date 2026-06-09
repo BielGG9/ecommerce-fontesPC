@@ -32,6 +32,16 @@ export class ClienteService {
     return this.http.post<void>(`${this.apiUrl}/alterar-senha`, { senhaAtual, novaSenha });
   }
 
+  completarCadastro(dados: {
+    cpf: string;
+    cep: string;
+    logradouro: string;
+    numero: string;
+    telefone: string;
+  }): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/completar-cadastro`, dados);
+  }
+
   uploadAvatar(idCliente: number, file: File): Observable<any> {
     const formData = new FormData();
     formData.append('idCliente', idCliente.toString());

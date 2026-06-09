@@ -27,9 +27,27 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(clonedReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 || error.status === 0 || error.status === 504) {
+      if (error.status === 401) {
         authService.limparSessao();
-        router.navigate(['/login']);
+        
+        // Só redireciona para a tela de login se o usuário estiver em uma rota protegida
+        const protectedPaths = [
+          '/admin',
+          '/marca',
+          '/fontes',
+          '/modelos',
+          '/funcionarios',
+          '/departamentos',
+          '/fornecedores',
+          '/checkout',
+          '/minha-conta'
+        ];
+        const currentPath = router.url.split('?')[0].split('#')[0];
+        const isProtectedRoute = protectedPaths.some(p => currentPath === p || currentPath.startsWith(p + '/'));
+        
+        if (isProtectedRoute) {
+          router.navigate(['/login']);
+        }
       }
       return throwError(() => error);
     })

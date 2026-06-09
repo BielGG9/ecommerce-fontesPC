@@ -38,6 +38,7 @@ export class CheckoutComponent implements OnInit {
   meusEnderecos: Endereco[] = [];
   selectedEnderecoId: number | null = null;
   adicionandoNovoEndereco: boolean = false;
+  enderecoSendoEditadoId: number | null = null;
   cupomService = inject(CupomService);
 
   cupomAplicado: CupomResponse | null = null;
@@ -147,7 +148,7 @@ export class CheckoutComponent implements OnInit {
       // usa endereço existente — NÃO chama enderecoService.create()
       this.criarPedido(this.selectedEnderecoId, formValue);
     } else {
-      // cria novo endereço e usa o id retornado
+      // cria novo endereço ou atualiza o endereço existente e usa o id retornado
       const endereco: Endereco = {
         rua: formValue.rua,
         numero: formValue.numero,
@@ -159,29 +160,74 @@ export class CheckoutComponent implements OnInit {
         idPessoa: this.idPessoa
       };
 
-      this.enderecoService.create(endereco).subscribe({
-        next: (endCriado) => {
-          this.criarPedido(endCriado.id!, formValue);
-        },
-        error: (err) => {
-          console.error('Erro ao criar endereço', err);
-          const backendMsg = err.error ? (typeof err.error === 'string' ? err.error : JSON.stringify(err.error)) : '';
-          alert('Erro ao processar o endereço: ' + backendMsg);
-          this.processando.set(false);
-        }
-      });
+      if (this.enderecoSendoEditadoId) {
+        endereco.id = this.enderecoSendoEditadoId;
+        this.enderecoService.update(this.enderecoSendoEditadoId, endereco).subscribe({
+          next: (endAtualizado) => {
+            this.criarPedido(endAtualizado.id!, formValue);
+          },
+          error: (err) => {
+            console.error('Erro ao atualizar endereço', err);
+            const backendMsg = err.error ? (typeof err.error === 'string' ? err.error : JSON.stringify(err.error)) : '';
+            alert('Erro ao atualizar o endereço: ' + backendMsg);
+            this.processando.set(false);
+          }
+        });
+      } else {
+        this.enderecoService.create(endereco).subscribe({
+          next: (endCriado) => {
+            this.criarPedido(endCriado.id!, formValue);
+          },
+          error: (err) => {
+            console.error('Erro ao criar endereço', err);
+            const backendMsg = err.error ? (typeof err.error === 'string' ? err.error : JSON.stringify(err.error)) : '';
+            alert('Erro ao processar o endereço: ' + backendMsg);
+            this.processando.set(false);
+          }
+        });
+      }
     }
   }
 
   selecionarEndereco(id: number): void {
     this.selectedEnderecoId = id;
     this.adicionandoNovoEndereco = false;
+    this.enderecoSendoEditadoId = null;
     this.updateEnderecoValidators();
   }
 
   selecionarNovoEndereco(): void {
     this.selectedEnderecoId = null;
     this.adicionandoNovoEndereco = true;
+    this.enderecoSendoEditadoId = null;
+    
+    this.checkoutForm.patchValue({
+      rua: '',
+      numero: '',
+      complemento: '',
+      bairro: '',
+      cidade: '',
+      estado: '',
+      cep: ''
+    });
+    this.updateEnderecoValidators();
+  }
+
+  editarEndereco(event: Event, endereco: Endereco): void {
+    event.stopPropagation();
+    this.selectedEnderecoId = null;
+    this.adicionandoNovoEndereco = true;
+    this.enderecoSendoEditadoId = endereco.id!;
+    
+    this.checkoutForm.patchValue({
+      rua: endereco.rua,
+      numero: endereco.numero,
+      complemento: endereco.complemento,
+      bairro: endereco.bairro,
+      cidade: endereco.cidade,
+      estado: endereco.estado,
+      cep: endereco.cep
+    });
     this.updateEnderecoValidators();
   }
 
@@ -258,8 +304,14 @@ export class CheckoutComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erro ao criar pedido', err);
-        const backendMsg = err.error ? (typeof err.error === 'string' ? err.error : JSON.stringify(err.error)) : '';
-        alert('Erro ao finalizar o pedido: ' + backendMsg);
+        
+        if (err.status === 401) {
+          alert('Sua sessão expirou por inatividade. Por favor, faça login novamente para finalizar seu pedido.');
+        } else {
+          const backendMsg = err.error ? (typeof err.error === 'string' ? err.error : JSON.stringify(err.error)) : '';
+          alert('Erro ao finalizar o pedido: ' + backendMsg);
+        }
+        
         this.processando.set(false);
       }
     });

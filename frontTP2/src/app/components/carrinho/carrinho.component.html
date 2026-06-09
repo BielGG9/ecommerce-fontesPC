@@ -114,7 +114,7 @@
                 </div>
 
                 <div class="flex flex-col gap-sm">
-                    <button class="w-full bg-primary text-on-primary font-label-large uppercase tracking-wider py-4 rounded-xl hover:bg-primary/90 transition-colors shadow-md flex items-center justify-center gap-sm" (click)="irParaCheckout()">
+                    <button class="w-full bg-primary text-on-primary font-label-large uppercase tracking-wider py-4 rounded-xl hover:bg-primary/90 transition-colors shadow-md flex items-center justify-center gap-sm" (click)="tentarCheckout()">
                         <span class="material-symbols-outlined">lock</span>
                         Finalizar Compra
                     </button>
@@ -141,3 +141,139 @@
         }
     </div>
 </div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     Modal: Completar Cadastro para Emissão de NF e Entrega
+     ══════════════════════════════════════════════════════════════════════ -->
+@if (exibirModalCompletar) {
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);">
+
+  <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-2xl w-full max-w-[480px] overflow-hidden animate-[fadeInUp_0.25s_ease]">
+
+    <!-- Cabeçalho -->
+    <div class="flex items-start justify-between p-6 border-b border-outline-variant bg-gradient-to-r from-primary/5 to-transparent">
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-outlined text-[36px] text-primary" style="font-variation-settings: 'FILL' 1;">bolt</span>
+        <div>
+          <h2 class="text-title-large font-bold text-on-surface leading-tight">Falta pouco!</h2>
+          <p class="text-body-small text-on-surface-variant mt-0.5">Dados de faturamento e entrega</p>
+        </div>
+      </div>
+      <button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg p-1 transition-colors" (click)="fecharModal()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Corpo -->
+    <div class="p-6">
+      <p class="text-body-md text-on-surface-variant mb-6 leading-relaxed">
+        Para garantirmos a energia do seu setup precisamos de alguns dados
+        para a <strong class="text-on-surface">emissão da nota fiscal</strong> e para a <strong class="text-on-surface">entrega</strong>.
+      </p>
+
+      <div class="flex flex-col gap-4">
+
+        <!-- CPF -->
+        <div class="flex flex-col gap-1">
+          <label class="text-label-small font-bold text-on-surface-variant uppercase tracking-wider" for="modal-cpf">CPF *</label>
+          <input
+            id="modal-cpf"
+            type="text"
+            [ngModel]="form.cpf"
+            (ngModelChange)="onCpfChange($event)"
+            placeholder="000.000.000-00"
+            maxlength="14"
+            class="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition"
+          />
+        </div>
+
+        <!-- CEP + Número (linha) -->
+        <div class="flex gap-3">
+          <div class="flex flex-col gap-1 flex-1">
+            <label class="text-label-small font-bold text-on-surface-variant uppercase tracking-wider" for="modal-cep">CEP *</label>
+            <input
+              id="modal-cep"
+              type="text"
+              [ngModel]="form.cep"
+              (ngModelChange)="onCepChange($event)"
+              placeholder="00000-000"
+              maxlength="9"
+              class="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition"
+            />
+          </div>
+          <div class="flex flex-col gap-1 w-28">
+            <label class="text-label-small font-bold text-on-surface-variant uppercase tracking-wider" for="modal-numero">Nº *</label>
+            <input
+              id="modal-numero"
+              type="text"
+              [(ngModel)]="form.numero"
+              placeholder="42"
+              class="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition"
+            />
+          </div>
+        </div>
+
+        <!-- Logradouro -->
+        <div class="flex flex-col gap-1">
+          <label class="text-label-small font-bold text-on-surface-variant uppercase tracking-wider" for="modal-logradouro">Endereço / Logradouro *</label>
+          <input
+            id="modal-logradouro"
+            type="text"
+            [(ngModel)]="form.logradouro"
+            placeholder="Rua das Placas, Bairro PC Master"
+            class="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition"
+          />
+        </div>
+
+        <!-- Telefone -->
+        <div class="flex flex-col gap-1">
+          <label class="text-label-small font-bold text-on-surface-variant uppercase tracking-wider" for="modal-telefone">Telefone / WhatsApp *</label>
+          <input
+            id="modal-telefone"
+            type="tel"
+            [ngModel]="form.telefone"
+            (ngModelChange)="onTelefoneChange($event)"
+            placeholder="(99) 99999-9999"
+            maxlength="15"
+            class="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition"
+          />
+        </div>
+
+        <!-- Erro -->
+        @if (erroCompletar) {
+        <div class="flex items-center gap-2 text-[#DC2626] bg-[#DC2626]/10 border border-[#DC2626]/20 rounded-xl px-4 py-3">
+          <span class="material-symbols-outlined text-[20px]">error</span>
+          <p class="text-body-sm font-medium">{{ erroCompletar }}</p>
+        </div>
+        }
+
+      </div>
+    </div>
+
+    <!-- Rodapé -->
+    <div class="flex gap-3 px-6 pb-6">
+      <button
+        class="flex-1 py-3 rounded-xl border-2 border-outline-variant text-on-surface-variant font-label-large uppercase tracking-wider hover:bg-surface-container transition-colors"
+        (click)="fecharModal()"
+        [disabled]="enviandoCompletar"
+      >Cancelar</button>
+      <button
+        id="btn-confirmar-completar"
+        class="flex-1 py-3 rounded-xl bg-primary text-on-primary font-label-large uppercase tracking-wider hover:bg-primary/90 transition-colors shadow-md flex items-center justify-center gap-2 disabled:opacity-60"
+        (click)="submeterCompletar()"
+        [disabled]="enviandoCompletar"
+      >
+        @if (enviandoCompletar) {
+          <span class="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>
+          Salvando...
+        } @else {
+          <span class="material-symbols-outlined text-[20px]">check_circle</span>
+          Confirmar e Finalizar
+        }
+      </button>
+    </div>
+
+  </div>
+</div>
+}

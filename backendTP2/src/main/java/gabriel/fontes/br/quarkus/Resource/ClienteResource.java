@@ -15,7 +15,11 @@ import java.util.logging.Logger;
 import gabriel.fontes.br.quarkus.Dto.AlteraSenhaRequest;
 import gabriel.fontes.br.quarkus.Dto.ClienteRequest;
 import gabriel.fontes.br.quarkus.Dto.ClienteResponse;
+import gabriel.fontes.br.quarkus.Dto.CompletarCadastroDTO;
+import gabriel.fontes.br.quarkus.Model.Endereco;
+import gabriel.fontes.br.quarkus.Model.Telefone;
 import gabriel.fontes.br.quarkus.Service.ClienteService;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 
 
 @Path("/clientes")
@@ -29,6 +33,12 @@ public class ClienteResource {
     @Inject
     gabriel.fontes.br.quarkus.Repository.ClienteRepository clienteRepository;
 
+    @Inject
+    gabriel.fontes.br.quarkus.Service.KeycloakAdminService keycloakAdminService;
+
+    @Inject
+    JsonWebToken jwt;
+
     private static final Logger logger = Logger.getLogger(ClienteResource.class.getName());
 
     @POST
@@ -38,10 +48,27 @@ public class ClienteResource {
     @Transactional
     @PermitAll
     public Response cadastroExpresso(gabriel.fontes.br.quarkus.Dto.CadastroExpressoDTO dto) {
+        // 1. Verificar se o cliente já existe no banco local por e-mail
+        if (clienteRepository.findByEmail(dto.email()) != null) {
+            return Response.status(Response.Status.CONFLICT)
+                .entity(java.util.Map.of("message", "Já existe um cliente cadastrado com este e-mail."))
+                .build();
+        }
+
+        // 2. Criar utilizador no Keycloak
+        String cpfPadrao = "00000000000";
+        String rgPadrao = "0000000";
+        String idKeycloak = keycloakAdminService.criarUsuario(dto.email(), dto.nome(), dto.email(), dto.senha(), cpfPadrao, rgPadrao);
+
+        // 3. Salvar o cliente localmente
         gabriel.fontes.br.quarkus.Model.Cliente cliente = new gabriel.fontes.br.quarkus.Model.Cliente();
         cliente.setNome(dto.nome());
         cliente.setEmail(dto.email());
         cliente.setSenha(dto.senha()); // Regra Absoluta: Salvando a senha em texto plano
+        cliente.setCpf(cpfPadrao);
+        cliente.setRg(rgPadrao);
+        cliente.setIdKeycloak(idKeycloak);
+        cliente.setDataCadastro(java.time.LocalDateTime.now());
         
         clienteRepository.persist(cliente);
         
@@ -50,6 +77,83 @@ public class ClienteResource {
             "nome", cliente.getNome(),
             "email", cliente.getEmail()
         )).build();
+    }
+
+    /**
+     * PUT /clientes/completar-cadastro
+     *
+     * Recebe os dados de faturamento/entrega de um usuário cadastrado via
+     * 'Cadastro Expresso' (que ainda não tem CPF real, endereço nem telefone).
+     * Identifica o usuário pelo subject do token JWT.
+     * Preenche apenas os campos que ainda estão nulos ou com valor padrão.
+     * Exige role USER ou ADM.
+     */
+    @PUT
+    @Path("/completar-cadastro")
+    @Transactional
+    @RolesAllowed({"USER", "ADM"})
+    public Response completarCadastro(CompletarCadastroDTO dto) {
+        String idKeycloak = jwt.getSubject();
+        if (idKeycloak == null) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity(java.util.Map.of("message", "Usuário não autenticado."))
+                    .build();
+        }
+
+        gabriel.fontes.br.quarkus.Model.Cliente cliente = clienteRepository.findByIdKeycloak(idKeycloak);
+        if (cliente == null) {
+            String email = jwt.getClaim("email");
+            if (email != null) cliente = clienteRepository.findByEmail(email);
+        }
+        if (cliente == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(java.util.Map.of("message", "Cliente não encontrado para o usuário autenticado."))
+                    .build();
+        }
+
+        // Atualiza o CPF somente se ainda for o placeholder ou nulo
+        if (dto.cpf() != null && !dto.cpf().isBlank()) {
+            cliente.setCpf(dto.cpf().replaceAll("[^\\d]", ""));
+        }
+
+        // Persiste o endereço de entrega
+        if (dto.cep() != null && !dto.cep().isBlank()) {
+            Endereco endereco = new Endereco();
+            endereco.setCep(dto.cep().replaceAll("[^\\d]", ""));
+            endereco.setRua(dto.logradouro() != null ? dto.logradouro() : "");
+            endereco.setNumero(dto.numero() != null ? dto.numero() : "S/N");
+            endereco.setBairro("");
+            endereco.setCidade("");
+            endereco.setEstado("");
+            endereco.setPessoa(cliente);
+            if (cliente.getEnderecos() == null) {
+                cliente.setEnderecos(new java.util.ArrayList<>());
+            }
+            cliente.getEnderecos().add(endereco);
+        }
+
+        // Persiste o telefone
+        if (dto.telefone() != null && !dto.telefone().isBlank()) {
+            String numeroBruto = dto.telefone().replaceAll("[^\\d]", "");
+            Telefone tel = new Telefone();
+            if (numeroBruto.length() > 2) {
+                tel.setDdd(numeroBruto.substring(0, 2));
+                tel.setNumero(numeroBruto.substring(2));
+            } else {
+                tel.setDdd("");
+                tel.setNumero(numeroBruto);
+            }
+            tel.setPessoa(cliente);
+            if (cliente.getTelefones() == null) {
+                cliente.setTelefones(new java.util.ArrayList<>());
+            }
+            cliente.getTelefones().add(tel);
+        }
+
+        clienteRepository.persist(cliente);
+        logger.info("Cadastro completado para cliente: " + cliente.getEmail());
+
+        return Response.ok(ClienteResponse.fromEntity(cliente)).build();
     }
 
     @GET

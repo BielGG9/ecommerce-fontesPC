@@ -35,14 +35,22 @@
                    class="endereco-card"
                    [class.selecionado]="selectedEnderecoId === endereco.id"
                    (click)="selecionarEndereco(endereco.id!)">
-                <input type="radio"
-                       [value]="endereco.id"
-                       [checked]="selectedEnderecoId === endereco.id"
-                       (change)="selecionarEndereco(endereco.id!)" />
-                <div class="endereco-info">
-                  <span><strong>{{ endereco.rua }}, {{ endereco.numero }}</strong></span>
-                  <span>{{ endereco.bairro }} — {{ endereco.cidade }}/{{ endereco.estado }}</span>
-                  <span>CEP: {{ endereco.cep }}</span>
+                <div class="d-flex w-100 justify-content-between align-items-center">
+                  <div class="d-flex align-items-center flex-grow-1">
+                    <input type="radio"
+                           [value]="endereco.id"
+                           [checked]="selectedEnderecoId === endereco.id"
+                           (change)="selecionarEndereco(endereco.id!)" />
+                    <div class="endereco-info ms-3">
+                      <span><strong>{{ endereco.rua }}, {{ endereco.numero }}</strong></span>
+                      <span>{{ endereco.bairro }} — {{ endereco.cidade }}/{{ endereco.estado }}</span>
+                      <span>CEP: {{ endereco.cep }}</span>
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-sm btn-outline-secondary ms-2 rounded-circle edit-btn" 
+                          (click)="editarEndereco($event, endereco)" title="Editar Endereço" style="border: none; background: transparent;">
+                    <i class="bi bi-pencil fs-5 text-primary"></i>
+                  </button>
                 </div>
               </div>
 
