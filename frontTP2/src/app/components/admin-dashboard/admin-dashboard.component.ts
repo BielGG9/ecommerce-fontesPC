@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { DashboardService } from '../../services/dashboard.service';
+import { ThemeService } from '../../services/theme.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -16,6 +17,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private authService = inject(AuthService);
   private dashboardService = inject(DashboardService);
+  private themeService = inject(ThemeService);
   private authSub!: Subscription;
 
   nomeUsuario: string | null = '';
@@ -24,7 +26,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   // Controle do estado da Sidebar
   isCollapsed = false;
   // Controle de Tema Claro/Escuro
-  isDarkMode = false;
+  get isDarkMode() {
+    return this.themeService.isDarkMode();
+  }
 
   ngOnInit() {
     this.authSub = this.authService.usuarioLogado$.subscribe(nome => {
@@ -81,37 +85,37 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     },
     {
       name: 'Fontes',
-      route: '/fontes',
+      route: '/admin/fontes',
       icon: 'bi bi-pc-display',
       description: 'Gerencie o estoque e especificações técnicas de fontes.'
     },
     {
       name: 'Marcas',
-      route: '/marca',
+      route: '/admin/marca',
       icon: 'bi bi-patch-check',
       description: 'Administre as marcas fabricantes de fontes.'
     },
     {
       name: 'Modelos',
-      route: '/modelos',
+      route: '/admin/modelos',
       icon: 'bi bi-cpu',
       description: 'Configure os modelos e linhas de produtos.'
     },
     {
       name: 'Fornecedores',
-      route: '/fornecedores',
+      route: '/admin/fornecedores',
       icon: 'bi bi-truck',
       description: 'Gerencie os fornecedores de produtos e estoque.'
     },
     {
       name: 'Funcionários',
-      route: '/funcionarios',
+      route: '/admin/funcionarios',
       icon: 'bi bi-person-badge',
       description: 'Gerencie a equipe e acessos ao sistema.'
     },
     {
       name: 'Departamentos',
-      route: '/departamentos',
+      route: '/admin/departamentos',
       icon: 'bi bi-building',
       description: 'Organize os departamentos da empresa.'
     },
@@ -138,6 +142,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   // Alterna entre tema claro e escuro
   toggleTheme() {
-    this.isDarkMode = !this.isDarkMode;
+    this.themeService.toggleTheme();
   }
 }

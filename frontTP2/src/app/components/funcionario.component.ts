@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, inject } from '@angular/core';
+import { Component, signal, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FuncionarioService } from '../services/funcionario.service';
@@ -6,24 +6,98 @@ import { Funcionario } from '../models/funcionario.model';
 import { DialogService } from '../services/dialog.service';
 import { DepartamentoService } from '../services/departamento.service';
 import { Departamento } from '../models/departamento.model';
-
-import { Router } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+import { ThemeService } from '../services/theme.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-funcionario',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './funcionario.component.html',
   styleUrl: './funcionario.component.css'
 })
-export class FuncionarioComponent implements OnInit {
+export class FuncionarioComponent implements OnInit, OnDestroy {
   private funcionarioService = inject(FuncionarioService);
   private departamentoService = inject(DepartamentoService);
   private fb = inject(FormBuilder);
-
   private router = inject(Router);
   private dialogService = inject(DialogService);
-  
+  private authService = inject(AuthService);
+  private themeService = inject(ThemeService);
+  private authSub!: Subscription;
+
+  nomeUsuario: string | null = '';
+  isCollapsed = false;
+  get isDarkMode() {
+    return this.themeService.isDarkMode();
+  }
+
+  menuItems = [
+    {
+      name: 'Dashboard',
+      route: '/admin',
+      icon: 'bi bi-speedometer2',
+      description: 'Visão geral do sistema e relatórios rápidos.'
+    },
+    {
+      name: 'Fontes',
+      route: '/admin/fontes',
+      icon: 'bi bi-pc-display',
+      description: 'Gerencie o estoque e especificações técnicas de fontes.'
+    },
+    {
+      name: 'Marcas',
+      route: '/admin/marca',
+      icon: 'bi bi-patch-check',
+      description: 'Administre as marcas fabricantes de fontes.'
+    },
+    {
+      name: 'Modelos',
+      route: '/admin/modelos',
+      icon: 'bi bi-cpu',
+      description: 'Configure os modelos e linhas de produtos.'
+    },
+    {
+      name: 'Fornecedores',
+      route: '/admin/fornecedores',
+      icon: 'bi bi-truck',
+      description: 'Gerencie os fornecedores de produtos and estoque.'
+    },
+    {
+      name: 'Funcionários',
+      route: '/admin/funcionarios',
+      icon: 'bi bi-person-badge',
+      description: 'Gerencie a equipe e acessos ao sistema.'
+    },
+    {
+      name: 'Departamentos',
+      route: '/admin/departamentos',
+      icon: 'bi bi-building',
+      description: 'Organize os departamentos da empresa.'
+    },
+    {
+      name: 'Pedidos',
+      route: '/admin/pedidos',
+      icon: 'bi bi-cart-check',
+      description: 'Acompanhe e gerencie os pedidos dos clientes.'
+    }
+  ];
+
+  toggleSidebar() {
+    this.isCollapsed = !this.isCollapsed;
+  }
+
+  toggleTheme() {
+    this.themeService.toggleTheme();
+  }
+
+  sair() {
+    this.authService.limparSessao();
+    this.router.navigate(['/login']);
+  }
+
   colunas: string[] = ['id', 'nome', 'cpf', 'cargo', 'departamento', 'acoes'];
 
   // Controle de Tela (Lista x Formulário)
@@ -49,6 +123,9 @@ export class FuncionarioComponent implements OnInit {
   });
 
   async ngOnInit() {
+    this.authSub = this.authService.usuarioLogado$.subscribe(nome => {
+      this.nomeUsuario = nome;
+    });
     try {
       const logado = !!localStorage.getItem('token');
     } catch(e) {
@@ -56,6 +133,12 @@ export class FuncionarioComponent implements OnInit {
     } finally {
       this.carregarDepartamentos();
       this.carregarFuncionarios();
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.authSub) {
+      this.authSub.unsubscribe();
     }
   }
 

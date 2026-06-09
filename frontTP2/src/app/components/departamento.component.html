@@ -1,130 +1,198 @@
-<div class="marca-container">
+<div class="d-flex" id="wrapper" [class.dark-theme]="isDarkMode">
   
-  @if (isFormVisible) {
-    <!-- VIEW DO FORMULÁRIO -->
-    <mat-card class="material-card">
-      <div class="card-header-azul">
-        <h2 style="margin: 0; font-size: 20px;">{{ departamentoForm.value.id ? 'Editar Departamento' : 'Novo Departamento' }}</h2>
-      </div>
-      <div style="margin-bottom: 20px; display: flex; align-items: center; padding: 16px;">
-        <button mat-button color="primary" (click)="voltarParaLista()">
-          <mat-icon>arrow_back</mat-icon>
-          Voltar para a Lista
-        </button>
-      </div>
-
-      <form [formGroup]="departamentoForm" (ngSubmit)="salvar()">
-      
-      <mat-card-content style="padding-top: 20px;">
-        
-        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 15px;">
-          <mat-label>Sigla</mat-label>
-          <input matInput formControlName="sigla" maxlength="10" placeholder="Ex: TI, FIN...">
-          @if (departamentoForm.get('sigla')?.invalid && departamentoForm.get('sigla')?.touched) {
-            <mat-error>{{ obterMensagemErro('sigla', 'Sigla') }}</mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" style="width: 100%;">
-          <mat-label>Descrição</mat-label>
-          <input matInput formControlName="descricao" maxlength="100" placeholder="Ex: Tecnologia da Informação">
-          @if (departamentoForm.get('descricao')?.invalid && departamentoForm.get('descricao')?.touched) {
-            <mat-error>{{ obterMensagemErro('descricao', 'Descrição') }}</mat-error>
-          }
-        </mat-form-field>
-
-      </mat-card-content>
-
-      <mat-card-actions align="end" style="padding: 16px;">
-        
-        <button mat-button type="button" (click)="voltarParaLista()">
-          Cancelar
-        </button>
-
-        <button mat-raised-button color="primary" type="submit" [disabled]="departamentoForm.invalid">
-          {{ departamentoForm.value.id ? 'Atualizar' : 'Salvar' }}
-        </button>
-
-      </mat-card-actions>
-    </form>
-  </mat-card>
-
-  } @else {
-    <!-- VIEW DA LISTA -->
-    <mat-card class="material-card mb-4">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 style="margin: 0; font-size: 24px; font-weight: bold; color: #2b3674;">Gestão de Departamentos</h2>
-        <div style="display: flex; gap: 10px;">
-          <button mat-button color="primary" (click)="navegarParaHome()">
-            <mat-icon>home</mat-icon>
-            Home
-          </button>
-          <button mat-raised-button color="primary" (click)="novoDepartamento()">
-            <mat-icon>add</mat-icon>
-            Adicionar Departamento
-          </button>
-        </div>
-      </div>
-
-      <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: baseline;">
-        <mat-form-field appearance="outline" style="flex: 1;">
-          <mat-label>Pesquisar Departamento por Descrição</mat-label>
-          <input matInput #inputPesquisa (keyup.enter)="buscar(inputPesquisa.value)" placeholder="Ex: Tecnologia da Informação">
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
-        
-        <button mat-raised-button color="primary" (click)="buscar(inputPesquisa.value)" style="height: 50px;">
-          Buscar
-        </button>
-      </div>
-
-<table mat-table [dataSource]="departamentos()" class="mat-elevation-z8" style="width: 100%; border-radius: 8px; margin-bottom: 30px;">
-
-    <ng-container matColumnDef="id">
-      <th mat-header-cell *matHeaderCellDef style="width: 80px; font-weight: bold;"> ID </th>
-      <td mat-cell *matCellDef="let departamento"> {{departamento.id}} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="sigla">
-      <th mat-header-cell *matHeaderCellDef style="font-weight: bold;"> Sigla </th>
-      <td mat-cell *matCellDef="let departamento"> {{departamento.sigla}} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="descricao">
-      <th mat-header-cell *matHeaderCellDef style="font-weight: bold;"> Descrição </th>
-      <td mat-cell *matCellDef="let departamento"> {{departamento.descricao}} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="acoes">
-      <th mat-header-cell *matHeaderCellDef style="width: 120px; text-align: center; font-weight: bold;"> Ações </th>
-      <td mat-cell *matCellDef="let departamento" style="text-align: center;">
-        
-        <button mat-icon-button color="primary" (click)="editar(departamento)" title="Editar">
-          <mat-icon>edit</mat-icon>
-        </button>
-
-        <button mat-icon-button color="warn" (click)="excluir(departamento.id!)" title="Excluir">
-          <mat-icon>delete</mat-icon>
-        </button>
-
-      </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="colunas"></tr>
-    <tr mat-row *matRowDef="let row; columns: colunas;"></tr>
-
-  </table>
-
-  <mat-paginator 
-    [pageSizeOptions]="[2, 4, 8, 16]" 
-    [pageSize]="pageSize" 
-    [length]="totalDepartamentos()" 
-    (page)="paginar($event)">
-  </mat-paginator>
-
-  <div *ngIf="departamentos().length === 0" style="text-align: center; padding: 20px; color: #666;">
-    Nenhum departamento registado no momento.
+  <!-- Sidebar -->
+  <div class="bg-white border-0 sidebar" [ngClass]="{'collapsed': isCollapsed}" id="sidebar-wrapper">
+    <div class="sidebar-heading fw-bold d-flex align-items-center justify-content-center">
+      <i class="bi bi-shield-lock-fill fs-4 me-2 text-primary"></i>
+      <span class="sidebar-text">Painel Administrativo</span>
+    </div>
+    <div class="list-group list-group-flush mt-4">
+      @for (item of menuItems; track item.name) {
+        <a [routerLink]="item.route" 
+           routerLinkActive="active" 
+           [routerLinkActiveOptions]="{exact: item.route === '/admin'}"
+           class="list-group-item list-group-item-action d-flex align-items-center"
+           [title]="isCollapsed ? item.name : ''">
+          <i [class]="item.icon + ' fs-5'"></i>
+          <span class="sidebar-text ms-3">{{ item.name }}</span>
+        </a>
+      }
+    </div>
   </div>
-  </mat-card>
-  }
+
+  <!-- Page Content -->
+  <div id="page-content-wrapper" class="bg-light-custom" [ngClass]="{'collapsed': isCollapsed}">
+    
+    <!-- Topbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom topbar px-4 sticky-top">
+      <div class="d-flex align-items-center w-100 justify-content-between">
+        
+        <!-- Esquerda: Toggle Sidebar + Logo -->
+        <div class="d-flex align-items-center">
+          <button class="btn btn-light me-3 d-flex align-items-center justify-content-center border-0 shadow-sm rounded-circle p-2" (click)="toggleSidebar()" id="menu-toggle">
+            <i class="bi bi-list fs-4"></i>
+          </button>
+          
+          <a class="navbar-brand fw-bold text-primary d-flex align-items-center me-4" [routerLink]="['/']">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 35px; height: 35px;">
+              <i class="bi bi-lightning-fill"></i>
+            </div>
+            <span class="d-none d-sm-inline">Fontes PC</span>
+          </a>
+
+          <form class="d-none d-md-flex">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden">
+              <span class="input-group-text bg-light border-0 px-3"><i class="bi bi-search text-muted"></i></span>
+              <input type="text" class="form-control border-0 bg-light shadow-none" placeholder="Pesquisar..." aria-label="Pesquisar">
+            </div>
+          </form>
+        </div>
+
+        <!-- Direita: Tema + Info Usuário -->
+        <div class="d-flex align-items-center">
+          <button class="btn btn-light me-3 d-flex align-items-center justify-content-center border-0 shadow-sm rounded-circle p-2 theme-toggle" (click)="toggleTheme()" title="Alternar Tema">
+            <i class="bi" [ngClass]="isDarkMode ? 'bi-sun-fill text-warning' : 'bi-moon-fill text-primary'" class="fs-5"></i>
+          </button>
+
+          <div class="d-flex align-items-center bg-light rounded-pill px-3 py-1 border shadow-sm transition-all hover-shadow">
+            <span class="me-3 fw-medium text-secondary d-none d-sm-inline">
+              Olá, <span class="fw-bold text-primary">{{ nomeUsuario || 'Admin' }}</span>!
+            </span>
+            <span class="me-2 fw-medium text-secondary d-inline d-sm-none" title="Olá, {{ nomeUsuario || 'Admin' }}!">
+              <i class="bi bi-person-circle fs-5 text-primary"></i>
+            </span>
+            <button class="btn btn-sm btn-outline-danger rounded-pill fw-bold px-3" (click)="sair()">
+              Sair
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="container-fluid p-4 main-content">
+      <div class="w-full">
+        @if (isFormVisible) {
+          <!-- VIEW DO FORMULÁRIO -->
+          <mat-card class="material-card">
+            <div class="card-header-azul text-white p-4 font-bold text-lg rounded-t-custom mb-4" style="background-color: #1e4db7; text-align: center;">
+              {{ departamentoForm.value.id ? 'Editar Departamento' : 'Novo Departamento' }}
+            </div>
+            <div style="margin-bottom: 20px; display: flex; align-items: center; padding: 16px;">
+              <button mat-button color="primary" (click)="voltarParaLista()">
+                <mat-icon>arrow_back</mat-icon>
+                Voltar para a Lista
+              </button>
+            </div>
+
+            <form [formGroup]="departamentoForm" (ngSubmit)="salvar()">
+            
+              <mat-card-content style="padding-top: 20px;">
+                
+                <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 15px;">
+                  <mat-label>Sigla</mat-label>
+                  <input matInput formControlName="sigla" maxlength="10" placeholder="Ex: TI, FIN...">
+                  @if (departamentoForm.get('sigla')?.invalid && departamentoForm.get('sigla')?.touched) {
+                    <mat-error>{{ obterMensagemErro('sigla', 'Sigla') }}</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" style="width: 100%;">
+                  <mat-label>Descrição</mat-label>
+                  <input matInput formControlName="descricao" maxlength="100" placeholder="Ex: Tecnologia da Informação">
+                  @if (departamentoForm.get('descricao')?.invalid && departamentoForm.get('descricao')?.touched) {
+                    <mat-error>{{ obterMensagemErro('descricao', 'Descrição') }}</mat-error>
+                  }
+                </mat-form-field>
+
+              </mat-card-content>
+
+              <mat-card-actions align="end" style="padding: 16px;">
+                <button mat-button type="button" (click)="voltarParaLista()">
+                  Cancelar
+                </button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="departamentoForm.invalid">
+                  {{ departamentoForm.value.id ? 'Atualizar' : 'Salvar' }}
+                </button>
+              </mat-card-actions>
+            </form>
+          </mat-card>
+
+        } @else {
+          <!-- VIEW DA LISTA -->
+          <mat-card class="material-card mb-4 p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2 style="margin: 0; font-size: 24px; font-weight: bold; color: #2b3674;">Gestão de Departamentos</h2>
+              <div style="display: flex; gap: 10px;">
+                <button mat-button color="primary" (click)="navegarParaHome()">
+                  <mat-icon>home</mat-icon>
+                  Home
+                </button>
+                <button mat-raised-button color="primary" (click)="novoDepartamento()">
+                  <mat-icon>add</mat-icon>
+                  Adicionar Departamento
+                </button>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: baseline;">
+              <mat-form-field appearance="outline" style="flex: 1;">
+                <mat-label>Pesquisar Departamento por Descrição</mat-label>
+                <input matInput #inputPesquisa (keyup.enter)="buscar(inputPesquisa.value)" placeholder="Ex: Tecnologia da Informação">
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+              
+              <button mat-raised-button color="primary" (click)="buscar(inputPesquisa.value)" style="height: 50px;">
+                Buscar
+              </button>
+            </div>
+
+            <table mat-table [dataSource]="departamentos()" class="mat-elevation-z8" style="width: 100%; border-radius: 8px; margin-bottom: 30px;">
+              <ng-container matColumnDef="id">
+                <th mat-header-cell *matHeaderCellDef style="width: 80px; font-weight: bold;"> ID </th>
+                <td mat-cell *matCellDef="let departamento"> {{departamento.id}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="sigla">
+                <th mat-header-cell *matHeaderCellDef style="font-weight: bold;"> Sigla </th>
+                <td mat-cell *matCellDef="let departamento"> {{departamento.sigla}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="descricao">
+                <th mat-header-cell *matHeaderCellDef style="font-weight: bold;"> Descrição </th>
+                <td mat-cell *matCellDef="let departamento"> {{departamento.descricao}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="acoes">
+                <th mat-header-cell *matHeaderCellDef style="width: 120px; text-align: center; font-weight: bold;"> Ações </th>
+                <td mat-cell *matCellDef="let departamento" style="text-align: center;">
+                  <button mat-icon-button color="primary" (click)="editar(departamento)" title="Editar">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" (click)="excluir(departamento.id!)" title="Excluir">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+              <tr mat-row *matRowDef="let row; columns: colunas;"></tr>
+            </table>
+
+            <mat-paginator 
+              [pageSizeOptions]="[2, 4, 8, 16]" 
+              [pageSize]="pageSize" 
+              [length]="totalDepartamentos()" 
+              (page)="paginar($event)">
+            </mat-paginator>
+
+            <div *ngIf="departamentos().length === 0" style="text-align: center; padding: 20px; color: #666;">
+              Nenhum departamento registado no momento.
+            </div>
+          </mat-card>
+        }
+      </div>
+    </div>
+  </div>
 </div>
