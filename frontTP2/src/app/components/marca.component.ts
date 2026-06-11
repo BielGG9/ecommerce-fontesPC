@@ -7,7 +7,7 @@ import { DialogService } from '../services/dialog.service';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ThemeService } from '../services/theme.service';
-import { Subscription } from 'rxjs';
+import { Subscription, concat } from 'rxjs';
 
 @Component({
   selector: 'app-marca',
@@ -228,23 +228,25 @@ export class MarcaComponent implements OnInit, OnDestroy {
   }
 
   excluir(id: number) {
-    if (confirm('Tem a certeza que deseja eliminar esta marca?')) {
-      this.marcaService.delete(id).subscribe({
-        next: () => {
-          this.dialogService.showSuccess('Marca eliminada!');
-          this.resetForm();
-          this.carregarMarcas();
-        },
-        error: (err) => {
-          if (err.status === 400) {
-            alert('Não é possível excluir esta Marca, pois ela possui modelos vinculados. Remova os modelos primeiro.');
-          } else {
-            alert('Falha ao tentar remover a marca. Verifique a conexão.');
-            console.error(err);
+    this.dialogService.showConfirm('Tem a certeza que deseja eliminar esta marca?', 'Eliminar Marca').subscribe(confirmado => {
+      if (confirmado) {
+        this.marcaService.delete(id).subscribe({
+          next: () => {
+            this.dialogService.showSuccess('Marca eliminada!');
+            this.resetForm();
+            this.carregarMarcas();
+          },
+          error: (err) => {
+            if (err.status === 400) {
+              this.dialogService.showWarning('Não é possível excluir esta Marca, pois ela possui modelos vinculados. Remova os modelos primeiro.', 'Aviso');
+            } else {
+              this.dialogService.showWarning('Falha ao tentar remover a marca. Verifique a conexão.', 'Erro');
+              console.error(err);
+            }
           }
-        }
-      });
-    }
+        });
+      }
+    });
   }
 
   obterMensagemErro(campo: string, nomeCampo: string = 'Campo'): string {
@@ -269,16 +271,26 @@ export class MarcaComponent implements OnInit, OnDestroy {
 
   // --- Gerenciamento de Imagens ---
   onFileSelected(event: any, marcaId: number) {
-    const file: File = event.target.files[0];
-    if (file) {
-      this.marcaService.uploadImagem(marcaId, file).subscribe({
+    const files: FileList = event.target.files;
+    if (files && files.length > 0) {
+      const uploads = [];
+      for (let i = 0; i < files.length; i++) {
+        uploads.push(this.marcaService.uploadImagem(marcaId, files[i]));
+      }
+
+      concat(...uploads).subscribe({
         next: () => {
-          this.dialogService.showSuccess('Imagem enviada com sucesso!');
-          this.carregarMarcas();
+          // Executado a cada upload concluído
         },
         error: (err) => {
-          console.error('Erro no upload da imagem', err);
-          alert('Erro ao enviar imagem.');
+          console.error('Erro no upload das imagens', err);
+          const mensagemErro = (typeof err.error === 'string' && err.error) ? err.error : 'Erro ao enviar uma ou mais imagens.';
+          this.dialogService.showWarning(mensagemErro, 'Erro');
+          this.carregarMarcas();
+        },
+        complete: () => {
+          this.dialogService.showSuccess('Todas as imagens foram enviadas com sucesso!');
+          this.carregarMarcas();
         }
       });
     }
@@ -289,17 +301,20 @@ export class MarcaComponent implements OnInit, OnDestroy {
     const partes = fidUrl.split('/');
     const fid = partes[partes.length - 1];
     
-    if (confirm('Deseja realmente remover esta imagem?')) {
-      this.marcaService.deleteImagem(fid).subscribe({
-        next: () => {
-          this.carregarMarcas();
-        },
-        error: (err) => {
-          console.error('Erro ao remover imagem', err);
-          alert('Erro ao remover imagem.');
-        }
-      });
-    }
+    this.dialogService.showConfirm('Deseja realmente remover esta imagem?', 'Excluir Imagem').subscribe(confirmado => {
+      if (confirmado) {
+        this.marcaService.deleteImagem(fid).subscribe({
+          next: () => {
+            this.carregarMarcas();
+            this.dialogService.showSuccess('Imagem removida com sucesso!');
+          },
+          error: (err) => {
+            console.error('Erro ao remover imagem', err);
+            this.dialogService.showWarning('Erro ao remover imagem.', 'Erro');
+          }
+        });
+      }
+    });
   }
 
   getImagemUrl(url: string): string {

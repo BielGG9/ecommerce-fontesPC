@@ -16,7 +16,7 @@ import { CertificacaoDialog } from './certificacao-dialog/certificacao-dialog';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ThemeService } from '../services/theme.service';
-import { Subscription } from 'rxjs';
+import { Subscription, concat } from 'rxjs';
 
 @Component({
   selector: 'app-fonte',
@@ -245,7 +245,7 @@ export class FonteComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('Erro ao atualizar fonte', err);
-          alert('Erro ao atualizar. Verifique o F12.');
+          this.dialogService.showWarning('Erro ao atualizar a fonte.', 'Erro');
         }
       });
     } else {
@@ -258,7 +258,7 @@ export class FonteComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('Erro ao salvar fonte', err);
-          alert('Erro ao guardar fonte. Verifique o F12.');
+          this.dialogService.showWarning('Erro ao guardar a fonte.', 'Erro');
         }
       });
     }
@@ -290,19 +290,21 @@ export class FonteComponent implements OnInit, OnDestroy {
   excluir(id: number | undefined) {
     if (!id) return;
     
-    if (confirm('Tem a certeza que deseja eliminar esta fonte?')) {
-      this.fonteService.delete(id).subscribe({
-        next: () => {
-          this.dialogService.showSuccess('Fonte eliminada com sucesso!');
-          this.resetForm();
-          this.carregarFontes();
-        },
-        error: (err) => {
-          console.error('Erro ao excluir', err);
-          alert('Erro ao excluir a fonte.');
-        }
-      });
-    }
+    this.dialogService.showConfirm('Tem a certeza que deseja eliminar esta fonte?', 'Eliminar Fonte').subscribe(confirmado => {
+      if (confirmado) {
+        this.fonteService.delete(id).subscribe({
+          next: () => {
+            this.dialogService.showSuccess('Fonte eliminada com sucesso!');
+            this.resetForm();
+            this.carregarFontes();
+          },
+          error: (err) => {
+            console.error('Erro ao excluir', err);
+            this.dialogService.showWarning('Erro ao excluir a fonte.', 'Erro');
+          }
+        });
+      }
+    });
   }
 
   obterMensagemErro(campo: string, nomeCampo: string = 'Campo'): string {
@@ -422,16 +424,26 @@ export class FonteComponent implements OnInit, OnDestroy {
   // --- Gerenciamento de Imagens ---
   onFileSelected(event: any, fonteId: number | undefined) {
     if (fonteId === undefined) return;
-    const file: File = event.target.files[0];
-    if (file) {
-      this.fonteService.uploadImagem(fonteId, file).subscribe({
+    const files: FileList = event.target.files;
+    if (files && files.length > 0) {
+      const uploads = [];
+      for (let i = 0; i < files.length; i++) {
+        uploads.push(this.fonteService.uploadImagem(fonteId, files[i]));
+      }
+
+      concat(...uploads).subscribe({
         next: () => {
-          this.dialogService.showSuccess('Imagem enviada com sucesso!');
-          this.carregarFontes();
+          // Executado a cada upload concluído
         },
         error: (err) => {
-          console.error('Erro no upload da imagem', err);
-          alert('Erro ao enviar imagem.');
+          console.error('Erro no upload das imagens', err);
+          const mensagemErro = (typeof err.error === 'string' && err.error) ? err.error : 'Erro ao enviar uma ou mais imagens.';
+          this.dialogService.showWarning(mensagemErro, 'Erro');
+          this.carregarFontes();
+        },
+        complete: () => {
+          this.dialogService.showSuccess('Todas as imagens foram enviadas com sucesso!');
+          this.carregarFontes();
         }
       });
     }
@@ -442,17 +454,20 @@ export class FonteComponent implements OnInit, OnDestroy {
     const partes = fidUrl.split('/');
     const fid = partes[partes.length - 1];
     
-    if (confirm('Deseja realmente remover esta imagem?')) {
-      this.fonteService.deleteImagem(fid).subscribe({
-        next: () => {
-          this.carregarFontes();
-        },
-        error: (err) => {
-          console.error('Erro ao remover imagem', err);
-          alert('Erro ao remover imagem.');
-        }
-      });
-    }
+    this.dialogService.showConfirm('Deseja realmente remover esta imagem?', 'Excluir Imagem').subscribe(confirmado => {
+      if (confirmado) {
+        this.fonteService.deleteImagem(fid).subscribe({
+          next: () => {
+            this.carregarFontes();
+            this.dialogService.showSuccess('Imagem removida com sucesso!');
+          },
+          error: (err) => {
+            console.error('Erro ao remover imagem', err);
+            this.dialogService.showWarning('Erro ao remover imagem.', 'Erro');
+          }
+        });
+      }
+    });
   }
 
   getImagemUrl(url: string): string {
