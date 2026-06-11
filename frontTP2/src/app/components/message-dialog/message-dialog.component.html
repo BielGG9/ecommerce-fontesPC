@@ -3,6 +3,8 @@
     <mat-icon class="dialog-icon" *ngIf="data.type === 'success'">check_circle</mat-icon>
     <mat-icon class="dialog-icon" *ngIf="data.type === 'info'">info</mat-icon>
     <mat-icon class="dialog-icon" *ngIf="data.type === 'warning'">warning</mat-icon>
+    <mat-icon class="dialog-icon" *ngIf="data.type === 'error'">error</mat-icon>
+    <mat-icon class="dialog-icon" *ngIf="data.type === 'confirm'">help_outline</mat-icon>
   </div>
   
   <h2 class="dialog-title">{{ data.title }}</h2>
@@ -11,7 +13,16 @@
     <p>{{ data.message }}</p>
   </div>
 
-  <div class="dialog-footer">
+  <div class="dialog-footer" *ngIf="data.type !== 'confirm'">
     <button mat-flat-button class="action-btn" (click)="fechar()">OK</button>
+  </div>
+
+  <div class="dialog-footer-confirm" *ngIf="data.type === 'confirm'">
+    <div class="confirm-btn-col">
+      <button mat-stroked-button type="button" class="action-btn cancel-btn" (click)="confirmar(false)">Cancelar</button>
+    </div>
+    <div class="confirm-btn-col">
+      <button mat-flat-button type="button" class="action-btn confirm-btn" (click)="confirmar(true)">Confirmar</button>
+    </div>
   </div>
 </div>

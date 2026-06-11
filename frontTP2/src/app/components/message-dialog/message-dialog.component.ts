@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 export interface MessageDialogData {
   title: string;
   message: string;
-  type: 'success' | 'info' | 'warning';
+  type: 'success' | 'info' | 'warning' | 'error' | 'confirm';
 }
 
 @Component({
@@ -24,6 +24,10 @@ export class MessageDialogComponent {
   ) {}
 
   fechar(): void {
-    this.dialogRef.close();
+    this.dialogRef.close(false);
+  }
+
+  confirmar(resultado: boolean): void {
+    this.dialogRef.close(resultado);
   }
 }

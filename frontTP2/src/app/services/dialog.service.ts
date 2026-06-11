@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MessageDialogComponent } from '../components/message-dialog/message-dialog.component';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,6 @@ export class DialogService {
         type: 'success'
       },
       width: '380px',
-      // panelClass é opcional, mas removemos estilos padrão indesejados se existirem
       panelClass: 'custom-message-dialog-panel'
     });
   }
@@ -43,5 +43,30 @@ export class DialogService {
       width: '380px',
       panelClass: 'custom-message-dialog-panel'
     });
+  }
+
+  showError(message: string, title: string = 'Erro'): void {
+    this.dialog.open(MessageDialogComponent, {
+      data: {
+        title,
+        message,
+        type: 'error'
+      },
+      width: '380px',
+      panelClass: 'custom-message-dialog-panel'
+    });
+  }
+
+  showConfirm(message: string, title: string = 'Confirmar'): Observable<boolean> {
+    const dialogRef = this.dialog.open(MessageDialogComponent, {
+      data: {
+        title,
+        message,
+        type: 'confirm'
+      },
+      width: '380px',
+      panelClass: 'custom-message-dialog-panel'
+    });
+    return dialogRef.afterClosed();
   }
 }
