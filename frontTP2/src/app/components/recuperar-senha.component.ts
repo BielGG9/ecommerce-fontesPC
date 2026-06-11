@@ -1,8 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormGroupDirective } from '@angular/forms';
+import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { DialogService } from '../services/dialog.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -32,6 +33,8 @@ export class RecuperarSenhaComponent {
 
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private dialogService = inject(DialogService);
+  private router = inject(Router);
 
   constructor() {
     this.form = this.fb.group({
@@ -39,7 +42,7 @@ export class RecuperarSenhaComponent {
     });
   }
 
-  enviarEmail() {
+  enviarEmail(formDirective: FormGroupDirective) {
     if (this.form.valid) {
       this.enviando = true;
       this.sucesso = false;
@@ -48,18 +51,39 @@ export class RecuperarSenhaComponent {
 
       this.authService.solicitarRecuperacaoSenha(this.form.value.email).subscribe({
         next: () => {
-          this.mensagemSucesso = 'Verifique o seu e-mail para receber o link de recuperação.';
           this.enviando = false;
           this.sucesso = true;
+          this.mensagemSucesso = 'E-mail de recuperação enviado com sucesso! Verifique a sua caixa de entrada.';
+          
+          this.dialogService.showSuccess('Verifique o seu e-mail para receber o link de recuperação.', 'E-mail Enviado!');
+          
+          // Reseta a diretiva do formulário para evitar a linha vermelha ao redor do input
+          if (formDirective) {
+            formDirective.resetForm();
+          }
           this.form.reset();
+
+          // Redireciona de volta para o login após 10 segundos
+          setTimeout(() => {
+            this.router.navigate(['/login']);
+          }, 10000);
         },
         error: (err) => {
-          if (err.status === 404) {
-            this.mensagemErro = 'E-mail não encontrado no sistema.';
-          } else {
-            this.mensagemErro = 'Erro ao tentar recuperar a senha. Tente novamente mais tarde.';
-          }
           this.enviando = false;
+          this.sucesso = false;
+          
+          let errorMsg = 'Erro ao tentar recuperar a senha. Tente novamente mais tarde.';
+          if (err) {
+            if (err.status === 404) {
+              errorMsg = 'E-mail não encontrado no sistema.';
+            } else if (err.error && typeof err.error === 'string') {
+              errorMsg = err.error;
+            } else if (err.error && err.error.message) {
+              errorMsg = err.error.message;
+            }
+          }
+          
+          this.dialogService.showError(errorMsg, 'E-mail Não Enviado');
         }
       });
     }

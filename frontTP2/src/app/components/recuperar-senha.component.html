@@ -5,7 +5,7 @@
       <p>Introduza o seu e-mail</p>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="enviarEmail()">
+    <form [formGroup]="form" #formDirective="ngForm" (ngSubmit)="enviarEmail(formDirective)">
       <mat-card-content class="form-content">
         
         @if (mensagemErro) {

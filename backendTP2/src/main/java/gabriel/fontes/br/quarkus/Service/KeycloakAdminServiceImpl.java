@@ -20,14 +20,32 @@ public class KeycloakAdminServiceImpl implements KeycloakAdminService {
 
     @Override
     public void enviarEmailRecuperacaoSenha(String email) {
-        java.util.List<UserRepresentation> users = keycloak.realm("TP2").users().search(null, null, null, email, 0, 1);
-        
-        if (users == null || users.isEmpty()) {
-            throw new jakarta.ws.rs.NotFoundException("Utilizador não encontrado no Keycloak.");
+        try {
+            java.util.List<UserRepresentation> users = keycloak.realm("TP2").users().search(null, null, null, email, 0, 1);
+            
+            if (users == null || users.isEmpty()) {
+                throw new jakarta.ws.rs.NotFoundException("Utilizador não encontrado no Keycloak.");
+            }
+            
+            String userId = users.get(0).getId();
+            keycloak.realm("TP2").users().get(userId).executeActionsEmail(java.util.Collections.singletonList("UPDATE_PASSWORD"));
+        } catch (jakarta.ws.rs.NotFoundException e) {
+            throw e;
+        } catch (jakarta.ws.rs.WebApplicationException e) {
+            throw e;
+        } catch (jakarta.ws.rs.ProcessingException e) {
+            throw new jakarta.ws.rs.WebApplicationException(
+                jakarta.ws.rs.core.Response.status(503)
+                    .entity(java.util.Map.of("message", "Serviço Keycloak indisponível. Tente novamente mais tarde."))
+                    .build()
+            );
+        } catch (Exception e) {
+            throw new jakarta.ws.rs.WebApplicationException(
+                jakarta.ws.rs.core.Response.status(500)
+                    .entity(java.util.Map.of("message", "Erro ao comunicar com o Keycloak: " + e.getMessage()))
+                    .build()
+            );
         }
-        
-        String userId = users.get(0).getId();
-        keycloak.realm("TP2").users().get(userId).executeActionsEmail(java.util.Collections.singletonList("UPDATE_PASSWORD"));
     }
 
     @Override

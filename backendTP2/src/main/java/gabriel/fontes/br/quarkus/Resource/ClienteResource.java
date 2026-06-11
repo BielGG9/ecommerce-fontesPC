@@ -189,8 +189,26 @@ public class ClienteResource {
     @Path("/esqueci-senha")
     @PermitAll
     public Response esqueciSenha(EsqueciSenhaRequest request) {
-        service.recuperarSenha(request.email());
-        return Response.ok().build();
+        try {
+            service.recuperarSenha(request.email());
+            return Response.ok(java.util.Map.of("message", "E-mail enviado com sucesso!")).build();
+        } catch (jakarta.ws.rs.NotFoundException e) {
+            logger.warning("E-mail para recuperação não encontrado no Keycloak: " + request.email());
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity(java.util.Map.of("message", "E-mail não encontrado no sistema."))
+                .build();
+        } catch (WebApplicationException e) {
+            logger.severe("Erro de aplicação ao recuperar senha: " + e.getMessage());
+            int status = e.getResponse() != null ? e.getResponse().getStatus() : 500;
+            return Response.status(status)
+                .entity(java.util.Map.of("message", e.getMessage() != null ? e.getMessage() : "Erro no servidor de autenticação."))
+                .build();
+        } catch (Exception e) {
+            logger.severe("Erro inesperado ao recuperar senha: " + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(java.util.Map.of("message", "Erro ao tentar processar a solicitação: " + e.getMessage()))
+                .build();
+        }
     }
 
     @POST
