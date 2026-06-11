@@ -52,17 +52,38 @@
       <div class="produto-imagem-col">
 
         <!-- 🔵 IMAGEM REAL — só renderiza se a API devolveu pelo menos uma -->
-        <ng-container *ngIf="primeiraImagemUrl; else semImagem">
-          <div class="imagem-wrapper">
-            <img [src]="primeiraImagemUrl" [alt]="fonte?.nome ?? 'Imagem do produto'" class="produto-img" loading="lazy"
-              (error)="imgElement.src = 'assets/placeholder-produto.svg'; imgElement.onerror = null" #imgElement />
+        <ng-container *ngIf="imagemAtualUrl; else semImagem">
+          <div class="slider-container" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
+            
+            <!-- Botão Anterior (se houver múltiplas imagens) -->
+            <button *ngIf="fonte?.imagens?.length > 1" type="button" class="slider-arrow arrow-left" (click)="imagemAnterior()" aria-label="Imagem anterior">
+              <mat-icon>keyboard_arrow_left</mat-icon>
+            </button>
+
+            <!-- Wrapper com a Imagem Principal -->
+            <div class="imagem-wrapper">
+              <img [src]="imagemAtualUrl" [alt]="fonte?.nome ?? 'Imagem do produto'" class="produto-img fade-anim" loading="lazy"
+                (error)="imgElement.src = 'assets/placeholder-produto.svg'; imgElement.onerror = null" #imgElement />
+            </div>
+
+            <!-- Botão Próxima (se houver múltiplas imagens) -->
+            <button *ngIf="fonte?.imagens?.length > 1" type="button" class="slider-arrow arrow-right" (click)="proximaImagem()" aria-label="Próxima imagem">
+              <mat-icon>keyboard_arrow_right</mat-icon>
+            </button>
+            
+            <!-- Dots Indicadores -->
+            <div class="slider-dots" *ngIf="fonte?.imagens?.length > 1">
+              <span *ngFor="let img of fonte?.imagens; let i = index" class="dot" 
+                    [class.dot-active]="i === imagemAtualIndex" (click)="selecionarImagem(i)"></span>
+            </div>
           </div>
+
           <!-- Galeria de miniaturas (quando há mais de 1 imagem) -->
           <div class="galeria-thumbs" *ngIf="fonte?.imagens?.length > 1">
             <ng-container *ngFor="let img of fonte?.imagens; let i = index">
               <img *ngIf="img?.url" [src]="getImagemUrl(img.url)"
                 [alt]="'Imagem ' + (i + 1) + ' de ' + (fonte?.nome ?? 'produto')" class="thumb"
-                [class.thumb-active]="i === 0" loading="lazy" />
+                [class.thumb-active]="i === imagemAtualIndex" (click)="selecionarImagem(i)" loading="lazy" />
             </ng-container>
           </div>
         </ng-container>
@@ -141,10 +162,18 @@
         <!-- Botões de ação -->
         <div class="acoes">
 
-          <button mat-raised-button color="primary" class="btn-carrinho" [disabled]="!temEstoque"
+          <!-- Botão Comprar Agora (Redireciona direto para o carrinho) -->
+          <button mat-raised-button class="btn-comprar-agora" [disabled]="!temEstoque"
+            (click)="comprarAgora()" id="btn-comprar-agora">
+            <mat-icon>flash_on</mat-icon>
+            {{ temEstoque ? 'Comprar Agora' : 'Produto Esgotado' }}
+          </button>
+
+          <!-- Botão Adicionar ao Carrinho -->
+          <button mat-flat-button class="btn-carrinho" [disabled]="!temEstoque"
             (click)="adicionarAoCarrinho()" id="btn-adicionar-carrinho">
             <mat-icon>shopping_cart</mat-icon>
-            {{ temEstoque ? 'Adicionar ao Carrinho' : 'Produto Esgotado' }}
+            Adicionar ao Carrinho
           </button>
 
           <button mat-stroked-button class="btn-wishlist" [disabled]="isFavorito || adicionandoWishlist"

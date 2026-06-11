@@ -172,6 +172,17 @@ export class ProdutoDetalheComponent implements OnInit, OnDestroy {
     }
   }
 
+  comprarAgora(): void {
+    if (!this.fonte) return;
+    try {
+      this.carrinhoService.adicionar(this.fonte);
+      this.router.navigate(['/carrinho']);
+    } catch (e) {
+      console.error('[ProdutoDetalhe] Erro ao comprar agora:', e);
+      this.dialogService.showWarning('Erro ao processar compra.', 'Erro');
+    }
+  }
+
   adicionarAWishlist(): void {
     if (!this.fonte || this.adicionandoWishlist) return;
     this.adicionandoWishlist = true;
@@ -216,22 +227,63 @@ export class ProdutoDetalheComponent implements OnInit, OnDestroy {
     return `http://localhost:8081${urlRelativa}`;
   }
 
-  /**
-   * Retorna a URL da primeira imagem disponível ou null se não houver.
-   * Guarda tripla: fonte existê, imagens existê, e array não está vazio.
-   * O template usa este getter para decidir entre imagem real e placeholder.
-   */
+  // ─── Estado do Slider de Imagens ───────────────────────────────────────────
+  imagemAtualIndex = 0;
+
+  /** Monta a URL da imagem correspondente ao índice atual do slider */
+  get imagemAtualUrl(): string | null {
+    if (!this.fonte || !this.fonte.imagens || this.fonte.imagens.length === 0) {
+      return null;
+    }
+    const idx = this.imagemAtualIndex;
+    if (idx < 0 || idx >= this.fonte.imagens.length) {
+      this.imagemAtualIndex = 0;
+    }
+    const imagem = this.fonte.imagens[this.imagemAtualIndex];
+    if (!imagem || !imagem.url) return null;
+    return this.getImagemUrl(imagem.url);
+  }
+
+  proximaImagem(): void {
+    if (!this.fonte || !this.fonte.imagens || this.fonte.imagens.length <= 1) return;
+    this.imagemAtualIndex = (this.imagemAtualIndex + 1) % this.fonte.imagens.length;
+    this.cdr.detectChanges();
+  }
+
+  imagemAnterior(): void {
+    if (!this.fonte || !this.fonte.imagens || this.fonte.imagens.length <= 1) return;
+    this.imagemAtualIndex = (this.imagemAtualIndex - 1 + this.fonte.imagens.length) % this.fonte.imagens.length;
+    this.cdr.detectChanges();
+  }
+
+  selecionarImagem(index: number): void {
+    if (!this.fonte || !this.fonte.imagens || index < 0 || index >= this.fonte.imagens.length) return;
+    this.imagemAtualIndex = index;
+    this.cdr.detectChanges();
+  }
+
+  // Swipe Mobile
+  private touchStartX = 0;
+
+  onTouchStart(event: TouchEvent): void {
+    this.touchStartX = event.changedTouches[0].screenX;
+  }
+
+  onTouchEnd(event: TouchEvent): void {
+    const touchEndX = event.changedTouches[0].screenX;
+    const diff = this.touchStartX - touchEndX;
+
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        this.proximaImagem();
+      } else {
+        this.imagemAnterior();
+      }
+    }
+  }
+
   get primeiraImagemUrl(): string | null {
-    // Guarda 1: fonte ainda não foi carregado
-    if (!this.fonte) return null;
-    // Guarda 2: campo imagens é undefined/null (API não retornou o campo)
-    if (!this.fonte.imagens) return null;
-    // Guarda 3: array vazio — API retornou [] (produto sem foto cadastrada)
-    if (this.fonte.imagens.length === 0) return null;
-    // Guarda 4: existe o item [0] mas a propriedade url é vazia
-    const primeiraImagem = this.fonte.imagens[0];
-    if (!primeiraImagem || !primeiraImagem.url) return null;
-    return this.getImagemUrl(primeiraImagem.url);
+    return this.imagemAtualUrl;
   }
 
   /** Rótulo legível da certificação */
