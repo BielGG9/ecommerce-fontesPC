@@ -173,10 +173,20 @@
           
           <div class="checkout-items mb-3" style="max-height: 300px; overflow-y: auto;">
             @for (item of carrinhoService.itens(); track item.fonte?.id) {
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <div>
-                  <span class="text-secondary small d-block text-truncate" style="max-width: 180px;">{{ item.fonte?.nome }}</span>
-                  <span class="text-muted small">{{ item.quantidade }}x</span>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center">
+                  <!-- Thumbnail do Produto -->
+                  <div class="thumbnail-checkout me-3 bg-light rounded d-flex align-items-center justify-center border" style="width: 48px; height: 48px; overflow: hidden; flex-shrink: 0;">
+                    @if (getFirstImageUrl(item.fonte)) {
+                      <img [src]="getFirstImageUrl(item.fonte)" alt="{{ item.fonte?.nome }}" class="max-h-full max-w-full object-contain p-1" />
+                    } @else {
+                      <i class="bi bi-lightning-fill text-primary" style="font-size: 20px;"></i>
+                    }
+                  </div>
+                  <div>
+                    <span class="text-secondary small d-block text-truncate fw-bold" style="max-width: 160px;" title="{{ item.fonte?.nome }}">{{ item.fonte?.nome }}</span>
+                    <span class="text-muted small">{{ item.quantidade }}x</span>
+                  </div>
                 </div>
                 <span class="fw-medium small">{{ (item.precoUnitario * item.quantidade) | currency:'BRL' }}</span>
               </div>

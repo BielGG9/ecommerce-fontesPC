@@ -5,6 +5,7 @@ import { RouterModule, Router } from '@angular/router';
 import { CarrinhoService } from '../../services/carrinho.service';
 import { ClienteService } from '../../services/cliente.service';
 import { AuthService } from '../../services/auth.service';
+import { FonteService } from '../../services/fonte.service';
 import { ItemPedido } from '../../models/item-pedido.model';
 
 @Component({
@@ -19,6 +20,7 @@ export class CarrinhoComponent implements OnInit {
   router         = inject(Router);
   clienteService = inject(ClienteService);
   authService    = inject(AuthService);
+  fonteService   = inject(FonteService);
 
   // ─── Estado do Modal de Completar Cadastro ───────────────────────────────
   exibirModalCompletar = false;
@@ -46,6 +48,33 @@ export class CarrinhoComponent implements OnInit {
         error: ()       => { this.usuarioLogado = null; }
       });
     }
+
+    this.atualizarFontesDoCarrinho();
+  }
+
+  atualizarFontesDoCarrinho(): void {
+    const itensAtuais = this.carrinhoService.itens();
+    if (itensAtuais.length === 0) return;
+
+    itensAtuais.forEach(item => {
+      if (item.fonte && item.fonte.id) {
+        this.fonteService.findById(item.fonte.id).subscribe({
+          next: (fonteAtualizada) => {
+            if (fonteAtualizada) {
+              this.carrinhoService.itens.update(itens => {
+                const i = itens.find(it => it.fonte?.id === item.fonte?.id);
+                if (i) {
+                  i.fonte = fonteAtualizada;
+                  i.precoUnitario = fonteAtualizada.preco;
+                }
+                return [...itens];
+              });
+            }
+          },
+          error: (err) => console.warn(`Erro ao atualizar fonte ${item.fonte?.id} no carrinho`, err)
+        });
+      }
+    });
   }
 
   // ─── Lógica do botão "Finalizar Compra" ──────────────────────────────────

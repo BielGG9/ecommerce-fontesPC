@@ -340,4 +340,15 @@ export class CheckoutComponent implements OnInit {
     input.value = value;
     this.checkoutForm.get('validadeCartao')?.setValue(value, { emitEvent: false });
   }
+
+  getImagemUrl(url: string): string {
+    return `http://localhost:8081${url}`;
+  }
+
+  getFirstImageUrl(fonte: any): string | null {
+    if (!fonte?.imagens || fonte.imagens.length === 0) return null;
+    const first = fonte.imagens[0];
+    if (!first?.url) return null;
+    return this.getImagemUrl(first.url);
+  }
 }
