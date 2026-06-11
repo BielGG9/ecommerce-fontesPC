@@ -79,7 +79,7 @@
         
         <button (click)="$event.stopPropagation(); comprar(fonte)" [disabled]="(fonte.estoque ?? 0) === 0" class="w-full mt-auto bg-transparent border-2 border-primary text-primary font-label-caps text-label-caps py-2.5 rounded-lg hover:bg-primary hover:text-on-primary disabled:border-outline-variant disabled:text-outline-variant disabled:hover:bg-transparent transition-colors flex items-center justify-center gap-2">
           <span class="material-symbols-outlined">shopping_cart</span>
-          {{ (fonte.estoque ?? 0) > 0 ? 'Comprar' : 'Esgotado' }}
+          {{ (fonte.estoque ?? 0) > 0 ? 'Adicionar ao Carrinho' : 'Esgotado' }}
         </button>
       </article>
     } @empty {
