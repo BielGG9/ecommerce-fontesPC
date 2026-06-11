@@ -74,3 +74,45 @@ li strong {
   border-radius: var(--border-radius);
   box-shadow: var(--shadow);
 }
+
+/* ========================================================================= */
+/* ADMIN STYLING OVERRIDES & CORRECTIONS
+/* ========================================================================= */
+
+/* Centralização do ícone do escudo com menu colapsado */
+.sidebar.collapsed .sidebar-heading {
+  justify-content: center !important;
+  padding: 0 !important;
+}
+
+.sidebar.collapsed .sidebar-heading i {
+  margin-right: 0 !important;
+  font-size: 1.8rem !important;
+  transition: all 0.3s ease;
+}
+
+/* Estilização da pílula de usuário logado (Topbar) */
+.topbar .d-flex.align-items-center.bg-light.rounded-pill.border {
+  background-color: #f1f5f9 !important; /* Fundo cinza claro e suave no modo claro */
+  border-color: #e2e8f0 !important;
+  transition: all 0.3s ease;
+}
+
+.topbar .d-flex.align-items-center.bg-light.rounded-pill.border span {
+  color: #475569 !important;
+}
+
+/* Versão dark mode para a pílula */
+.dark-theme .topbar .d-flex.align-items-center.bg-light.rounded-pill.border {
+  background-color: #1e293b !important; /* Fundo slate escuro */
+  border-color: #334155 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dark-theme .topbar .d-flex.align-items-center.bg-light.rounded-pill.border span {
+  color: #cbd5e1 !important;
+}
+
+.dark-theme .topbar .d-flex.align-items-center.bg-light.rounded-pill.border .text-primary {
+  color: #818cf8 !important; /* Tom indigo suave para o nome no modo escuro */
+}
