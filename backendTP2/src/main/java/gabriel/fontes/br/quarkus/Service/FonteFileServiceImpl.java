@@ -6,20 +6,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 import java.nio.file.Paths;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
 import org.jboss.resteasy.reactive.multipart.FileUpload;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gabriel.fontes.br.quarkus.Model.Arquivo;
 import gabriel.fontes.br.quarkus.Model.Fonte;
@@ -31,7 +23,6 @@ import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Response;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
 public class FonteFileServiceImpl implements FileService {
@@ -46,15 +37,7 @@ public class FonteFileServiceImpl implements FileService {
     ArquivoRepository arquivoRepository;
 
     @Inject
-    ObjectMapper objectMapper;
-
-    @ConfigProperty(name = "seaweedfs.master.url", defaultValue = "http://localhost:9333")
-    String masterUrl;
-
-    @ConfigProperty(name = "seaweedfs.request-timeout-ms", defaultValue = "10000")
-    int timeoutMs;
-
-    private final HttpClient httpClient = HttpClient.newHttpClient();
+    S3StorageService storageService;
 
     @Override
     @Transactional
@@ -67,7 +50,20 @@ public class FonteFileServiceImpl implements FileService {
         validarTamanho(file);
         validarExtensao(file);
 
-        String fid = uploadParaSeaweed(file);
+        byte[] fileBytes = Files.readAllBytes(file.uploadedFile());
+        String originalName = Paths.get(file.fileName()).getFileName().toString();
+        String extension = getExtension(originalName);
+        String fid = UUID.randomUUID().toString() + (extension == null ? "" : "." + extension.toLowerCase(Locale.ROOT));
+
+        String mimeType = file.contentType();
+        if (mimeType == null || mimeType.isBlank()) {
+            mimeType = guessMimeTypeByExtension(extension);
+        }
+
+        // Realiza o upload no MinIO
+        storageService.upload(fid, fileBytes, mimeType);
+
+        // Cria a entidade de banco de dados
         Arquivo arquivo = buildArquivoEntity(file, fid);
         arquivoRepository.persist(arquivo);
         fonte.addArquivo(arquivo);
@@ -91,51 +87,6 @@ public class FonteFileServiceImpl implements FileService {
         return arquivo;
     }
 
-    private String uploadParaSeaweed(FileUpload file) throws IOException {
-        String fileName = Paths.get(file.fileName()).getFileName().toString();
-        String extension = getExtension(fileName);
-        String normalizedName = UUID.randomUUID() + (extension == null ? "" : "." + extension.toLowerCase(Locale.ROOT));
-        byte[] fileBytes = Files.readAllBytes(file.uploadedFile());
-
-        JsonNode assignJson = requestJson("GET", masterUrl + "/dir/assign", null, null);
-        String fid = text(assignJson, "fid");
-        String volumeUrl = text(assignJson, "publicUrl");
-        if (volumeUrl == null) {
-            volumeUrl = text(assignJson, "url");
-        }
-        if (volumeUrl != null && (volumeUrl.contains("172.") || volumeUrl.contains("192.") || volumeUrl.contains("10."))) {
-            volumeUrl = "localhost:8088";
-        }
-
-        if (fid == null || volumeUrl == null) {
-            throw new WebApplicationException("Resposta inválida do SeaweedFS ao alocar arquivo.", Response.Status.BAD_GATEWAY);
-        }
-
-        String boundary = "----QuarkusSeaweedBoundary" + UUID.randomUUID();
-        byte[] body = buildMultipartBody(boundary, normalizedName, file.contentType(), fileBytes);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://" + volumeUrl + "/" + fid))
-                .timeout(java.time.Duration.ofMillis(timeoutMs))
-                .header("Content-Type", "multipart/form-data; boundary=" + boundary)
-                .POST(HttpRequest.BodyPublishers.ofByteArray(body))
-                .build();
-
-        HttpResponse<String> response;
-        try {
-            response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IOException("Upload interrompido.", e);
-        }
-
-        if (response.statusCode() < 200 || response.statusCode() >= 300) {
-            throw new WebApplicationException("Falha ao enviar imagem para o SeaweedFS.", Response.Status.BAD_GATEWAY);
-        }
-
-        return fid;
-    }
-
     @Override
     public ArquivoDownload download(String fid) {
         if (fid == null || fid.isBlank()) {
@@ -145,47 +96,11 @@ public class FonteFileServiceImpl implements FileService {
         Arquivo meta = arquivoRepository.findByFid(fid)
                 .orElseThrow(() -> new WebApplicationException("Imagem não encontrada no banco de dados.", Response.Status.NOT_FOUND));
 
-        String volumeId = extractVolumeId(fid);
-        JsonNode lookup = requestJson("GET", masterUrl + "/dir/lookup?volumeId=" + volumeId, null, null);
-        JsonNode locations = lookup.get("locations");
-
-        if (locations == null || !locations.isArray() || locations.isEmpty()) {
-            throw new WebApplicationException("Imagem não encontrada no SeaweedFS.", Response.Status.NOT_FOUND);
-        }
-
-        String publicUrl = text(locations.get(0), "publicUrl");
-        if (publicUrl == null) {
-            publicUrl = text(locations.get(0), "url");
-        }
-
-        if (publicUrl != null && (publicUrl.contains("172.") || publicUrl.contains("192.") || publicUrl.contains("10."))) {
-            publicUrl = "localhost:8088";
-        }
-
-        if (publicUrl == null) {
-            throw new WebApplicationException("Lookup de imagem sem endereço válido.", Response.Status.BAD_GATEWAY);
-        }
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://" + publicUrl + "/" + fid))
-                .timeout(java.time.Duration.ofMillis(timeoutMs))
-                .GET()
-                .build();
-
         try {
-            HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
-            if (response.statusCode() == 404) {
-                throw new WebApplicationException("Imagem não encontrada.", Response.Status.NOT_FOUND);
-            }
-            if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                throw new WebApplicationException("Falha ao baixar imagem do SeaweedFS.", Response.Status.BAD_GATEWAY);
-            }
-            return new ArquivoDownload(response.body(), meta.getMimeType(), meta.getNomeOriginal());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new WebApplicationException("Download interrompido.", Response.Status.INTERNAL_SERVER_ERROR);
-        } catch (IOException e) {
-            throw new WebApplicationException("Erro ao baixar imagem.", e, Response.Status.BAD_GATEWAY);
+            byte[] fileBytes = storageService.download(fid);
+            return new ArquivoDownload(fileBytes, meta.getMimeType(), meta.getNomeOriginal());
+        } catch (Exception e) {
+            throw new WebApplicationException("Erro ao baixar imagem do armazenamento.", e, Response.Status.BAD_GATEWAY);
         }
     }
 
@@ -199,8 +114,10 @@ public class FonteFileServiceImpl implements FileService {
         Arquivo arquivo = arquivoRepository.findByFid(fid)
                 .orElseThrow(() -> new WebApplicationException("Imagem não encontrada no banco de dados.", Response.Status.NOT_FOUND));
 
-        deletarNoSeaweedBestEffort(fid);
-        // Remove the reference from Fonte
+        // Deleta do MinIO
+        storageService.delete(fid);
+
+        // Remove a referência da Fonte
         fonteRepository.find("select f from Fonte f join f.arquivos a where a.id = ?1", arquivo.getId())
                 .firstResultOptional()
                 .ifPresent(fonte -> fonte.removeArquivo(arquivo));
@@ -208,110 +125,27 @@ public class FonteFileServiceImpl implements FileService {
         arquivoRepository.delete(arquivo);
     }
 
-    private void deletarNoSeaweedBestEffort(String fid) {
-        try {
-            String volumeId = extractVolumeId(fid);
-            JsonNode lookup = requestJson("GET", masterUrl + "/dir/lookup?volumeId=" + volumeId, null, null);
-            JsonNode locations = lookup.get("locations");
-            if (locations == null || !locations.isArray() || locations.isEmpty()) {
-                return;
-            }
-
-            String publicUrl = text(locations.get(0), "publicUrl");
-            if (publicUrl == null) {
-                publicUrl = text(locations.get(0), "url");
-            }
-
-            if (publicUrl != null && (publicUrl.contains("172.") || publicUrl.contains("192.") || publicUrl.contains("10."))) {
-                publicUrl = "localhost:8088";
-            }
-
-            if (publicUrl == null) {
-                return;
-            }
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://" + publicUrl + "/" + fid))
-                    .timeout(java.time.Duration.ofMillis(timeoutMs))
-                    .DELETE()
-                    .build();
-
-            httpClient.send(request, HttpResponse.BodyHandlers.discarding());
-        } catch (Exception ignored) {
-        }
-    }
-
-    private JsonNode requestJson(String method, String url, String contentType, byte[] body) {
-        HttpRequest.Builder builder = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .timeout(java.time.Duration.ofMillis(timeoutMs));
-
-        if (contentType != null) {
-            builder.header("Content-Type", contentType);
-        }
-
-        if ("POST".equalsIgnoreCase(method)) {
-            builder.POST(HttpRequest.BodyPublishers.ofByteArray(body == null ? new byte[0] : body));
-        } else if ("DELETE".equalsIgnoreCase(method)) {
-            builder.DELETE();
-        } else {
-            builder.GET();
-        }
-
-        try {
-            HttpResponse<String> response = httpClient.send(builder.build(), HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                throw new WebApplicationException("Erro de comunicação com SeaweedFS.", Response.Status.BAD_GATEWAY);
-            }
-            return objectMapper.readTree(response.body());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new WebApplicationException("Operação com SeaweedFS interrompida.", Response.Status.INTERNAL_SERVER_ERROR);
-        } catch (IOException e) {
-            throw new WebApplicationException("Erro ao processar resposta do SeaweedFS.", e, Response.Status.BAD_GATEWAY);
-        }
-    }
-
-    private byte[] buildMultipartBody(String boundary, String fileName, String contentType, byte[] bytes) {
-        String safeContentType = (contentType == null || contentType.isBlank()) ? "application/octet-stream" : contentType;
-
-        byte[] prefix = (
-                "--" + boundary + "\r\n" +
-                "Content-Disposition: form-data; name=\"file\"; filename=\"" + fileName + "\"\r\n" +
-                "Content-Type: " + safeContentType + "\r\n\r\n")
-                .getBytes(StandardCharsets.UTF_8);
-
-        byte[] suffix = ("\r\n--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8);
-        byte[] body = new byte[prefix.length + bytes.length + suffix.length];
-
-        System.arraycopy(prefix, 0, body, 0, prefix.length);
-        System.arraycopy(bytes, 0, body, prefix.length, bytes.length);
-        System.arraycopy(suffix, 0, body, prefix.length + bytes.length, suffix.length);
-
-        return body;
-    }
-
     private void validarTamanho(FileUpload file) {
         if (file == null || file.uploadedFile() == null) {
-            throw new WebApplicationException("Arquivo de imagem não informado.", Response.Status.BAD_REQUEST);
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Arquivo de imagem não informado.").build());
         }
 
         long size = file.size();
         if (size <= 0) {
-            throw new WebApplicationException("Arquivo vazio.", Response.Status.BAD_REQUEST);
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Arquivo vazio.").build());
         }
         if (size < MIN_FILE_SIZE) {
-            throw new WebApplicationException("Arquivo muito pequeno para ser considerado imagem válida.", Response.Status.BAD_REQUEST);
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Arquivo muito pequeno para ser considerado imagem válida (mínimo de 1 KB).").build());
         }
         if (size > MAX_FILE_SIZE) {
-            throw new WebApplicationException("Arquivo muito grande. Máximo permitido: " + MAX_FILE_SIZE + " bytes.", Response.Status.BAD_REQUEST);
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Arquivo muito grande. Máximo permitido: 5 MB.").build());
         }
     }
 
     private void validarExtensao(FileUpload file) {
         String ext = getExtension(file.fileName());
         if (ext == null || !ALLOWED_EXTENSIONS.contains(ext.toLowerCase(Locale.ROOT))) {
-            throw new WebApplicationException("Extensão de arquivo não suportada.", Response.Status.BAD_REQUEST);
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("Extensão de arquivo não suportada. Use jpg, jpeg, png, gif ou webp.").build());
         }
     }
 
@@ -325,14 +159,6 @@ public class FonteFileServiceImpl implements FileService {
             return null;
         }
         return onlyName.substring(idx + 1);
-    }
-
-    private String extractVolumeId(String fid) {
-        int comma = fid.indexOf(',');
-        if (comma <= 0) {
-            throw new WebApplicationException("FID inválido para lookup no SeaweedFS.", Response.Status.BAD_REQUEST);
-        }
-        return fid.substring(0, comma);
     }
 
     private String sha256Hex(java.nio.file.Path uploadedPath) throws IOException {
@@ -360,10 +186,5 @@ public class FonteFileServiceImpl implements FileService {
             case "webp" -> "image/webp";
             default -> "application/octet-stream";
         };
-    }
-
-    private String text(JsonNode node, String field) {
-        JsonNode value = node.get(field);
-        return value == null || value.isNull() ? null : value.asText();
     }
 }
