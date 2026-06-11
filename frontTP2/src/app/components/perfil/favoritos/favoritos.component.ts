@@ -84,4 +84,15 @@ export class FavoritosComponent implements OnInit {
       this.cdr.detectChanges();
     });
   }
+
+  getImagemUrl(url: string): string {
+    return `http://localhost:8081${url}`;
+  }
+
+  getFirstImageUrl(fonte: any): string | null {
+    if (!fonte?.imagens || fonte.imagens.length === 0) return null;
+    const first = fonte.imagens[0];
+    if (!first?.url) return null;
+    return this.getImagemUrl(first.url);
+  }
 }
