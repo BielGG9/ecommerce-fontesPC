@@ -46,6 +46,7 @@ public class EnderecoServiceImpl implements EnderecoService {
     @Override
     @Transactional
     public EnderecoResponse create(EnderecoRequest dto) {
+        System.out.println("DEBUG EnderecoServiceImpl.create: dto.salvo() = " + dto.salvo());
         // Criar um novo endereço com os dados fornecidos
         Endereco novoEndereco = new Endereco();
         novoEndereco.setRua(dto.rua());
@@ -55,6 +56,8 @@ public class EnderecoServiceImpl implements EnderecoService {
         novoEndereco.setCidade(dto.cidade());
         novoEndereco.setEstado(dto.estado());
         novoEndereco.setCep(dto.cep());
+        novoEndereco.setSalvo(dto.salvo() != null ? dto.salvo() : true);
+        System.out.println("DEBUG EnderecoServiceImpl.create: novoEndereco.getSalvo() = " + novoEndereco.getSalvo());
 
         // Associar o endereço a uma pessoa existente
         if (dto.idPessoa() != null) {
@@ -85,6 +88,9 @@ public class EnderecoServiceImpl implements EnderecoService {
         endereco.setCidade(dto.cidade());
         endereco.setEstado(dto.estado());
         endereco.setCep(dto.cep());
+        if (dto.salvo() != null) {
+            endereco.setSalvo(dto.salvo());
+        }
 
         return EnderecoResponse.fromEntity(endereco);
     }
@@ -127,7 +133,7 @@ public class EnderecoServiceImpl implements EnderecoService {
         if (cliente == null) {
             throw new NotFoundException("Cliente não encontrado.");
         }
-        return repository.find("pessoa.id", cliente.getId()).stream()
+        return repository.find("pessoa.id = ?1 and (salvo is null or salvo = true)", cliente.getId()).stream()
                 .map(EnderecoResponse::fromEntity)
                 .collect(Collectors.toList());
     }

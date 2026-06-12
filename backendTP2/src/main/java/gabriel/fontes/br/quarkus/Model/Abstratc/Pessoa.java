@@ -28,6 +28,7 @@ public abstract class Pessoa extends DefaultEntity { // Continua abstrata
     @Column(unique = true)
     private String idKeycloak;
 
+    private String nomeImagem;
 
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
@@ -39,4 +40,6 @@ public abstract class Pessoa extends DefaultEntity { // Continua abstrata
     public void setTelefones(List<Telefone> telefones) { this.telefones = telefones; }
     public String getIdKeycloak() { return idKeycloak; }
     public void setIdKeycloak(String idKeycloak) { this.idKeycloak = idKeycloak; }
+    public String getNomeImagem() { return nomeImagem; }
+    public void setNomeImagem(String nomeImagem) { this.nomeImagem = nomeImagem; }
 }

@@ -8,5 +8,6 @@ export interface PedidoRequest {
     pagamento: string; // 'boleto', 'pix', 'cartao'
     idCartao?: number;
     novoCartao?: CartaoRequest;
+    salvarCartao?: boolean;
     cupom?: string | null;
 }

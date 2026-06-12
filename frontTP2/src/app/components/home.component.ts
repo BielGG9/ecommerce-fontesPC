@@ -86,17 +86,6 @@ export class HomeComponent implements OnInit {
   comprar(fonte: Fonte) {
     if ((fonte.estoque ?? 0) > 0) {
       this.carrinhoService.adicionar(fonte);
-      
-      // Atualiza o estoque recriando o objeto da fonte no Signal
-      // O Angular prefere essa abordagem para acionar a atualização de tela corretamente!
-      this.fontes.update(lista => 
-        lista.map(f => {
-          if (f.id === fonte.id) {
-            return { ...f, estoque: (f.estoque ?? 1) - 1 };
-          }
-          return f;
-        })
-      );
 
       // Mostra quantos itens já temos guardados
       this.dialogService.showSuccess(`${fonte.nome} adicionado! O seu carrinho tem agora ${this.carrinhoService.quantidadeTotal()} itens.`, 'Adicionado!');

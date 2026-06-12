@@ -6,7 +6,7 @@ public record CartaoResponse(
        Long id,
        String numeroCartao,
        String nomeImpresso,
-       String validade,
+       String validadeCartao,
        String cvv
 ) {
 

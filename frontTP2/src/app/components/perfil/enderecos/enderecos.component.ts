@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EnderecoService } from '../../../services/endereco.service';
@@ -19,6 +19,7 @@ export class EnderecosComponent implements OnInit {
   clienteService = inject(ClienteService);
   fb = inject(FormBuilder);
   dialogService = inject(DialogService);
+  cdr = inject(ChangeDetectorRef);
 
   cliente: Cliente | null = null;
   enderecos: any[] = []; // Assuming we get a list from cliente.enderecos or similar
@@ -52,6 +53,7 @@ export class EnderecosComponent implements OnInit {
         this.enderecoService.getMeusEnderecos().subscribe({
           next: (ends) => {
             this.enderecos = ends || [];
+            this.cdr.detectChanges();
           },
           error: (err) => console.error('Erro ao buscar endereços:', err)
         });

@@ -29,14 +29,22 @@
             <div class="card h-100 shadow-sm border-0 address-card">
               <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                  <h5 class="card-title fw-bold text-dark mb-0">{{ cartao.bandeira | uppercase }}</h5>
+                  <h5 class="card-title fw-bold text-dark mb-0">
+                    **** **** **** {{ cartao.numeroCartao?.slice(-4) }}
+                  </h5>
                   <i class="bi bi-credit-card-2-front text-muted fs-4"></i>
                 </div>
-                <h6 class="card-subtitle mb-2 text-muted mt-2">Final {{ cartao.numero.slice(-4) }}</h6>
                 <p class="card-text mb-1 text-uppercase">{{ cartao.nomeImpresso }}</p>
+                <p class="card-text text-muted small" *ngIf="cartao.validadeCartao">
+                  Validade: {{ cartao.validadeCartao }}
+                </p>
                 <div class="mt-3">
-                  <button class="btn btn-sm btn-outline-primary me-2" (click)="editarCartao(cartao)"><i class="bi bi-pencil"></i> Editar</button>
-                  <button class="btn btn-sm btn-outline-danger" (click)="excluirCartao(cartao.id)"><i class="bi bi-trash"></i> Excluir</button>
+                  <button class="btn btn-sm btn-outline-primary me-2" (click)="editarCartao(cartao)">
+                    <i class="bi bi-pencil"></i> Editar
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" (click)="excluirCartao(cartao.id!)">
+                    <i class="bi bi-trash"></i> Excluir
+                  </button>
                 </div>
               </div>
             </div>
@@ -52,8 +60,9 @@
         <div class="row">
           <div class="col-md-6 mb-3">
             <label class="form-label fw-bold">Número do Cartão</label>
-            <input type="text" class="form-control" formControlName="numero" placeholder="0000 0000 0000 0000" maxlength="16" (keypress)="apenasNumeros($event)">
-            <small class="text-danger" *ngIf="formGroup.get('numero')?.invalid && formGroup.get('numero')?.touched">
+            <input type="text" class="form-control" formControlName="numeroCartao"
+                   placeholder="0000000000000000" maxlength="16" (keypress)="apenasNumeros($event)">
+            <small class="text-danger" *ngIf="formGroup.get('numeroCartao')?.invalid && formGroup.get('numeroCartao')?.touched">
               Número deve ter exatamente 16 dígitos.
             </small>
           </div>
@@ -62,20 +71,19 @@
             <input type="text" class="form-control" formControlName="nomeImpresso" placeholder="Ex: JOAO A SILVA">
           </div>
           <div class="col-md-6 mb-3">
-            <label class="form-label fw-bold">Bandeira</label>
-            <select class="form-select" formControlName="bandeira">
-              <option value="">Selecione...</option>
-              <option value="Visa">Visa</option>
-              <option value="Mastercard">Mastercard</option>
-              <option value="Elo">Elo</option>
-              <option value="Amex">American Express</option>
-            </select>
+            <label class="form-label fw-bold">Validade (MM/AA)</label>
+            <input type="text" class="form-control" formControlName="validadeCartao"
+                   placeholder="MM/AA" maxlength="5" (input)="formatarValidade($event)">
+            <small class="text-danger" *ngIf="formGroup.get('validadeCartao')?.invalid && formGroup.get('validadeCartao')?.touched">
+              Informe a validade no formato MM/AA.
+            </small>
           </div>
           <div class="col-md-6 mb-3">
-            <label class="form-label fw-bold">CPF/CNPJ do Titular</label>
-            <input type="text" class="form-control" formControlName="cpfCnpj" placeholder="000.000.000-00" maxlength="14" (keypress)="apenasNumeros($event)">
-            <small class="text-danger" *ngIf="formGroup.get('cpfCnpj')?.invalid && formGroup.get('cpfCnpj')?.touched">
-              Informe um CPF (11 dígitos) ou CNPJ (14 dígitos) válido.
+            <label class="form-label fw-bold">CVV</label>
+            <input type="text" class="form-control" formControlName="cvv"
+                   placeholder="000" maxlength="4" (keypress)="apenasNumeros($event)">
+            <small class="text-danger" *ngIf="formGroup.get('cvv')?.invalid && formGroup.get('cvv')?.touched">
+              CVV deve ter 3 ou 4 dígitos.
             </small>
           </div>
         </div>
@@ -89,4 +97,5 @@
       </form>
     </div>
   }
+
 </div>

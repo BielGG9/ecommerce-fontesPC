@@ -98,6 +98,14 @@
                 </div>
               </div>
             </div>
+
+            <!-- Checkbox Salvar Endereço -->
+            <div *ngIf="adicionandoNovoEndereco" class="form-check mt-3">
+              <input class="form-check-input" type="checkbox" id="salvarEnderecoCheck" formControlName="salvarEndereco">
+              <label class="form-check-label text-muted small" for="salvarEnderecoCheck">
+                <i class="bi bi-bookmark me-1"></i> Salvar este endereço nos meus endereços para compras futuras
+              </label>
+            </div>
           </div>
         </div>
 
@@ -127,28 +135,76 @@
               </div>
             </div>
 
+            <!-- Dados do PIX -->
+            @if (checkoutForm.get('pagamento')?.value === 'pix') {
+              <div class="bg-light p-4 rounded-3 border text-center mb-4">
+                <h5 class="fw-bold mb-3 text-success"><i class="bi bi-qr-code me-2"></i>Escaneie para pagar com PIX</h5>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=SimulacaoPixEcommerce123" alt="QR Code PIX" class="img-fluid rounded shadow-sm mb-3">
+                <p class="text-muted small mb-0">Após o escaneamento, o pagamento será validado.</p>
+              </div>
+            }
+
             <!-- Dados do Cartão -->
             @if (checkoutForm.get('pagamento')?.value === 'cartao') {
               <div class="bg-light p-4 rounded-3 border">
-                <h5 class="mb-3"><i class="bi bi-credit-card-2-front me-2"></i>Dados do Cartão de Crédito</h5>
-                <div class="row g-3">
-                  <div class="col-12">
-                    <label class="form-label text-muted small">Nome Impresso no Cartão</label>
-                    <input type="text" class="form-control" formControlName="nomeImpresso">
+                <h5 class="mb-3"><i class="bi bi-credit-card-2-front me-2"></i>Cartão de Crédito</h5>
+
+                <!-- Cartões salvos -->
+                @if (meusCartoes.length > 0) {
+                  <div class="mb-3">
+                    @for (cartao of meusCartoes; track cartao.id) {
+                      <div class="endereco-card"
+                           [class.selecionado]="selectedCartaoId === cartao.id"
+                           (click)="selecionarCartao(cartao.id!)">
+                        <input type="radio"
+                               [checked]="selectedCartaoId === cartao.id"
+                               (change)="selecionarCartao(cartao.id!)" />
+                        <span class="fw-medium">
+                          **** **** **** {{ cartao.numeroCartao?.slice(-4) }}
+                          <span class="text-muted small ms-1 text-uppercase">{{ cartao.nomeImpresso }}</span>
+                        </span>
+                      </div>
+                    }
+                    <div class="endereco-card"
+                         [class.selecionado]="adicionandoNovoCartao"
+                         (click)="selecionarNovoCartao()">
+                      <input type="radio"
+                             [checked]="adicionandoNovoCartao"
+                             (change)="selecionarNovoCartao()" />
+                      <span>+ Usar outro cartão</span>
+                    </div>
                   </div>
-                  <div class="col-12">
-                    <label class="form-label text-muted small">Número do Cartão</label>
-                    <input type="text" class="form-control" formControlName="numeroCartao" placeholder="0000 0000 0000 0000" maxlength="16" (keypress)="apenasNumeros($event)">
+                }
+
+                <!-- Formulário de novo cartão -->
+                @if (adicionandoNovoCartao) {
+                  <div class="row g-3">
+                    <div class="col-12">
+                      <label class="form-label text-muted small">Nome Impresso no Cartão</label>
+                      <input type="text" class="form-control" formControlName="nomeImpresso">
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label text-muted small">Número do Cartão</label>
+                      <input type="text" class="form-control" formControlName="numeroCartao" placeholder="0000 0000 0000 0000" maxlength="16" (keypress)="apenasNumeros($event)">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label text-muted small">Validade (MM/AA)</label>
+                      <input type="text" class="form-control" formControlName="validadeCartao" placeholder="12/30" maxlength="5" (input)="formatarValidade($event)">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label text-muted small">CVV</label>
+                      <input type="text" class="form-control" formControlName="cvv" placeholder="123" maxlength="4" (keypress)="apenasNumeros($event)">
+                    </div>
                   </div>
-                  <div class="col-md-6">
-                    <label class="form-label text-muted small">Validade (MM/AA)</label>
-                    <input type="text" class="form-control" formControlName="validadeCartao" placeholder="12/30" maxlength="5" (input)="formatarValidade($event)">
+
+                  <!-- Checkbox Salvar Cartão -->
+                  <div class="form-check mt-3">
+                    <input class="form-check-input" type="checkbox" id="salvarCartaoCheck" formControlName="salvarCartao">
+                    <label class="form-check-label text-muted small" for="salvarCartaoCheck">
+                      <i class="bi bi-bookmark me-1"></i> Salvar este cartão para minhas próximas compras
+                    </label>
                   </div>
-                  <div class="col-md-6">
-                    <label class="form-label text-muted small">CVV</label>
-                    <input type="text" class="form-control" formControlName="cvv" placeholder="123" maxlength="4" (keypress)="apenasNumeros($event)">
-                  </div>
-                </div>
+                }
               </div>
             }
           </div>

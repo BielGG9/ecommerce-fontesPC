@@ -46,7 +46,8 @@ public class CartaoServiceImpl implements CartaoService {
         
         // Dados obrigatórios da herança Pagamento
         cartao.setValor(0.0); 
-        cartao.setStatus("SALVO"); 
+        cartao.setStatus("SALVO");
+        cartao.setSalvo(true);
 
         // 3. VINCULA AO CLIENTE (Essencial para o findById funcionar depois)
         cartao.setCliente(cliente);
@@ -60,9 +61,8 @@ public class CartaoServiceImpl implements CartaoService {
     public List<CartaoResponse> findAll() {
         String idUsuarioKeycloak = jwt.getSubject();
         
-        // Busca apenas os cartões deste cliente específico
-        // "cliente.idKeycloak" assume que sua entidade Cliente tem esse campo mapeado no JPA
-        return cartaoRepository.find("cliente.idKeycloak", idUsuarioKeycloak).list().stream()
+        // Busca apenas os cartões salvos deste cliente específico
+        return cartaoRepository.find("cliente.idKeycloak = ?1 and (salvo is null or salvo = true)", idUsuarioKeycloak).list().stream()
                 .map(CartaoResponse::fromEntity)
                 .toList();
     }

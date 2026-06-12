@@ -29,7 +29,21 @@ export class PerfilComponent implements OnInit {
   menuAvatarAberto = false;
 
   onAvatarSelected(event: any) {
-    console.log(event.target.files[0]);
+    const file: File = event.target.files[0];
+    if (file) {
+      this.clienteService.uploadAvatar(file).subscribe({
+        next: (res) => {
+          console.log('Upload sucesso:', res);
+          // Reload the profile to get the new nomeImagem
+          this.carregarPerfil();
+          this.menuAvatarAberto = false;
+        },
+        error: (err) => {
+          console.error('Erro no upload', err);
+          alert('Erro ao enviar a imagem.');
+        }
+      });
+    }
   }
 
   toggleMenuAvatar() {
@@ -37,7 +51,10 @@ export class PerfilComponent implements OnInit {
   }
 
   editarFotoAtual() {
-    console.log('Placeholder para edição da foto');
+    // Pode disparar o fileInput também
+    const fileInput = document.querySelector('input[type="file"]') as HTMLElement;
+    if (fileInput) fileInput.click();
+    this.menuAvatarAberto = false;
   }
 
   ngOnInit() {
@@ -50,6 +67,9 @@ export class PerfilComponent implements OnInit {
       next: (dados) => {
         this.ngZone.run(() => {
           this.cliente = dados;
+          if (this.cliente?.nomeImagem) {
+            this.avatarUrl = this.clienteService.getAvatarUrl(this.cliente.nomeImagem);
+          }
           this.cdr.detectChanges();
         });
         console.log('Perfil carregado:', this.cliente);

@@ -42,10 +42,13 @@ export class ClienteService {
     return this.http.put<any>(`${this.apiUrl}/completar-cadastro`, dados);
   }
 
-  uploadAvatar(idCliente: number, file: File): Observable<any> {
+  uploadAvatar(file: File): Observable<any> {
     const formData = new FormData();
-    formData.append('idCliente', idCliente.toString());
     formData.append('file', file);
     return this.http.patch(`${this.apiUrl}/image/upload`, formData);
+  }
+
+  getAvatarUrl(nomeImagem: string): string {
+    return `${this.apiUrl}/image/download/${nomeImagem}`;
   }
 }

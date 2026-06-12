@@ -8,4 +8,5 @@ export interface Endereco {
     estado: string;
     cep: string;
     idPessoa?: number;
+    salvo?: boolean;
 }

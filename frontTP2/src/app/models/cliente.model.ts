@@ -5,6 +5,7 @@ import { Endereco } from './endereco.model'; // Certifique-se de ter este modelo
 export interface Cliente extends Pessoa {
     cpf: string;
     rg?: string;
+    nomeImagem?: string;
     login?: string;
     username?: string;
     senha?: string;

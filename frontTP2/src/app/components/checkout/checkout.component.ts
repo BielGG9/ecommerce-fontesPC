@@ -6,6 +6,7 @@ import { CarrinhoService } from '../../services/carrinho.service';
 import { PedidoService } from '../../services/pedido.service';
 import { EnderecoService } from '../../services/endereco.service';
 import { ClienteService } from '../../services/cliente.service';
+import { CartaoService, Cartao } from '../../services/cartao.service';
 import { PedidoRequest } from '../../models/pedido-request.model';
 import { Endereco } from '../../models/endereco.model';
 import { DialogService } from '../../services/dialog.service';
@@ -26,6 +27,7 @@ export class CheckoutComponent implements OnInit {
   pedidoService = inject(PedidoService);
   enderecoService = inject(EnderecoService);
   clienteService = inject(ClienteService);
+  cartaoService = inject(CartaoService);
   fb = inject(FormBuilder);
   router = inject(Router);
   dialogService = inject(DialogService);
@@ -39,6 +41,10 @@ export class CheckoutComponent implements OnInit {
   selectedEnderecoId: number | null = null;
   adicionandoNovoEndereco: boolean = false;
   enderecoSendoEditadoId: number | null = null;
+
+  meusCartoes: Cartao[] = [];
+  selectedCartaoId: number | null = null;
+  adicionandoNovoCartao: boolean = false;
   cupomService = inject(CupomService);
 
   cupomAplicado: CupomResponse | null = null;
@@ -75,6 +81,24 @@ export class CheckoutComponent implements OnInit {
             this.cdr.detectChanges();
           }
         });
+
+        // Carrega os cartões salvos do cliente
+        this.cartaoService.findAll().subscribe({
+          next: (cartoes) => {
+            this.meusCartoes = cartoes;
+            if (cartoes.length > 0) {
+              this.selectedCartaoId = cartoes[0].id || null;
+              this.adicionandoNovoCartao = false;
+            } else {
+              this.adicionandoNovoCartao = true;
+            }
+            this.atualizarValidadoresCartao();
+            this.cdr.detectChanges();
+          },
+          error: () => {
+            this.adicionandoNovoCartao = true;
+          }
+        });
       },
       error: (err) => {
         console.error('Erro ao buscar perfil:', err);
@@ -100,33 +124,13 @@ export class CheckoutComponent implements OnInit {
       numeroCartao: [''],
       validadeCartao: [''],
       cvv: [''],
-      cupom: ['']
+      cupom: [''],
+      salvarEndereco: [true],
+      salvarCartao: [true]
     });
 
     this.checkoutForm.get('pagamento')?.valueChanges.subscribe(value => {
-      const isCartao = value === 'cartao';
-      
-      const controlNome = this.checkoutForm.get('nomeImpresso');
-      const controlNumero = this.checkoutForm.get('numeroCartao');
-      const controlValidade = this.checkoutForm.get('validadeCartao');
-      const controlCvv = this.checkoutForm.get('cvv');
-
-      if (isCartao) {
-        controlNome?.setValidators(Validators.required);
-        controlNumero?.setValidators([Validators.required, Validators.pattern('^[0-9]{16}$')]);
-        controlValidade?.setValidators(Validators.required);
-        controlCvv?.setValidators([Validators.required, Validators.pattern('^[0-9]{3,4}$')]);
-      } else {
-        controlNome?.clearValidators();
-        controlNumero?.clearValidators();
-        controlValidade?.clearValidators();
-        controlCvv?.clearValidators();
-      }
-
-      controlNome?.updateValueAndValidity();
-      controlNumero?.updateValueAndValidity();
-      controlValidade?.updateValueAndValidity();
-      controlCvv?.updateValueAndValidity();
+      this.atualizarValidadoresCartao(value);
     });
   }
 
@@ -149,6 +153,7 @@ export class CheckoutComponent implements OnInit {
       this.criarPedido(this.selectedEnderecoId, formValue);
     } else {
       // cria novo endereço ou atualiza o endereço existente e usa o id retornado
+      const salvarEndereco: boolean = this.checkoutForm.get('salvarEndereco')?.value ?? true;
       const endereco: Endereco = {
         rua: formValue.rua,
         numero: formValue.numero,
@@ -157,7 +162,8 @@ export class CheckoutComponent implements OnInit {
         cidade: formValue.cidade,
         estado: formValue.estado,
         cep: formValue.cep,
-        idPessoa: this.idPessoa
+        idPessoa: this.idPessoa,
+        salvo: salvarEndereco
       };
 
       if (this.enderecoSendoEditadoId) {
@@ -231,6 +237,46 @@ export class CheckoutComponent implements OnInit {
     this.updateEnderecoValidators();
   }
 
+  selecionarCartao(id: number): void {
+    this.selectedCartaoId = id;
+    this.adicionandoNovoCartao = false;
+    this.atualizarValidadoresCartao();
+  }
+
+  selecionarNovoCartao(): void {
+    this.selectedCartaoId = null;
+    this.adicionandoNovoCartao = true;
+    this.checkoutForm.patchValue({ nomeImpresso: '', numeroCartao: '', validadeCartao: '', cvv: '' });
+    this.atualizarValidadoresCartao();
+  }
+
+  atualizarValidadoresCartao(pagamento?: string): void {
+    const tipoPagamento = pagamento ?? this.checkoutForm.get('pagamento')?.value;
+    const precisaDigitarCartao = tipoPagamento === 'cartao' && this.adicionandoNovoCartao;
+
+    const controlNome = this.checkoutForm.get('nomeImpresso');
+    const controlNumero = this.checkoutForm.get('numeroCartao');
+    const controlValidade = this.checkoutForm.get('validadeCartao');
+    const controlCvv = this.checkoutForm.get('cvv');
+
+    if (precisaDigitarCartao) {
+      controlNome?.setValidators(Validators.required);
+      controlNumero?.setValidators([Validators.required, Validators.pattern('^[0-9]{16}$')]);
+      controlValidade?.setValidators(Validators.required);
+      controlCvv?.setValidators([Validators.required, Validators.pattern('^[0-9]{3,4}$')]);
+    } else {
+      controlNome?.clearValidators();
+      controlNumero?.clearValidators();
+      controlValidade?.clearValidators();
+      controlCvv?.clearValidators();
+    }
+
+    controlNome?.updateValueAndValidity();
+    controlNumero?.updateValueAndValidity();
+    controlValidade?.updateValueAndValidity();
+    controlCvv?.updateValueAndValidity();
+  }
+
   updateEnderecoValidators(): void {
     const fields = ['rua', 'numero', 'bairro', 'cidade', 'estado', 'cep'];
     fields.forEach(field => {
@@ -288,12 +334,19 @@ export class CheckoutComponent implements OnInit {
     };
 
     if (formValue.pagamento === 'cartao') {
-      pedidoRequest.novoCartao = {
-        nomeImpresso: formValue.nomeImpresso,
-        numeroCartao: formValue.numeroCartao,
-        validadeCartao: formValue.validadeCartao,
-        cvv: formValue.cvv
-      };
+      if (this.selectedCartaoId !== null) {
+        // usa cartão existente
+        pedidoRequest.idCartao = this.selectedCartaoId;
+      } else {
+        // novo cartão digitado
+        pedidoRequest.novoCartao = {
+          nomeImpresso: formValue.nomeImpresso,
+          numeroCartao: formValue.numeroCartao,
+          validadeCartao: formValue.validadeCartao,
+          cvv: formValue.cvv
+        };
+        pedidoRequest.salvarCartao = formValue.salvarCartao ?? false;
+      }
     }
 
     this.pedidoService.create(pedidoRequest).subscribe({

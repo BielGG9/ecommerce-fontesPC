@@ -27,6 +27,8 @@ public record PedidoRequest(
 
     CartaoRequest novoCartao,
 
+    Boolean salvarCartao,
+
     String cupom
 ) {    
 }

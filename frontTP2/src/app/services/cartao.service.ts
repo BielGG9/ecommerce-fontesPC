@@ -4,18 +4,17 @@ import { Observable } from 'rxjs';
 
 export interface Cartao {
   id?: number;
-  numero: string;
+  numeroCartao: string;
   nomeImpresso: string;
-  bandeira: string;
-  cpfCnpj: string;
+  validadeCartao?: string;
+  cvv?: string;
 }
 
 export interface CartaoRequest {
-  numero: string;
+  numeroCartao: string;
   nomeImpresso: string;
-  bandeira: string;
-  cpfCnpj: string;
-  idPessoa: number;
+  validadeCartao?: string;
+  cvv?: string;
 }
 
 @Injectable({

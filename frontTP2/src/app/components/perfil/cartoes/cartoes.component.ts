@@ -1,7 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CartaoService } from '../../../services/cartao.service';
+import { CartaoService, Cartao } from '../../../services/cartao.service';
 import { ClienteService } from '../../../services/cliente.service';
 import { Cliente } from '../../../models/cliente.model';
 import { RouterModule } from '@angular/router';
@@ -19,10 +19,11 @@ export class CartoesComponent implements OnInit {
   clienteService = inject(ClienteService);
   fb = inject(FormBuilder);
   dialogService = inject(DialogService);
+  cdr = inject(ChangeDetectorRef);
 
   cliente: Cliente | null = null;
-  cartoes: any[] = []; 
-  
+  cartoes: Cartao[] = [];
+
   formGroup!: FormGroup;
   isFormVisible = false;
   editingId: number | null = null;
@@ -34,10 +35,10 @@ export class CartoesComponent implements OnInit {
 
   initForm() {
     this.formGroup = this.fb.group({
-      numero: ['', [Validators.required, Validators.pattern('^[0-9]{16}$')]],
+      numeroCartao: ['', [Validators.required, Validators.pattern('^[0-9]{16}$')]],
       nomeImpresso: ['', Validators.required],
-      bandeira: ['', Validators.required],
-      cpfCnpj: ['', [Validators.required, Validators.pattern('^[0-9]{11}$|^[0-9]{14}$')]]
+      validadeCartao: ['', [Validators.required, Validators.pattern('^(0[1-9]|1[0-2])\\/[0-9]{2}$')]],
+      cvv: ['', [Validators.required, Validators.pattern('^[0-9]{3,4}$')]]
     });
   }
 
@@ -45,9 +46,17 @@ export class CartoesComponent implements OnInit {
     this.clienteService.getMeuPerfil().subscribe({
       next: (dados) => {
         this.cliente = dados;
-        this.cartoes = dados.cartoes || []; // Depende de como o back mapeia
+        this.cdr.detectChanges();
       },
       error: (err) => console.error(err)
+    });
+
+    this.cartaoService.findAll().subscribe({
+      next: (cartoes) => {
+        this.cartoes = cartoes || [];
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Erro ao carregar cartões:', err)
     });
   }
 
@@ -55,32 +64,32 @@ export class CartoesComponent implements OnInit {
     this.isFormVisible = true;
     this.editingId = null;
     this.formGroup.reset();
+    this.formGroup.get('numeroCartao')?.enable();
   }
 
-  editarCartao(cartao: any) {
+  editarCartao(cartao: Cartao) {
     this.isFormVisible = true;
-    this.editingId = cartao.id;
+    this.editingId = cartao.id ?? null;
     this.formGroup.patchValue({
-      numero: cartao.numero,
+      numeroCartao: cartao.numeroCartao,
       nomeImpresso: cartao.nomeImpresso,
-      bandeira: cartao.bandeira,
-      cpfCnpj: cartao.cpfCnpj
+      validadeCartao: cartao.validadeCartao,
+      cvv: cartao.cvv
     });
+    this.formGroup.get('numeroCartao')?.disable();
   }
 
   cancelar() {
     this.isFormVisible = false;
     this.editingId = null;
     this.formGroup.reset();
+    this.formGroup.get('numeroCartao')?.enable();
   }
 
   salvar() {
-    if (this.formGroup.invalid || !this.cliente) return;
+    if (this.formGroup.invalid) return;
 
-    const request = {
-      ...this.formGroup.value,
-      idPessoa: this.cliente.id
-    };
+    const request = this.formGroup.getRawValue();
 
     if (this.editingId) {
       this.cartaoService.update(this.editingId, request).subscribe({
@@ -122,5 +131,15 @@ export class CartoesComponent implements OnInit {
       return false;
     }
     return true;
+  }
+
+  formatarValidade(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value.replace(/\D/g, '');
+    if (value.length >= 3) {
+      value = value.substring(0, 2) + '/' + value.substring(2, 4);
+    }
+    input.value = value;
+    this.formGroup.get('validadeCartao')?.setValue(value, { emitEvent: false });
   }
 }

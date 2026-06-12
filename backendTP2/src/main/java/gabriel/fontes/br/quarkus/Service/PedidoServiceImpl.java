@@ -205,22 +205,30 @@ public class PedidoServiceImpl implements PedidoService {
         
         // CENÁRIO B: Cartão existe e é DO MESMO DONO (Reutiliza)
         else {
+            System.out.println("DEBUG PedidoServiceImpl Scenario B: dto.salvarCartao() = " + dto.salvarCartao() + ", cartaoExistenteNoBanco.getSalvo() = " + cartaoExistenteNoBanco.getSalvo());
             // Não salvamos um novo. Usamos o que já está no banco.
             cartaoParaPagamento = cartaoExistenteNoBanco;
+            if (dto.salvarCartao() != null && dto.salvarCartao()) {
+                cartaoExistenteNoBanco.setSalvo(true);
+            }
+            System.out.println("DEBUG PedidoServiceImpl Scenario B: cartaoExistenteNoBanco.getSalvo() after check = " + cartaoExistenteNoBanco.getSalvo());
         }
 
     } else {
+        System.out.println("DEBUG PedidoServiceImpl Scenario C: dto.salvarCartao() = " + dto.salvarCartao());
         // CENÁRIO C: Cartão não existe (Cria Novo)
         Cartao novo = new Cartao();
         novo.setNomeImpresso(dto.novoCartao().nomeImpresso());
         novo.setNumeroCartao(numeroCartaoInput); 
         novo.setValidade(dto.novoCartao().validadeCartao()); 
         novo.setCvv(dto.novoCartao().cvv());
+        novo.setSalvo(dto.salvarCartao() != null ? dto.salvarCartao() : true);
         
         novo.setCliente(clienteAutenticado);
         
         cartaoRepository.persist(novo);
         cartaoParaPagamento = novo;
+        System.out.println("DEBUG PedidoServiceImpl Scenario C: novo.getSalvo() = " + novo.getSalvo());
     }
                 } else {
                     throw new BadRequestException(

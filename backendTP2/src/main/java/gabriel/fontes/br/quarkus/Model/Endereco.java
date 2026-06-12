@@ -19,6 +19,7 @@ public class Endereco extends DefaultEntity {
     private String cidade;
     private String estado;
     private String cep;
+    private Boolean salvo = true;
 
     @ManyToOne
     @JoinColumn(name = "pessoa_id")
@@ -41,4 +42,6 @@ public class Endereco extends DefaultEntity {
     public void setNumero(String numero) { this.numero = numero; }
     public Pessoa getPessoa() { return pessoa; }
     public void setPessoa(Pessoa pessoa) { this.pessoa = pessoa; }
+    public Boolean getSalvo() { return salvo; }
+    public void setSalvo(Boolean salvo) { this.salvo = salvo; }
 }

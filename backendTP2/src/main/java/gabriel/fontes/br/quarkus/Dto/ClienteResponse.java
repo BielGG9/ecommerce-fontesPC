@@ -8,7 +8,8 @@ public record ClienteResponse(
     String email,
     String cpf,
     String rg,
-    String username
+    String username,
+    String nomeImagem
 ) {
 
     public static ClienteResponse fromEntity(Cliente cliente) {
@@ -18,7 +19,8 @@ public record ClienteResponse(
             cliente.getEmail(),
             cliente.getCpf(),
             cliente.getRg(),
-            null
+            null,
+            cliente.getNomeImagem()
         );
     }
 
@@ -29,7 +31,8 @@ public record ClienteResponse(
             cliente.getEmail(),
             cliente.getCpf(),
             cliente.getRg(),
-            username
+            username,
+            cliente.getNomeImagem()
         );
     }
 }

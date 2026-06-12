@@ -29,7 +29,9 @@ public record EnderecoRequest(
     String cep,
 
     @NotNull(message = "O ID da pessoa não pode ser nulo")
-    Long idPessoa
+    Long idPessoa,
+
+    Boolean salvo
 ) {
 
 }

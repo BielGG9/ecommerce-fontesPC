@@ -279,4 +279,85 @@ public Response delete(@PathParam("id") Long id) {
                     .build();
         }
     }
+    @Inject
+    gabriel.fontes.br.quarkus.Service.S3StorageService s3StorageService;
+
+    @PATCH
+    @Path("/image/upload")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Transactional
+    @RolesAllowed({"USER", "ADM"})
+    public Response uploadAvatar(@org.jboss.resteasy.reactive.RestForm("file") org.jboss.resteasy.reactive.multipart.FileUpload file) {
+        String idKeycloak = jwt.getSubject();
+        if (idKeycloak == null) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(java.util.Map.of("message", "Usuário não autenticado.")).build();
+        }
+
+        gabriel.fontes.br.quarkus.Model.Cliente cliente = clienteRepository.findByIdKeycloak(idKeycloak);
+        if (cliente == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity(java.util.Map.of("message", "Cliente não encontrado.")).build();
+        }
+
+        if (file == null || file.uploadedFile() == null) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(java.util.Map.of("message", "Nenhum arquivo enviado.")).build();
+        }
+
+        try {
+            byte[] fileBytes = java.nio.file.Files.readAllBytes(file.uploadedFile());
+            String extension = "jpg"; // Default
+            String fileName = file.fileName();
+            if (fileName != null && fileName.contains(".")) {
+                extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+            }
+            
+            String mimeType = file.contentType();
+            if (mimeType == null || mimeType.isBlank()) {
+                mimeType = "image/" + extension;
+            }
+
+            String fid = "avatar-" + java.util.UUID.randomUUID().toString() + "." + extension;
+
+            // Se o cliente já tiver uma imagem, removemos a antiga do MinIO
+            if (cliente.getNomeImagem() != null && !cliente.getNomeImagem().isBlank()) {
+                s3StorageService.delete(cliente.getNomeImagem());
+            }
+
+            // Realiza o upload no MinIO
+            s3StorageService.upload(fid, fileBytes, mimeType);
+
+            // Atualiza o perfil
+            cliente.setNomeImagem(fid);
+            clienteRepository.persist(cliente);
+
+            return Response.ok(java.util.Map.of("message", "Foto de perfil atualizada com sucesso!", "nomeImagem", fid)).build();
+        } catch (Exception e) {
+            logger.severe("Erro ao fazer upload da foto de perfil: " + e.getMessage());
+            return Response.serverError().entity(java.util.Map.of("message", "Erro ao salvar imagem.")).build();
+        }
+    }
+
+    @GET
+    @Path("/image/download/{nomeImagem}")
+    @PermitAll
+    public Response downloadAvatar(@PathParam("nomeImagem") String nomeImagem) {
+        if (nomeImagem == null || nomeImagem.isBlank()) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Nome de imagem inválido.").build();
+        }
+        try {
+            byte[] fileBytes = s3StorageService.download(nomeImagem);
+            
+            String mimeType = "application/octet-stream";
+            if (nomeImagem.endsWith(".jpg") || nomeImagem.endsWith(".jpeg")) mimeType = "image/jpeg";
+            else if (nomeImagem.endsWith(".png")) mimeType = "image/png";
+            else if (nomeImagem.endsWith(".webp")) mimeType = "image/webp";
+
+            return Response.ok(fileBytes)
+                    .header("Content-Disposition", "inline; filename=\"" + nomeImagem + "\"")
+                    .header("Content-Type", mimeType)
+                    .build();
+        } catch (Exception e) {
+            logger.severe("Erro ao baixar avatar: " + e.getMessage());
+            return Response.status(Response.Status.NOT_FOUND).entity("Avatar não encontrado.").build();
+        }
+    }
 }

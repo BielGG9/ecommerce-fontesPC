@@ -21,6 +21,52 @@ public class EnderecoResource {
     @Inject
     EnderecoService service;
 
+    @Inject
+    gabriel.fontes.br.quarkus.Repository.EnderecoRepository repoEnd;
+
+    @Inject
+    gabriel.fontes.br.quarkus.Repository.CartaoRepository repoCartao;
+
+    @Inject
+    gabriel.fontes.br.quarkus.Repository.PedidoRepository repoPedido;
+
+    @GET
+    @Path("/debug")
+    @jakarta.annotation.security.PermitAll
+    public Response debug() {
+        java.util.List<java.util.Map<String, Object>> ends = repoEnd.listAll().stream().map(e -> {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", e.getId());
+            map.put("rua", e.getRua());
+            map.put("salvo", e.getSalvo());
+            map.put("pessoaId", e.getPessoa() != null ? e.getPessoa().getId() : null);
+            map.put("pessoaKeycloak", e.getPessoa() != null ? e.getPessoa().getIdKeycloak() : null);
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
+
+        java.util.List<java.util.Map<String, Object>> cards = repoCartao.listAll().stream().map(c -> {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", c.getId());
+            map.put("numero", c.getNumeroCartao());
+            map.put("salvo", c.getSalvo());
+            map.put("clienteId", c.getCliente() != null ? c.getCliente().getId() : null);
+            map.put("clienteKeycloak", c.getCliente() != null ? c.getCliente().getIdKeycloak() : null);
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
+
+        java.util.List<java.util.Map<String, Object>> peds = repoPedido.listAll().stream().map(p -> {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", p.getId());
+            map.put("clienteId", p.getCliente() != null ? p.getCliente().getId() : null);
+            map.put("clienteKeycloak", p.getCliente() != null ? p.getCliente().getIdKeycloak() : null);
+            map.put("pagamentoId", p.getPagamento() != null ? p.getPagamento().getId() : null);
+            map.put("cartaoId", p.getCartao() != null ? p.getCartao().getId() : null);
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
+
+        return Response.ok(java.util.Map.of("enderecos", ends, "cartoes", cards, "pedidos", peds)).build();
+    }
+
     private static final Logger logger = Logger.getLogger(ClienteResource.class.getName());
 
     @POST

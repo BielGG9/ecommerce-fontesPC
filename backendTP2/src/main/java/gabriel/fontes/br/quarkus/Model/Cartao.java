@@ -14,6 +14,7 @@ public class Cartao extends Pagamento{
     private String nomeImpresso;
     private String validadeCartao;
     private String cvv;
+    private Boolean salvo = true;
 
     @ManyToOne
     @JoinColumn(name = "id_cliente")
@@ -61,5 +62,8 @@ public class Cartao extends Pagamento{
     public void setCliente(Cliente cliente) { 
         this.cliente = cliente; 
     }
+
+    public Boolean getSalvo() { return salvo; }
+    public void setSalvo(Boolean salvo) { this.salvo = salvo; }
 
 }
