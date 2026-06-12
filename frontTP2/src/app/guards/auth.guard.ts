@@ -29,7 +29,7 @@ export const canActivateUser: CanActivateFn = async (route, state) => {
   const logado = !!localStorage.getItem('token');
 
   if (!logado) {
-    alert('Você precisa estar logado para finalizar a compra!');
+    alert('Você precisa estar logado para acessar esta página.');
     router.navigate(['/login']);
     return false;
   }

@@ -7,6 +7,7 @@ import { DepartamentoComponent } from './components/departamento.component';
 import { FuncionarioComponent } from './components/funcionario.component';
 import { FornecedorComponent } from './components/fornecedor.component';
 import { CadastroClienteComponent } from './components/cadastro-cliente.component';
+import { CadastroCompletoComponent } from './components/cadastro-completo.component';
 import { LoginComponent } from './components/login.component';
 import { RecuperarSenhaComponent } from './components/recuperar-senha.component';
 import { PedidoComponent } from './components/pedido/pedido.component';
@@ -25,11 +26,13 @@ export const routes: Routes = [
   { path: 'admin/departamentos', component: DepartamentoComponent, canActivate: [canActivateAuthRole] }, 
   { path: 'admin/fornecedores', component: FornecedorComponent, canActivate: [canActivateAuthRole] },
   { path: 'cadastro-cliente', component: CadastroClienteComponent },
+  { path: 'cadastro-completo', component: CadastroCompletoComponent },
   { path: 'recuperar-senha', component: RecuperarSenhaComponent },
   { path: 'admin', component: AdminDashboardComponent, canActivate: [canActivateAuthRole] },
   { path: 'admin/pedidos', component: PedidoComponent, canActivate: [canActivateAuthRole]},
   { path: 'carrinho', loadComponent: () => import('./components/carrinho/carrinho.component').then(c => c.CarrinhoComponent) },
   { path: 'checkout', loadComponent: () => import('./components/checkout/checkout.component').then(c => c.CheckoutComponent), canActivate: [canActivateUser] },
+  { path: 'pedido-confirmado', loadComponent: () => import('./components/checkout/pedido-confirmado.component').then(c => c.PedidoConfirmadoComponent), canActivate: [canActivateUser] },
   { path: 'minha-conta', loadComponent: () => import('./components/perfil/perfil.component').then(c => c.PerfilComponent), canActivate: [canActivateUser] },
   
   // Rotas filhas da Minha Conta

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../services/auth.service';
@@ -8,7 +8,7 @@ import { AuthService } from '../services/auth.service';
 @Component({
   selector: 'app-cadastro-cliente',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './cadastro-cliente.component.html',
   styleUrl: './cadastro-cliente.component.css'
 })

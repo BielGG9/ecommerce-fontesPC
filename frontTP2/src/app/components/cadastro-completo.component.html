@@ -1,0 +1,97 @@
+<div class="cadastro-container">
+  <mat-card class="cadastro-card mat-elevation-z8">
+
+    <div class="card-header">
+      <h2>Criar Conta Completa</h2>
+      <p>Preencha todos os seus dados para ter acesso completo à loja</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="criarContaCompleta()">
+      <mat-card-content class="form-content">
+
+        <!-- Alerta de erro geral do backend -->
+        @if (erroForm) {
+          <div class="error-message" style="margin-bottom: 12px;">
+            {{ erroForm }}
+          </div>
+        }
+
+        <!-- Nome Completo -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nome Completo</mat-label>
+          <input matInput formControlName="nome" placeholder="Ex: João da Silva">
+          @if (form.get('nome')?.touched && form.get('nome')?.invalid) {
+            <mat-error>{{ obterErro('nome') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Username -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nome de Usuário</mat-label>
+          <input matInput formControlName="username" placeholder="Ex: joao.silva">
+          @if (form.get('username')?.touched && form.get('username')?.invalid) {
+            <mat-error>{{ obterErro('username') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- E-mail -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>E-mail</mat-label>
+          <input matInput formControlName="email" type="email" placeholder="voce@exemplo.com">
+          @if (form.get('email')?.touched && form.get('email')?.invalid) {
+            <mat-error>{{ obterErro('email') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- CPF e RG lado a lado -->
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>CPF (somente dígitos)</mat-label>
+            <input matInput formControlName="cpf" placeholder="12345678901" maxlength="11" (keypress)="apenasNumeros($event)">
+            @if (form.get('cpf')?.touched && form.get('cpf')?.invalid) {
+              <mat-error>{{ obterErro('cpf') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>RG (somente dígitos)</mat-label>
+            <input matInput formControlName="rg" placeholder="1234567" maxlength="15" (keypress)="apenasNumeros($event)">
+            @if (form.get('rg')?.touched && form.get('rg')?.invalid) {
+              <mat-error>{{ obterErro('rg') }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- Senha -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Senha</mat-label>
+          <input matInput formControlName="senha" [type]="mostrarSenha ? 'text' : 'password'" placeholder="Mínimo 6 caracteres">
+          <button mat-icon-button matSuffix type="button" (click)="mostrarSenha = !mostrarSenha">
+            <mat-icon>{{ mostrarSenha ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (form.get('senha')?.touched && form.get('senha')?.invalid) {
+            <mat-error>{{ obterErro('senha') }}</mat-error>
+          }
+        </mat-form-field>
+
+      </mat-card-content>
+
+      <mat-card-actions class="cadastro-actions">
+        <button mat-button type="button" routerLink="/login">
+          Já tenho conta
+        </button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="isLoading">
+          {{ isLoading ? 'Criando...' : 'Criar Conta' }}
+        </button>
+      </mat-card-actions>
+
+      <!-- Link para o Cadastro Rápido -->
+      <div style="text-align: center; padding: 0 24px 20px; font-size: 13px; color: #666;">
+        Quer algo mais rápido?
+        <a routerLink="/cadastro-cliente" style="color: #3f51b5; font-weight: bold;">Cadastro Expresso</a>
+        (só nome, e-mail e senha)
+      </div>
+
+    </form>
+  </mat-card>
+</div>

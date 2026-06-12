@@ -351,9 +351,8 @@ export class CheckoutComponent implements OnInit {
 
     this.pedidoService.create(pedidoRequest).subscribe({
       next: (pedido) => {
-        this.dialogService.showSuccess('Pedido realizado com sucesso!');
         this.carrinhoService.limparCarrinho();
-        this.router.navigate(['/']);
+        this.router.navigate(['/pedido-confirmado']);
       },
       error: (err) => {
         console.error('Erro ao criar pedido', err);

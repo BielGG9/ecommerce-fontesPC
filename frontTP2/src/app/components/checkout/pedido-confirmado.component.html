@@ -1,0 +1,28 @@
+<div class="confirmacao-container py-5 mt-5 text-center">
+  <div class="card border-0 shadow-sm rounded-4 mx-auto" style="max-width: 600px;">
+    <div class="card-body p-5">
+      <div class="mb-4">
+        <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+      </div>
+      <h2 class="fw-bold text-dark mb-3">Pedido Confirmado!</h2>
+      <p class="text-muted mb-4" style="font-size: 1.1rem;">
+        Obrigado por comprar na Fontes PC. O seu pedido foi registrado com sucesso e já estamos cuidando de tudo para você.
+      </p>
+      
+      <div class="bg-light p-4 rounded-3 mb-4">
+        <p class="mb-0">
+          Você pode acompanhar o status da sua compra diretamente no seu perfil.
+        </p>
+      </div>
+
+      <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+        <button class="btn btn-primary btn-lg rounded-pill px-4" (click)="irParaMeusPedidos()">
+          <i class="bi bi-box-seam me-2"></i> Ver Meus Pedidos
+        </button>
+        <button class="btn btn-outline-secondary btn-lg rounded-pill px-4" (click)="irParaHome()">
+          <i class="bi bi-house-door me-2"></i> Voltar à Loja
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

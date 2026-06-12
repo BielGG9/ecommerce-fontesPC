@@ -208,6 +208,7 @@ export class ProdutoDetalheComponent implements OnInit, OnDestroy {
               'Faça login para adicionar à lista de desejos.',
               'Login necessário'
             );
+            this.router.navigate(['/login']);
           } else {
             this.dialogService.showWarning(
               'Erro ao adicionar à lista de desejos. Tente novamente.',
